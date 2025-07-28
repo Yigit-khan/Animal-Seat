@@ -15,5 +15,4 @@ MonoBehaviour:
   _animalName: "Su ayg\u0131r\u0131"
   gridOriginPos: {x: 4, y: 7}
   size: {x: 1, y: 1}
-  traits:
-  - {fileID: 11400000, guid: 4562b16ecc2543b46aaafbc1b549101b, type: 2}
+  traits: []

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c244071309c499c48bb7546a48afb645, type: 3}
   m_Name: AnimalObject_Fil
   m_EditorClassIdentifier: 
-  _animalName: Fil
+  _animalName: 
   gridOriginPos: {x: 6, y: 6}
   size: {x: 2, y: 2}
   traits: []

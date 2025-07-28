@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using NUnit.Framework;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.UIElements;
 
 [ExecuteInEditMode]
 public class AnimalManager : MonoBehaviour
@@ -55,13 +58,6 @@ public class AnimalManager : MonoBehaviour
         }
     }
 
-    private bool containsAntiTrait(AnimalTraitSO antiTrait, AnimalSO otherAnimal)
-    {
-        foreach (var otherTrait in otherAnimal.traits)
-            if (otherTrait == antiTrait) return true;
-        
-        return false;
-    }
 
     private void CheckCollidingTraits(AnimalSO owner, AnimalTraitSO ownersTrait, AnimalTraitSO traitToCheck = null)
     {
@@ -71,25 +67,24 @@ public class AnimalManager : MonoBehaviour
             return;
         }
 
-        //print("Checking " + owner.name);
-        Rect effectRect = ownersTrait.GetTraitEffectRect(owner.gridOriginPos, owner.size);
+        var effectPointList = ownersTrait.GetTraitEffectPoints(owner.gridOriginPos, owner.size);
+        print("Point listeleri: " + string.Join(", ", effectPointList));
 
         foreach (AnimalSO otherAnimal in animalDatas)
         {
             if (otherAnimal == null || otherAnimal == owner) continue;
 
-            if (!containsAntiTrait(traitToCheck, otherAnimal) && !ownersTrait.antiToEveryTrait)
+            if (!otherAnimal.traits.Contains(traitToCheck) && !ownersTrait.antiToEveryTrait)
             {
-                //print($"compared {ownersTrait.name} to {traitToCheck.traitName}");
+                //print("skipped: " + traitToCheck + " (" + otherAnimal.name +  "), " + ownersTrait);
                 continue;
             }
 
-            Rect otherRect = new Rect(otherAnimal.gridOriginPos, otherAnimal.size);
-
-            if (effectRect.Overlaps(otherRect))
+            if (effectPointList.Contains(otherAnimal.gridOriginPos))
             {
                 Debug.Log($"[SPECIFIC] {owner._animalName} ({ownersTrait.traitName}) menzilinin icinde -> {otherAnimal._animalName}");
             }
+ 
         }
     }
 }

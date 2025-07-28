@@ -14,6 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   traitName: Otobur
   traitDescription: "Y\u0131rt\u0131c\u0131dan korkar"
-  traitEffectRange: {x: 0, y: 0}
-  antiTraits: []
   antiToEveryTrait: 0
+  antiTraits: []
+  effectRanges:
+    up: 0
+    down: 0
+    right: 0
+    left: 0

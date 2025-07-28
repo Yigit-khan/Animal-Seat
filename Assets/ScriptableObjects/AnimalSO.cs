@@ -16,21 +16,4 @@ public class AnimalSO : ScriptableObject
 
     [Tooltip("Hayvanın sahip olduğu karakteristiklerin (trait) listesi")]
     public AnimalTraitSO[] traits;
-
-
-    /// <summary>
-    /// Her bir trait için etki alanı dikdörtgenini hesaplar.
-    /// </summary>
-    private void CalculateTraitEffectRect()
-    {
-        
-    }
-
-#if UNITY_EDITOR
-    private void OnValidate()
-    {
-        //CalculateTraitEffectRect(); // Geçici olarak test amaçlı
-    }
-
-#endif
 }

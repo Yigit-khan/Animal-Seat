@@ -1,4 +1,6 @@
 using UnityEngine;
+using System.Collections.Generic;
+
 #if UNITY_EDITOR
 using UnityEditor;  // Handles için
 #endif
@@ -37,16 +39,46 @@ public class GridManager : MonoBehaviour
     {
         if (gridSize.x <= 0 || gridSize.y <= 0) return;
 
+        // 1) Occupied hücreleri işaretle
+        var occupied = new HashSet<Vector2Int>();
+        if (animalDatas != null)
+        {
+            foreach (var data in animalDatas)
+            {
+                if (data == null) continue;
+                for (int x = data.gridOriginPos.x; x < data.gridOriginPos.x + data.size.x; x++)
+                    for (int y = data.gridOriginPos.y; y < data.gridOriginPos.y + data.size.y; y++)
+                        occupied.Add(new Vector2Int(x, y));
+            }
+        }
+
+        // 2) Wireframe grid ve boş hücre koordinatları
         Gizmos.color = Color.gray;
         for (int x = 0; x < gridSize.x; x++)
+        {
             for (int y = 0; y < gridSize.y; y++)
             {
                 var cellCenter = new Vector3(x + 0.5f, -y - 0.5f, 0) * cellSize;
                 Gizmos.DrawWireCube(cellCenter, Vector3.one * cellSize);
+
+#if UNITY_EDITOR
+                // Boş hücrelere koordinat yaz
+                var idx = new Vector2Int(x, y);
+                if (!occupied.Contains(idx))
+                {
+                    GUIStyle style = new GUIStyle();
+                    style.normal.textColor = Color.white;
+                    style.alignment = TextAnchor.MiddleCenter;
+                    style.fontSize = Mathf.RoundToInt(cellSize * 8f);
+                    Handles.Label(cellCenter, $"({x},{y})", style);
+                }
+#endif
             }
+        }
 
         if (animalDatas == null) return;
 
+        // 3) Hayvanları çiz + altına hücre koordinatları
         for (int i = 0; i < animalDatas.Length; i++)
         {
             var data = animalDatas[i];
@@ -61,17 +93,38 @@ public class GridManager : MonoBehaviour
             var size3d = new Vector3(data.size.x, data.size.y, 1) * cellSize;
             var worldCtr = center * cellSize;
 
+            // Dolu kutu
             Gizmos.color = new Color(baseColor.r, baseColor.g, baseColor.b, 0.3f);
             Gizmos.DrawCube(worldCtr, size3d);
 
 #if UNITY_EDITOR
-            GUIStyle style = new GUIStyle();
-            style.normal.textColor = Color.white;
-            style.alignment = TextAnchor.MiddleCenter;
-            style.fontSize = Mathf.RoundToInt(cellSize * 10f); // hücre boyutuna göre ölçek
-            Handles.Label(worldCtr, data._animalName, style);
+            // Hayvan ismi
+            {
+                GUIStyle style = new GUIStyle();
+                style.normal.textColor = Color.white;
+                style.alignment = TextAnchor.MiddleCenter;
+                style.fontSize = Mathf.RoundToInt(cellSize * 10f);
+                Handles.Label(worldCtr, data._animalName, style);
+            }
+
+            // Her bir işgal edilen hücreye koordinat yaz (kutu altına)
+            for (int x = data.gridOriginPos.x; x < data.gridOriginPos.x + data.size.x; x++)
+            {
+                for (int y = data.gridOriginPos.y; y < data.gridOriginPos.y + data.size.y; y++)
+                {
+                    var cellCenter = new Vector3(x + 0.5f, -y - 0.5f, 0) * cellSize;
+                    GUIStyle coordStyle = new GUIStyle();
+                    coordStyle.normal.textColor = Color.white;
+                    coordStyle.alignment = TextAnchor.UpperCenter;
+                    coordStyle.fontSize = Mathf.RoundToInt(cellSize * 6f);
+                    // Kutu altına biraz kaydır
+                    var labelPos = cellCenter + new Vector3(0, -cellSize * 0.4f, 0);
+                    Handles.Label(labelPos, $"({x},{y})", coordStyle);
+                }
+            }
 #endif
 
+            // 4) Trait etki alanı wireframe
             if (data.traits != null)
             {
                 foreach (var trait in data.traits)

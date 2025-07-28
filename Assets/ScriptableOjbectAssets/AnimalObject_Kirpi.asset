@@ -15,5 +15,4 @@ MonoBehaviour:
   _animalName: Kirpi
   gridOriginPos: {x: 3, y: 0}
   size: {x: 1, y: 1}
-  traits:
-  - {fileID: 11400000, guid: 42a3149dcc7661e4baaf01c50c88e9aa, type: 2}
+  traits: []
