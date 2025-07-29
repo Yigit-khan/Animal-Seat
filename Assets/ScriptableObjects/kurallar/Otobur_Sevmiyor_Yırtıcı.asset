@@ -17,4 +17,4 @@ MonoBehaviour:
   TargetAnimal: 0
   Interaction: 1
   Icon: {fileID: 21300000, guid: 08691427d3901fe4482aff8f5ddedc38, type: 3}
-  Description: "Et\xE7illerin yan\u0131na oturmak istemiyor"
+  Description: "Et\xE7illerin yan\u0131na oturmak istemiyor\ncam kenar\u0131 istiyor"

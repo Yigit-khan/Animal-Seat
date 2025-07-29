@@ -9,8 +9,35 @@ public class SeatController : MonoBehaviour
     public bool isOccupied { get; private set; } = false;
     public AnimalController occupiedBy { get; private set; } = null;
     public bool isWet { get; set; } = false;
-
+    private MeshRenderer meshRenderer;
+    private Material originalMaterial;
     // GridSystem bu metodu kullanarak koltuðun pozisyonunu ona bildirecek.
+
+    void Awake()
+    {
+        // Oyun baþladýðýnda MeshRenderer'ý ve orijinal materyalini bulup kaydet.
+        meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            originalMaterial = meshRenderer.material;
+        }
+    }
+    public void Highlight(Material highlightMaterial)
+    {
+        if (meshRenderer != null)
+        {
+            meshRenderer.material = highlightMaterial;
+        }
+    }
+
+    // Koltuðu orijinal rengine/materyaline geri döndürmek için.
+    public void ResetHighlight()
+    {
+        if (meshRenderer != null && originalMaterial != null)
+        {
+            meshRenderer.material = originalMaterial;
+        }
+    }
     public void SetGridPosition(Vector2Int position)
     {
         GridPosition = position;
