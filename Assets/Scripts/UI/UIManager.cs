@@ -28,6 +28,7 @@ public class UIManager: MonoBehaviour
     private Coroutine lifeCoroutine;
     private void Start()
     {
+        //butonlara fonksiyon atamasý
         settingsButton.onClick.AddListener(OpensettingsPopUp);
         lifePlusButton.onClick.AddListener(OpenLifePopUp);
 

@@ -17,8 +17,11 @@ public class UIGameManager : MonoBehaviour
     [Header("Texts")]
     public TMP_Text levelInfo;
 
+    public LevelSelectController levelSelectController;
+
     private void Start()
     {
+
         settingsButton.onClick.AddListener(OpensettingsPopUp);
         ReplayButton.onClick.AddListener(OpenReplayPopUp);
         exitButtonSettings.onClick.AddListener(CloseSettingsPopUp);

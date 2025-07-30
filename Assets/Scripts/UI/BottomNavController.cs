@@ -27,6 +27,7 @@ public class BottomNavController : MonoBehaviour
         UpdateNavUI();
     }
 
+    //alt kýsýmdaki butonlardan hangisine týklanýyosa o buton yukarý çýkýyor ve text'i açýlýyor
     void UpdateNavUI()
     {
         for (int i = 0; i < navItems.Length; i++)
