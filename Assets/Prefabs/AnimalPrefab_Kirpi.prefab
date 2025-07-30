@@ -151,4 +151,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 138f895f504365740ae3c7094e78a312, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animalSO: {fileID: 11400000, guid: 4c3e6c2a63fe39d4fac1e5d40ad616ec, type: 2}
+  animalSO: {fileID: 11400000, guid: 419149c9bd3b3174da8880caa0674144, type: 2}

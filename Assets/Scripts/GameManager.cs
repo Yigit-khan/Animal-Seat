@@ -324,7 +324,7 @@ public class GameManager : MonoBehaviour
                 lastValidHoldingSlotTarget = null; // Diðer hedefi temizle
                 if (lastValidSeatTarget != targetSeat)
                 {
-                    //ShowEffectArea(selectedAnimal.data, targetSeat);
+                    ShowEffectArea(selectedAnimal.animalSO, targetSeat);
                     lastValidSeatTarget = targetSeat;
                 }
             }
@@ -458,6 +458,7 @@ public class GameManager : MonoBehaviour
 
         // 5) Interaction testi için doğru listeyi kullanın
         bool isValid = _animalManager.IsAllInteractionsValid(animalSOs);
+        Debug.Log("isValid: " + isValid);
         return isValid;
     }
 
@@ -653,29 +654,31 @@ public class GameManager : MonoBehaviour
         selectedAnimal.DisplayMyRules();
     }
 
-    private void ShowEffectArea(AnimalData animalData, SeatController potentialSeat)
+    private void ShowEffectArea(AnimalSO animalSO, SeatController potentialSeat)
     {
         // Önce varsa eski highlight'larý temizle.
         ResetAllHighlights();
 
-        // 1. Etki Alaný Menzilini Belirle
-        int effectRange = 0;
-        if (animalData.turu == AnimalType.Yirtici) effectRange = 1;
-        if (animalData.turu == AnimalType.Otobur) effectRange = 1; // Sadece yanýndaki yýrtýcýyý etkiler
-        if (animalData.turu == AnimalType.Savunmaci) effectRange = 1;
-        // Diðer hayvan türleri için de menziller belirlenebilir...
-
-        if (effectRange > 0)
+        List<SeatController> neighbors = new List<SeatController>();
+        foreach (var trait in animalSO.traits)
         {
-            // 2. Potansiyel koltuðun etrafýndaki komþularý al.
-            List<SeatController> neighbors = gridSystem.GetNeighbors(potentialSeat, effectRange);
-
-            // 3. Bu komþu koltuklarý renklendir.
-            foreach (var neighbor in neighbors)
+            var effectPoints = trait.GetTraitEffectPoints(potentialSeat.GridPosition, animalSO.size);
+            //print(string.Join(", ", effectPoints));
+            foreach (var point in effectPoints)
             {
-                neighbor.Highlight(effectAreaMaterial);
-                currentlyHighlightedSeats.Add(neighbor);
+                if (point != null)
+                {
+                    var seat = gridSystem.GetSeatAt(point);
+                    if (seat != null)
+                        neighbors.Add(seat);
+                }
             }
+        }
+
+        foreach (var neighbor in neighbors)
+        {
+            neighbor.Highlight(effectAreaMaterial);
+            currentlyHighlightedSeats.Add(neighbor);
         }
     }
 

@@ -69,12 +69,13 @@ public class AnimalManager
             if (!otherAnimal.traits.Contains(traitToCheck) && !ownersTrait.antiToEveryTrait)
             {
                 //print("skipped: " + traitToCheck + " (" + otherAnimal.name +  "), " + ownersTrait);
+                Debug.Log("continuing...");
                 continue;
             }
 
             if (effectPointList.Contains(otherAnimal.gridOriginPos))
             {
-                Debug.Log($"[SPECIFIC] {otherAnimal._animalName}, {owner._animalName}'nin menzilinin icinde ->  ({ownersTrait.traitName})");
+                Debug.Log($"[SPECIFIC] {otherAnimal._animalName} ({owner.gridOriginPos.ToString()}), {otherAnimal._animalName}'nin ({otherAnimal.gridOriginPos.ToString()}) menzilinin icinde");
                 return false;
             }
         }
