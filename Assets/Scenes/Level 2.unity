@@ -471,7 +471,7 @@ GameObject:
   m_Layer: 0
   m_Name: "s\u0131ra1"
   m_TagString: Untagged
-  m_Icon: {fileID: 2800000, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
+  m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -484,7 +484,7 @@ Transform:
   m_GameObject: {fileID: 277714845}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3, y: 0, z: -1.46}
+  m_LocalPosition: {x: -3, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -552,7 +552,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 6.81
+  orthographic size: 9
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -966,7 +966,7 @@ Transform:
   m_GameObject: {fileID: 503636854}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.27, y: 0, z: -2.87}
+  m_LocalPosition: {x: -2.134, y: 0, z: -3.484}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1381,7 +1381,7 @@ Transform:
   m_GameObject: {fileID: 678976772}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.13, y: -0.18000007, z: -1.4}
+  m_LocalPosition: {x: 4.26, y: -0.18000007, z: -3.34}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -2307,7 +2307,7 @@ GameObject:
   m_Layer: 0
   m_Name: "s\u0131ra1 (1)"
   m_TagString: Untagged
-  m_Icon: {fileID: 2800000, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
+  m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -2320,7 +2320,7 @@ Transform:
   m_GameObject: {fileID: 1697198102}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -1.5000002, y: 0, z: -1.4600003}
+  m_LocalPosition: {x: -1.5000002, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2535,7 +2535,7 @@ GameObject:
   m_Layer: 0
   m_Name: "s\u0131ra1 (2)"
   m_TagString: Untagged
-  m_Icon: {fileID: 2800000, guid: 207ee8102dd4143d288186ef0be518ee, type: 3}
+  m_Icon: {fileID: -1412012063857583412, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -2548,7 +2548,7 @@ Transform:
   m_GameObject: {fileID: 1985462424}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -1.4600003}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

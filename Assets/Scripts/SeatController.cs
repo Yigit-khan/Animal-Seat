@@ -1,37 +1,46 @@
 using UnityEngine;
 
+// Sadece Unity EditÃ¶r'de Ã§alÄ±ÅŸacak Ã¶zel fonksiyonlar iÃ§in bu using satÄ±rÄ±nÄ± ekliyoruz.
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 /// <summary>
-/// Bir koltuğun davranışını, durumunu (dolu/boş) ve grid üzerindeki pozisyonunu yönetir.
-/// Seviye tasarımı için oyun başında üzerinde bir hayvanla başlamasını da sağlayabilir.
+/// Bir koltuÄŸun davranÄ±ÅŸÄ±nÄ±, durumunu (dolu/boÅŸ) ve grid Ã¼zerindeki pozisyonunu yÃ¶netir.
+/// Seviye tasarÄ±mÄ± iÃ§in oyun baÅŸÄ±nda Ã¼zerinde bir hayvanla baÅŸlamasÄ±nÄ± da saÄŸlayabilir.
 /// </summary>
 public class SeatController : MonoBehaviour
 {
-    [Header("Seviye Tasarım Ayarı")]
-    [Tooltip("Oyun başında bu koltukta direkt olarak başlayacak hayvan prefab'ını buraya sürükleyin. Sadece o hayvanın başlangıç (sol üst) koltuğuna atayın.")]
+    [Header("Seviye TasarÄ±m AyarÄ±")]
+    [Tooltip("Oyun baÅŸÄ±nda bu koltukta direkt olarak baÅŸlayacak hayvan prefab'Ä±nÄ± buraya sÃ¼rÃ¼kleyin.")]
     public GameObject startingAnimalPrefab;
 
+    [Header("EditÃ¶r GÃ¶rÃ¼nÃ¼m AyarlarÄ±")]
+    [Tooltip("Hayvan isminin gÃ¶rÃ¼neceÄŸi maksimum uzaklÄ±k. Sahnenin kalabalÄ±k olmasÄ±nÄ± engeller.")]
+    [SerializeField] private float gizmoMaxDrawDistance = 30f;
+
     [Header("Durum Bilgileri")]
-    [Tooltip("Bu koltuğun grid sistemindeki koordinatı.")]
+    [Tooltip("Bu koltuÄŸun grid sistemindeki koordinatÄ±.")]
     public Vector2Int GridPosition;
 
-    [Tooltip("Koltuk şu anda dolu mu?")]
+    [Tooltip("Koltuk ÅŸu anda dolu mu?")]
     public bool isOccupied { get; private set; } = false;
 
-    [Tooltip("Eğer koltuk doluysa, hangi hayvan tarafından işgal edildiği.")]
+    [Tooltip("EÄŸer koltuk doluysa, hangi hayvan tarafÄ±ndan iÅŸgal edildiÄŸi.")]
     public AnimalController occupiedBy { get; private set; } = null;
 
-    [Tooltip("Koltuk ıslak mı? (Gelecekteki mekanikler için)")]
+    [Tooltip("Koltuk Ä±slak mÄ±? (Gelecekteki mekanikler iÃ§in)")]
     public bool isWet { get; set; } = false;
 
 
-    // --- Özel Değişkenler ---
+    // --- Ã–zel DeÄŸiÅŸkenler ---
     private MeshRenderer meshRenderer;
     private Material originalMaterial;
 
 
     private void Awake()
     {
-        // Oyun başladığında, görsel efektler için MeshRenderer'ı ve orijinal materyalini bulup kaydet.
+        // Oyun baÅŸladÄ±ÄŸÄ±nda, gÃ¶rsel efektler iÃ§in MeshRenderer'Ä± ve orijinal materyalini bulup kaydet.
         meshRenderer = GetComponent<MeshRenderer>();
         if (meshRenderer != null)
         {
@@ -40,9 +49,8 @@ public class SeatController : MonoBehaviour
     }
 
     /// <summary>
-    /// Koltuğun materyalini, verilen highlight materyali ile değiştirir.
+    /// KoltuÄŸun materyalini, verilen highlight materyali ile deÄŸiÅŸtirir.
     /// </summary>
-    /// <param name="highlightMaterial">Uygulanacak yeni materyal.</param>
     public void Highlight(Material highlightMaterial)
     {
         if (meshRenderer != null)
@@ -52,7 +60,7 @@ public class SeatController : MonoBehaviour
     }
 
     /// <summary>
-    /// Koltuğun materyalini oyun başında sahip olduğu orijinal materyaline geri döndürür.
+    /// KoltuÄŸun materyalini oyun baÅŸÄ±nda sahip olduÄŸu orijinal materyaline geri dÃ¶ndÃ¼rÃ¼r.
     /// </summary>
     public void ResetHighlight()
     {
@@ -61,34 +69,29 @@ public class SeatController : MonoBehaviour
             meshRenderer.material = originalMaterial;
         }
     }
-
+    
     /// <summary>
-    /// Bu koltuğun grid pozisyonunu ayarlar. Genellikle GridSystem tarafından çağrılır.
+    /// Bu koltuÄŸun grid pozisyonunu ayarlar. Genellikle GridSystem tarafÄ±ndan Ã§aÄŸrÄ±lÄ±r.
     /// </summary>
-    /// <param name="position">Grid üzerindeki yeni (x, y) pozisyonu.</param>
     public void SetGridPosition(Vector2Int position)
     {
         GridPosition = position;
     }
 
     /// <summary>
-    /// Koltuğu belirli bir hayvan tarafından işgal edilmiş olarak işaretler.
+    /// KoltuÄŸu belirli bir hayvan tarafÄ±ndan iÅŸgal edilmiÅŸ olarak iÅŸaretler.
     /// </summary>
-    /// <param name="animal">Koltuğa yerleşen hayvanın AnimalController'ı.</param>
     public void Occupy(AnimalController animal)
     {
-        // Güvenlik kontrolü: Koltuk zaten doluysa uyarı ver.
         if (isOccupied)
         {
-            Debug.LogWarning($"Koltuk [{GridPosition.x},{GridPosition.y}] zaten {occupiedBy.animalSO._animalName} tarafından dolu, ancak {animal.animalSO._animalName} yerleştirilmeye çalışılıyor!");
+            Debug.LogWarning($"Koltuk [{GridPosition.x},{GridPosition.y}] zaten dolu!");
             return;
         }
 
         isOccupied = true;
         occupiedBy = animal;
-
-        // Kural sisteminin doğru çalışması için hayvanın ScriptableObject verisine
-        // hangi koltuğa (grid pozisyonuna) oturduğunu kaydet.
+        
         if (animal != null && animal.animalSO != null)
         {
             animal.animalSO.gridOriginPos = this.GridPosition;
@@ -96,11 +99,51 @@ public class SeatController : MonoBehaviour
     }
 
     /// <summary>
-    /// Koltuğu boşaltır ve işgal durumunu sıfırlar.
+    /// KoltuÄŸu boÅŸaltÄ±r ve iÅŸgal durumunu sÄ±fÄ±rlar.
     /// </summary>
     public void Vacate()
     {
         isOccupied = false;
         occupiedBy = null;
     }
+
+
+    // Bu fonksiyon bloÄŸu sadece Unity EditÃ¶r'de Ã§alÄ±ÅŸÄ±r ve oyunun build'ine dahil edilmez.
+    #if UNITY_EDITOR
+    /// <summary>
+    /// Sadece EditÃ¶r'de Ã§alÄ±ÅŸÄ±r. Sahne penceresine gÃ¶rsel yardÄ±mcÄ±lar (Gizmos) Ã§izmek iÃ§in kullanÄ±lÄ±r.
+    /// Bu fonksiyon, obje seÃ§ili olmasa bile her zaman Ã§alÄ±ÅŸÄ±r.
+    /// </summary>
+    private void OnDrawGizmos()
+    {
+        // Sadece bir prefab atanmÄ±ÅŸsa devam et.
+        if (startingAnimalPrefab == null)
+            return;
+            
+        // Sahne kamerasÄ±ndan Ã§ok uzaktaysak, performans ve okunabilirlik iÃ§in Ã§izim yapma.
+        if (SceneView.currentDrawingSceneView != null)
+        {
+            float distanceToCamera = Vector3.Distance(SceneView.currentDrawingSceneView.camera.transform.position, transform.position);
+            if (distanceToCamera > gizmoMaxDrawDistance)
+                return;
+        }
+            
+        // Atanan prefab'dan hayvanÄ±n ismini bul.
+        AnimalController controller = startingAnimalPrefab.GetComponent<AnimalController>();
+        string animalName = (controller != null && controller.animalSO != null) 
+                            ? controller.animalSO._animalName 
+                            : startingAnimalPrefab.name;
+
+        // Metnin stilini ayarla (renk, boyut, kalÄ±nlÄ±k vb.).
+        GUIStyle style = new GUIStyle();
+        style.normal.textColor = Color.white;
+        style.fontSize = 14;
+        style.fontStyle = FontStyle.Bold;
+        style.alignment = TextAnchor.MiddleCenter;
+
+        // Metni koltuÄŸun biraz Ã¼zerinde, sahnede Ã§iz.
+        Vector3 textPosition = transform.position + Vector3.up * 0.8f;
+        Handles.Label(textPosition, animalName, style);
+    }
+    #endif
 }
