@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: AnimalObject_Aslan
   m_EditorClassIdentifier: 
   _animalName: Aslan
-  gridOriginPos: {x: 3, y: 4}
+  gridOriginPos: {x: 0, y: 0}
   size: {x: 1, y: 1}
   traits:
   - {fileID: 11400000, guid: 99fcffd4ab7203945ae546c96636d9aa, type: 2}

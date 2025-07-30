@@ -151,3 +151,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 138f895f504365740ae3c7094e78a312, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  animalSO: {fileID: 0}

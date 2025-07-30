@@ -31,11 +31,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float queueMoveSpeed = 8f;
     [SerializeField] private float seatHeightOffset = 0.1f;
     [SerializeField] private float dragZOffset = -2f;
+    [SerializeField] private Vector3 downwardRayOffset = new Vector3(0, 0, 0.5f);
 
     [Header("Düþünce Balonu Ayarlarý")]
     [SerializeField] private GameObject thoughtBubblePrefab;
     [SerializeField] private List<RuleIconData> allRuleIcons;
     [SerializeField] private Vector3 bubbleOffset = new Vector3(0, 1.5f, 0);
+   
 
     [Header("Can Sistemi Ayarlarý")]
     [Tooltip("Oyuncunun baþlangýçtaki can sayýsý.")]
@@ -65,7 +67,8 @@ public class GameManager : MonoBehaviour
 
     [Header("Etki Alaný Gösterme Ayarlarý")]
     [Tooltip("Etki alanýndaki koltuklarý renklendirmek için kullanýlacak materyal.")]
-    [SerializeField] private Material effectAreaMaterial;
+    [SerializeField] private Material greenEffectAreaMaterial;
+    [SerializeField] private Material redEffectAreaMaterial;
 
     // --- Özel Deðiþkenler ---
     private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
@@ -76,6 +79,7 @@ public class GameManager : MonoBehaviour
     private AnimalController selectedAnimal = null;
     private Plane dragPlane;
     private Vector3 offset;
+    
     private int currentLives;
     private List<GameObject> heartIcons = new List<GameObject>();
     private AnimalManager _animalManager;
@@ -200,10 +204,24 @@ public class GameManager : MonoBehaviour
 
     private void SetupAnimalSOs()
     {
-        animalSOs = animalQueue
-        .Select(ac => ac.animalSO)
-        .Where(so => so != null)
-        .ToList();
+        animalSOs = new List<AnimalSO>();
+
+        foreach (var ac in animalQueue)
+        {
+            if (ac.animalSO == null)
+                continue;
+
+            // Orijinal SO'dan bir runtime kopyası (clone) oluştur
+            AnimalSO runtimeSO = ScriptableObject.Instantiate(ac.animalSO);
+            // Başlangıç pozisyonunu sıfırla
+            runtimeSO.gridOriginPos = new Vector2Int(-1, -1);
+            // Controller'ın referansını kopyaya yönlendir
+            ac.animalSO = runtimeSO;
+            // Listemize ekle
+            animalSOs.Add(runtimeSO);
+
+            Debug.Log($"Runtime SO created: {runtimeSO.name} at {runtimeSO.gridOriginPos}");
+        }
     }
     private void InitializeAnimalQueue()
     {
@@ -312,12 +330,14 @@ public class GameManager : MonoBehaviour
         }
 
         // 2. Hedef Tespiti ve Görsel Geri Bildirim
-        Ray downwardRay = new Ray(selectedAnimal.transform.position, Vector3.down);
+        Ray downwardRay = new Ray(selectedAnimal.transform.position + downwardRayOffset, Vector3.down);
         bool foundTarget = false;
+        Debug.DrawRay(downwardRay.origin, downwardRay.direction * 50, Color.green);
 
         // Önce, hayvanýn altýnda bir ANA KOLTUK var mý?
         if (Physics.Raycast(downwardRay, out RaycastHit hit, 20f, seatLayer))
         {
+
             if (hit.collider.TryGetComponent<SeatController>(out SeatController targetSeat))
             {
                 foundTarget = true;
@@ -378,9 +398,11 @@ public class GameManager : MonoBehaviour
         // 3. Eðer hiçbir yere yerleþemediyse, orijinal pozisyonuna geri dön.
         if (!placedSuccessfully)
         {
+            selectedAnimal.animalSO.gridOriginPos = new Vector2Int(-1, -1);
             ReturnAnimalToOrigin();
         }
 
+        
         selectedAnimal.gameObject.layer = selectedAnimal.originalLayer;
         selectedAnimal = null;
         lastValidSeatTarget = null;
@@ -675,9 +697,20 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        selectedAnimal.animalSO.gridOriginPos = potentialSeat.GridPosition;
+        if (!_animalManager.IsAllInteractionsValid(animalSOs))
+        {
+            potentialSeat.Highlight(redEffectAreaMaterial);
+            currentlyHighlightedSeats.Add(potentialSeat);
+            return;
+        }
+
+        potentialSeat.Highlight(greenEffectAreaMaterial);
+        currentlyHighlightedSeats.Add(potentialSeat);
+
         foreach (var neighbor in neighbors)
         {
-            neighbor.Highlight(effectAreaMaterial);
+            neighbor.Highlight(greenEffectAreaMaterial);
             currentlyHighlightedSeats.Add(neighbor);
         }
     }
@@ -690,6 +723,8 @@ public class GameManager : MonoBehaviour
             if (seat != null) seat.ResetHighlight();
         }
         currentlyHighlightedSeats.Clear();
+
+        
     }
 
 }

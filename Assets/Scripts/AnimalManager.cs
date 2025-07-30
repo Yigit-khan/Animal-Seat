@@ -9,12 +9,14 @@ public class AnimalManager
 {
     private List<AnimalSO> _animalDatas;
 
+
     [ContextMenu("Check All Interactions Now")]
+
     public bool IsAllInteractionsValid(List<AnimalSO> animalDatas)
     {
         _animalDatas = animalDatas;
         // Başlangıç logu
-        Debug.Log($"[AnimalManager] Çalıştırıldı, hayvan sayısı = {_animalDatas?.Count ?? 0}");
+        //Debug.Log($"[AnimalManager] Çalıştırıldı, hayvan sayısı = {_animalDatas?.Count ?? 0}");
 
         if (_animalDatas == null || _animalDatas.Count < 2)
         {
@@ -22,62 +24,61 @@ public class AnimalManager
             return false;
         }
 
-        foreach (AnimalSO owner in _animalDatas)
+        foreach (AnimalSO ownerAnimal in _animalDatas)
         {
-            if (owner == null)
+            if (ownerAnimal == null)
                 continue;
-
-            foreach (var trait in owner.traits)
-            {
-                if (trait == null)
-                    continue;
-
-                if (trait.antiToEveryTrait)
-                {
-                    if (IsPositionValid(owner, trait) == false)
-                        return false;
-                }
-                else
-                {
-                    foreach (var antiTrait in trait.antiTraits)
-                    {
-                        if (antiTrait != null)
-                            if (IsPositionValid(owner, trait, antiTrait) == false)
-                                return false;
-                    }
-                }
-            }
+ 
+            if (IsPositionValid(ownerAnimal) == false)
+                return false;
         }
         return true;
     }
 
-    private bool IsPositionValid(AnimalSO owner, AnimalTraitSO ownersTrait, AnimalTraitSO traitToCheck = null)
+    private bool IsPositionValid(AnimalSO ownerAnimal)
     {
-        if (traitToCheck == null && !ownersTrait.antiToEveryTrait)
-        {
-            Debug.LogWarning($"[SPECIFIC] {owner._animalName}.{ownersTrait.traitName} içinde null bir antiTraits var.");
-            return false;
-        }
+        //if (ownerAnimal.gridOriginPos.x < 0 || ownerAnimal.gridOriginPos.y < 0)
+        //{
+        //    Debug.Log("eksi " + ownerAnimal.gridOriginPos.x + ", " + ownerAnimal.gridOriginPos.y);
+        //    return false;
+        //}
 
-        var effectPointList = ownersTrait.GetTraitEffectPoints(owner.gridOriginPos, owner.size);
-        Debug.Log(owner._animalName + " hayvanı için point listesi: " + string.Join(", ", effectPointList));
+        //Debug.Log(ownerAnimal._animalName + " hayvanı için point listesi: " + string.Join(", ", effectPointList));
 
         foreach (AnimalSO otherAnimal in _animalDatas)
         {
-            if (otherAnimal == null || otherAnimal == owner)
-                continue;
-            if (!otherAnimal.traits.Contains(traitToCheck) && !ownersTrait.antiToEveryTrait)
+            if (otherAnimal == null || otherAnimal == ownerAnimal) continue; // kendisiyle karşılaştırma yapma
+
+            if (otherAnimal.gridOriginPos.x < 0 || otherAnimal.gridOriginPos.y < 0) continue;  // grid dışında ise geç
+
+            if (otherAnimal.gridOriginPos == ownerAnimal.gridOriginPos) // üst üste gelemez
+                return false;
+
+            // Trait tabanlı etki alanı kontrolü
+            foreach (var ownerTrait in ownerAnimal.traits)
             {
-                //print("skipped: " + traitToCheck + " (" + otherAnimal.name +  "), " + ownersTrait);
-                Debug.Log("continuing...");
-                continue;
+                // 1) Bu trait tüm trait'lere karşı ise:
+                if (ownerTrait.antiToEveryTrait)
+                {
+                    var allPoints = ownerTrait.GetTraitEffectPoints(ownerAnimal.gridOriginPos, ownerAnimal.size);
+                    if (allPoints.Contains(otherAnimal.gridOriginPos))
+                        return false;
+                }
+                else
+                {
+                    // 2) Sadece spesifik antiTraits için:
+                    var affectedPoints = ownerTrait.GetTraitEffectPoints(ownerAnimal.gridOriginPos, ownerAnimal.size);
+                    foreach (var antiTrait in ownerTrait.antiTraits)
+                    {
+                        if (antiTrait != null && otherAnimal.traits.Contains(antiTrait))
+                        {
+                            if (affectedPoints.Contains(otherAnimal.gridOriginPos))
+                                return false;
+                        }
+                    }
+                }
             }
 
-            if (effectPointList.Contains(otherAnimal.gridOriginPos))
-            {
-                Debug.Log($"[SPECIFIC] {otherAnimal._animalName} ({owner.gridOriginPos.ToString()}), {otherAnimal._animalName}'nin ({otherAnimal.gridOriginPos.ToString()}) menzilinin icinde");
-                return false;
-            }
         }
         return true;
     }

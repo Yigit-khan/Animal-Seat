@@ -1,3 +1,4 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.UI.Image;
@@ -12,7 +13,7 @@ public class AnimalSO : ScriptableObject
 
     [Tooltip("Hayvanın grid üzerinde bulunduğu başlangıç noktası (sol üst köşe)")]
     public Vector2Int gridOriginPos;
-
+    
     [Tooltip("Hayvanın grid üzerindeki boyutu (genişlik, yükseklik)")]
     public Vector2Int size;
 
