@@ -3,57 +3,66 @@ using UnityEngine;
 
 public class AnimalController : MonoBehaviour
 {
-    public AnimalData data { get; private set; }
-    public int originalLayer { get; private set; }
-
+    [Tooltip("Bu hayvanýn tüm verilerini ve karakteristiklerini tutan ScriptableObject.")]
     public AnimalSO animalSO;
 
-    private List<GameObject> myBubbles = new List<GameObject>(); // Kendi balonlarýný tutar
+    // --- YENÝ DEÐÝÞKEN ---
+    [Tooltip("Bu hayvanýn bir koltuða oturup oturmadýðýný belirtir.")]
+    public bool isSeated = false; // Varsayýlan olarak false.
+
+    public int originalLayer { get; private set; }
+    private List<GameObject> myBubbles = new List<GameObject>();
+
 
     public void Initialize()
     {
         originalLayer = gameObject.layer;
-
-        // Hayvan oluþturulur oluþturulmaz kendi kurallarýný gösterir.
-        DisplayMyRules();
     }
 
+    /// <summary>
+    /// Bu hayvanýn sahip olduðu tüm karakteristikler (trait) için düþünce balonlarý oluþturur.
+    /// </summary>
     public void DisplayMyRules()
     {
-        //// Önce varsa eski balonlarý temizle.
-        //ClearMyBubbles();
+        // 1. KONTROL: Eðer hayvan "oturuyor" olarak iþaretlenmiþse, ASLA balon oluþturma.
+        if (isSeated)
+        {
+            ClearMyBubbles(); // Hatta varsa eski balonlarý da sil.
+            return;           // Fonksiyondan hemen çýk.
+        }
 
-        //List<RuleIconData> applicableRules = GameManager.Instance.GetRulesForAnimal(data.turu);
+        // Önceki balonlarý temizle
+        ClearMyBubbles();
 
-        //foreach (var rule in applicableRules)
-        //{
-        //    // GameManager'dan balonu oluþturmasýný iste.
-        //    // Artýk geriye dönen GameObject'i direkt kullanacaðýz.
-        //    GameObject bubbleObj = GameManager.Instance.CreateThoughtBubble(rule.Icon, rule.Description);
+        if (animalSO == null || animalSO.traits == null) return;
 
-        //    if (bubbleObj != null)
-        //    {
-        //        // --- ÝÞTE KRÝTÝK DEÐÝÞÝKLÝK ---
-        //        // 1. Balonun parent'ýný bu hayvan objesi yap.
-        //        bubbleObj.transform.SetParent(this.transform);
-
-        //        // 2. Balonun yerel pozisyonunu ayarla (hayvanýn kendi merkezine göre).
-        //        // GameManager'daki bubbleOffset'i buraya taþýyabilir veya direkt burada belirleyebiliriz.
-        //        bubbleObj.transform.localPosition = new Vector3(0, 1.5f, 0); // Hayvanýn 1.5 birim üzerinde duracak.
-
-        //        myBubbles.Add(bubbleObj);
-        //    }
-        //}
+        // Balon oluþturma mantýðý (sadece oturmayan hayvanlar için çalýþacak)
+        foreach (var trait in animalSO.traits)
+        {
+            Sprite icon = GameManager.Instance.GetIconForTrait(trait);
+            if (icon != null)
+            {
+                GameObject bubbleObj = GameManager.Instance.CreateThoughtBubble(icon, trait.traitDescription);
+                if (bubbleObj != null)
+                {
+                    bubbleObj.transform.SetParent(this.transform);
+                    bubbleObj.transform.localPosition = GameManager.Instance.bubbleOffset;
+                    myBubbles.Add(bubbleObj);
+                }
+            }
+        }
     }
 
-    // Hayvan sahneden kaldýrýldýðýnda (örn: koltuða oturduðunda), balonlarýný da temizle.
+    /// <summary>
+    /// Hayvanýn üzerindeki tüm düþünce balonlarýný siler.
+    /// </summary>
     public void ClearMyBubbles()
     {
-        foreach (var bubble in myBubbles)
+        foreach (Transform child in transform)
         {
-            if (bubble != null)
+            if (child.GetComponent<ThoughtBubbleController>() != null)
             {
-                Destroy(bubble);
+                Destroy(child.gameObject);
             }
         }
         myBubbles.Clear();
@@ -61,7 +70,6 @@ public class AnimalController : MonoBehaviour
 
     void OnDestroy()
     {
-        // Her ihtimale karþý, obje yok olurken balonlarýný da temizle.
         ClearMyBubbles();
     }
 }

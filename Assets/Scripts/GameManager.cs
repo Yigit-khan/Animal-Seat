@@ -2,13 +2,22 @@
 using UnityEngine;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using System.Linq;
+using Unity.VisualScripting;
+
 
 
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
+[System.Serializable]
+public struct RuleIconData
+{
+    [Tooltip("Hangi hayvan karakteristiği (trait) için olduğu.")]
+    public AnimalTraitSO trait;
+    [Tooltip("Bu karakteristiği temsil edecek ikon.")]
+    public Sprite icon;
+}
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -35,11 +44,13 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float dragZOffset = -2f;
     [SerializeField] private Vector3 downwardRayOffset = new Vector3(0, 0, 0.5f);
 
-    [Header("Düþünce Balonu Ayarlarý")]
+    [Header("Düşünce Balonu Ayarları")]
     [SerializeField] private GameObject thoughtBubblePrefab;
+    // LİSTENİN TÜRÜNÜ DEĞİŞTİRİN:
     [SerializeField] private List<RuleIconData> allRuleIcons;
-    [SerializeField] private Vector3 bubbleOffset = new Vector3(0, 1.5f, 0);
-   
+    // BU DEĞİŞKENİ PUBLİC YAPIN:
+    public Vector3 bubbleOffset = new Vector3(0, 1.5f, 0);
+
 
     [Header("Can Sistemi Ayarlarý")]
     [Tooltip("Oyuncunun baþlangýçtaki can sayýsý.")]
@@ -101,13 +112,21 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        Time.timeScale = 1f; // Oyun yeniden baþladýðýnda zamaný normale döndür.
+        Time.timeScale = 1f;
+
+        // 1. Sistemleri kur
         gridSystem = new GridSystem(seatParent, gridOriginReference, gridCellSize);
         _animalManager = new AnimalManager();
+        animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
+
+        // 2. Editörde atanan başlangıç hayvanlarını sahneye yerleştir
+        PlaceStartingAnimals();
+
+        // 3. Diğer sistemleri kurmaya devam et
         SetupHoldingSlots();
         SetupLives();
         InitializeAnimalQueue();
-        SetupAnimalSOs(); // bu animal queue'dan sonra olmak zorunda
+        SetupAnimalSOs(); // Kuyruktaki hayvanların SO'larını ayarla
     }
 
 
@@ -119,17 +138,18 @@ public class GameManager : MonoBehaviour
 
     #region Public Fonksiyonlar
 
-    public List<RuleIconData> GetRulesForAnimal(AnimalType animalType)
+    public Sprite GetIconForTrait(AnimalTraitSO traitToFind)
     {
-        List<RuleIconData> rules = new List<RuleIconData>();
         foreach (var rule in allRuleIcons)
         {
-            if (rule.SourceAnimal == animalType && rule.Interaction == InteractionType.Dislikes)
+            if (rule.trait == traitToFind)
             {
-                rules.Add(rule);
+                return rule.icon;
             }
         }
-        return rules;
+        // Eğer eşleşen bir ikon bulunamazsa, uyarı ver ve null döndür.
+        Debug.LogWarning($"'{traitToFind.name}' için bir ikon bulunamadı. GameManager'daki 'All Rule Icons' listesini kontrol edin.");
+        return null;
     }
 
     public GameObject CreateThoughtBubble(Sprite icon, string description)
@@ -159,78 +179,27 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    //private void InitializeAnimalQueue()
-    //{
-    //    // Önce mevcut kuyruğu temizle (oyun yeniden başlarsa diye)
-    //    foreach (var animal in animalQueue)
-    //    {
-    //        if (animal != null) Destroy(animal.gameObject);
-    //    }
-    //    animalQueue.Clear();
-
-    //    // Seviye için tanımlanmış hayvanları oluştur
-    //    for (int i = 0; i < currentLevelAnimals.Count; i++)
-    //    {
-    //        // Sadece kuyruk pozisyonları kadar hayvan oluştur
-    //        if (i < queuePositions.Length)
-    //        {
-    //            // 1. O hayvanın verisini (AnimalSO) al
-    //            AnimalSO animalData = currentLevelAnimals[i];
-
-    //            // 2. ÖNEMLİ: Prefab'ın atanıp atanmadığını kontrol et. Hataları önler.
-    //            if (animalData.animalPrefab == null)
-    //            {
-    //                Debug.LogError($"'{animalData._animalName}' isimli AnimalSO asset'ine bir prefab atanmamış! Lütfen Project panelinden ilgili asset'i kontrol edin.");
-    //                continue; // Bu hayvanı atla ve bir sonrakine geç
-    //            }
-
-    //            // 3. AnimalSO içindeki doğru prefab'ı kullanarak hayvanı Instantiate et.
-    //            GameObject animalObj = Instantiate(
-    //                animalData.animalPrefab,         // Veri dosyasından gelen prefab
-    //                queuePositions[i].position,
-    //                Quaternion.identity
-    //            );
-
-    //            // 4. Oluşturulan objenin AnimalController'ını al ve initialize et.
-    //            if (animalObj.TryGetComponent<AnimalController>(out var animalController))
-    //            {
-    //                animalController.Initialize(); // Artık verinin tamamını yolluyoruz
-    //                animalQueue.Add(animalController);
-    //            }
-    //            else
-    //            {
-    //                Debug.LogError($"'{animalData.animalPrefab.name}' prefab'ında AnimalController component'i bulunamadı!");
-    //                Destroy(animalObj); // Hatalı objeyi yok et
-    //            }
-    //        }
-    //    }
-    //}
-
     private void SetupAnimalSOs()
     {
-        animalSOs = new List<AnimalSO>();
-
+        // BU FONKSİYON ARTIK SADECE KUYRUKTAKİ HAYVANLAR İÇİN ÇALIŞIR.
+        // Başlangıç hayvanlarının SO'ları PlaceStartingAnimals içinde zaten ayarlandı.
         foreach (var ac in animalQueue)
         {
             if (ac.animalSO == null)
                 continue;
 
-            // Orijinal SO'dan bir runtime kopyası (clone) oluştur
             AnimalSO runtimeSO = ScriptableObject.Instantiate(ac.animalSO);
-            // Başlangıç pozisyonunu sıfırla
-            runtimeSO.gridOriginPos = new Vector2Int(-1, -1);
-            // Controller'ın referansını kopyaya yönlendir
+            runtimeSO.gridOriginPos = new Vector2Int(-1, -1); // Kuyruktaki hayvanların pozisyonu yoktur
             ac.animalSO = runtimeSO;
-            // Listemize ekle
             animalSOs.Add(runtimeSO);
-
-            //Debug.Log($"Runtime SO created: {runtimeSO.name} at {runtimeSO.gridOriginPos}");
         }
     }
     private void InitializeAnimalQueue()
     {
         animalQueue.Clear();
-
+        // currentLevelAnimals listesinden kuyruğa hayvan ekle.
+        // Not: Seviye başında yerleştirdiğiniz hayvanları bu listeden çıkarabilirsiniz,
+        // böylece aynı hayvanlar hem oturup hem de kuyrukta olmaz.
         int count = Mathf.Min(currentLevelAnimals.Count, queuePositions.Length);
         for (int i = 0; i < count; i++)
         {
@@ -246,17 +215,17 @@ public class GameManager : MonoBehaviour
             if (animalController != null)
             {
                 animalController.Initialize();
+
+                // --- İŞTE YENİ EKLENEN SATIR ---
+                // Sadece kuyruğa eklenen hayvanların kurallarını/balonlarını göster.
+                animalController.DisplayMyRules();
+
                 animalQueue.Add(animalController);
-            }
-            else
-            {
-                Debug.LogError($"Prefab’ında AnimalController bulunamadı: {prefab.name}");
             }
         }
     }
     private void UpdateAnimalQueuePositions()
     {
-        // en küçük değeri al: hayvan sayısı mı, pozisyon sayısı mı
         int maxIndex = Mathf.Min(animalQueue.Count, queuePositions.Length);
 
         for (int i = 0; i < maxIndex; i++)
@@ -435,6 +404,8 @@ public class GameManager : MonoBehaviour
 
     private void PlaceAnimalOnSeat(AnimalController animal, SeatController seat)
     {
+        animal.isSeated = true; // Hayvan artık oturuyor.
+        
         animal.ClearMyBubbles();
         animal.transform.position = seat.transform.position + new Vector3(0, seatHeightOffset, 0);
         seat.Occupy(animal);
@@ -660,6 +631,7 @@ public class GameManager : MonoBehaviour
 
     private void ReturnAnimalToOrigin()
     {
+        selectedAnimal.isSeated = false; // Artık oturmuyor.
         // Eðer hayvan bir bekleme slotundan alýndýysa...
         if (startParentOfSelectedAnimal != null && startParentOfSelectedAnimal.TryGetComponent<HoldingSlotController>(out var slot))
         {
@@ -747,4 +719,58 @@ public class GameManager : MonoBehaviour
         
     }
 
+    private void PlaceStartingAnimals()
+    {
+        // Grid sistemindeki tüm koltukları al
+        Dictionary<Vector2Int, SeatController> allSeats = gridSystem.GetFullGrid();
+        foreach (var seatPair in allSeats)
+        {
+            SeatController seat = seatPair.Value;
+            if (seat.startingAnimalPrefab != null && !seat.isOccupied)
+            {
+                GameObject animalObj = Instantiate(
+                    seat.startingAnimalPrefab,
+                    seat.transform.position + new Vector3(0, seatHeightOffset, 0),
+                    Quaternion.identity
+                );
+                if (animalObj.TryGetComponent<AnimalController>(out var animalController))
+                {
+                    // Bu fonksiyon artık balon OLUŞTURMUYOR, bu yüzden burada çağırmak güvenli.
+                    animalController.Initialize();
+
+                    animalController.isSeated = true;
+
+                    // 3. Kural sisteminin kullanması için AnimalSO'dan bir RUNTIME KOPYASI oluştur
+                    AnimalSO runtimeSO = ScriptableObject.Instantiate(animalController.animalSO);
+                    runtimeSO.gridOriginPos = seat.GridPosition; // Grid pozisyonunu bu kopyaya ata
+                    animalController.animalSO = runtimeSO; // Controller'ın artık bu kopyayı kullanmasını sağla
+                    animalSOs.Add(runtimeSO); // Hayvanı, kural yöneticisinin listesine ekle
+
+                    // 4. Hayvanın boyutuna göre kapladığı TÜM koltukları "dolu" olarak işaretle
+                    Vector2Int size = runtimeSO.size;
+                    for (int x = 0; x < size.x; x++)
+                    {
+                        for (int y = 0; y < size.y; y++)
+                        {
+                            // Not: Grid'inizin Y ekseninin nasıl çalıştığına göre (aşağı mı yukarı mı artıyor)
+                            // buradaki 'seat.GridPosition.y + y' ifadesini '- y' olarak değiştirmeniz gerekebilir.
+                            // Genellikle +y doğrudur.
+                            Vector2Int currentPos = new Vector2Int(seat.GridPosition.x + x, seat.GridPosition.y + y);
+                            SeatController occupiedSeat = gridSystem.GetSeatAt(currentPos);
+                            if (occupiedSeat != null)
+                            {
+                                occupiedSeat.Occupy(animalController);
+                            }
+                        }
+                    }
+                    Debug.Log($"Başlangıç hayvanı '{runtimeSO._animalName}', grid pozisyonu [{seat.GridPosition.x},{seat.GridPosition.y}]'e yerleştirildi.");
+                }
+                else
+                {
+                    Debug.LogError($"{seat.startingAnimalPrefab.name} prefab'ında AnimalController componenti bulunamadı! Hayvan yerleştirilemedi.");
+                    Destroy(animalObj);
+                }
+            }
+        }
+    }
 }
