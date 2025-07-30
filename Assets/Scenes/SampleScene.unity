@@ -1841,10 +1841,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentLevelAnimals:
-  - {fileID: 11400000, guid: 5bfbe573d482da74ca53822bab5b74d0, type: 2}
-  - {fileID: 11400000, guid: 24889eda850e5544595b4cbf5be0f2c9, type: 2}
-  - {fileID: 11400000, guid: 24889eda850e5544595b4cbf5be0f2c9, type: 2}
-  animalPrefab3D: {fileID: 8885787366193381668, guid: f345d050bfd2d4b4e94e1ed7c6c21404, type: 3}
+  - {fileID: 8885787366193381668, guid: aac55c4eafad246498f6b28e50186d67, type: 3}
+  - {fileID: 8885787366193381668, guid: ae28efe0e4200aa40bf34ce83efa6134, type: 3}
+  - {fileID: 8885787366193381668, guid: 163e0a07c1b8e9345b60310579420d66, type: 3}
   seatLayer:
     serializedVersion: 2
     m_Bits: 64

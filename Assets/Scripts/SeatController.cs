@@ -4,7 +4,7 @@ public class SeatController : MonoBehaviour
 {
     // Artýk public gridX/gridY yerine Vector2Int kullanacaðýz.
     // Bu, grid koordinatlarýný tek bir deðiþkende tutar.
-    public Vector2Int GridPosition { get; private set; }
+    public Vector2Int GridPosition;
 
     public bool isOccupied { get; private set; } = false;
     public AnimalController occupiedBy { get; private set; } = null;
