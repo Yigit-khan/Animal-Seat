@@ -24,6 +24,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Transform seatParent;
     [SerializeField] private Transform gridOriginReference;
     [SerializeField] private Vector2 gridCellSize = new Vector2(1.2f, 1.2f);
+    [SerializeField] private bool activateSeatHighlight;
+
 
     [Header("Fiziksel Kuyruk ve Sürükleme Ayarlarý")]
     [SerializeField] private Transform[] queuePositions;
@@ -69,6 +71,8 @@ public class GameManager : MonoBehaviour
     [Tooltip("Etki alanýndaki koltuklarý renklendirmek için kullanýlacak materyal.")]
     [SerializeField] private Material greenEffectAreaMaterial;
     [SerializeField] private Material redEffectAreaMaterial;
+    [SerializeField] private Material yellowEffectAreaMaterial;
+    [SerializeField] private Material whiteEffectAreaMaterial;
 
     // --- Özel Deðiþkenler ---
     private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
@@ -220,7 +224,7 @@ public class GameManager : MonoBehaviour
             // Listemize ekle
             animalSOs.Add(runtimeSO);
 
-            Debug.Log($"Runtime SO created: {runtimeSO.name} at {runtimeSO.gridOriginPos}");
+            //Debug.Log($"Runtime SO created: {runtimeSO.name} at {runtimeSO.gridOriginPos}");
         }
     }
     private void InitializeAnimalQueue()
@@ -344,6 +348,7 @@ public class GameManager : MonoBehaviour
                 lastValidHoldingSlotTarget = null; // Diðer hedefi temizle
                 if (lastValidSeatTarget != targetSeat)
                 {
+                    
                     ShowEffectArea(selectedAnimal.animalSO, targetSeat);
                     lastValidSeatTarget = targetSeat;
                 }
@@ -476,11 +481,11 @@ public class GameManager : MonoBehaviour
         }
 
         animalController.animalSO.gridOriginPos = newOrigin;
-        Debug.Log($"{animalController.animalSO._animalName} yeni gridOriginPos: {newOrigin}");
+        //Debug.Log($"{animalController.animalSO._animalName} yeni gridOriginPos: {newOrigin}");
 
         // 5) Interaction testi için doğru listeyi kullanın
         bool isValid = _animalManager.IsAllInteractionsValid(animalSOs);
-        Debug.Log("isValid: " + isValid);
+        //Debug.Log("isValid: " + isValid);
         return isValid;
     }
 
@@ -695,6 +700,21 @@ public class GameManager : MonoBehaviour
                         neighbors.Add(seat);
                 }
             }
+        }
+
+        if (!activateSeatHighlight)
+        {
+            if (!potentialSeat.isOccupied)
+            {
+                potentialSeat.Highlight(yellowEffectAreaMaterial);
+                currentlyHighlightedSeats.Add(potentialSeat);
+                foreach (var neighbor in neighbors)
+                {
+                    neighbor.Highlight(whiteEffectAreaMaterial);
+                    currentlyHighlightedSeats.Add(neighbor);
+                }
+            }
+            return;
         }
 
         selectedAnimal.animalSO.gridOriginPos = potentialSeat.GridPosition;

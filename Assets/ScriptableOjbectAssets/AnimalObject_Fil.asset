@@ -16,4 +16,4 @@ MonoBehaviour:
   gridOriginPos: {x: 6, y: 6}
   size: {x: 2, y: 1}
   traits:
-  - {fileID: 11400000, guid: d0d78c06f24616e42ae7264fe1bd64fc, type: 2}
+  - {fileID: 11400000, guid: c1f6cc0d36d4b114dbb3fc2bd2b55628, type: 2}

@@ -14,12 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   traitName: "Savunmac\u0131"
   traitDescription: "Hi\xE7 kimse ile yan yana oturmak istemez"
-  antiToEveryTrait: 0
-  antiTraits:
-  - {fileID: 11400000, guid: d0d78c06f24616e42ae7264fe1bd64fc, type: 2}
-  - {fileID: 11400000, guid: c1f6cc0d36d4b114dbb3fc2bd2b55628, type: 2}
-  - {fileID: 11400000, guid: 2f210cec2b0dc7147b3d459a7b48fa41, type: 2}
-  - {fileID: 11400000, guid: 99fcffd4ab7203945ae546c96636d9aa, type: 2}
+  antiToEveryTrait: 1
+  antiTraits: []
   effectRanges:
     up: 0
     down: 0
