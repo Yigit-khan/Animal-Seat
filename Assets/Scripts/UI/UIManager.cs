@@ -9,7 +9,6 @@ public class UIManager: MonoBehaviour
     public GameObject settingsPopUp;
     public GameObject lifePopUp;
     public GameObject darkBackground;
-    
 
     [Header("Buttons")]
     public Button settingsButton;

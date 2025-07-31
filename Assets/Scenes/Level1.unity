@@ -1638,6 +1638,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   winUI: {fileID: 627182255}
+  gameCanvas: {fileID: 879444494}
 --- !u!4 &717618884
 Transform:
   m_ObjectHideFlags: 0
@@ -1911,6 +1912,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+--- !u!1 &879444494 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 744750946127697797, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+  m_PrefabInstance: {fileID: 879444493}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &905885714
 GameObject:
   m_ObjectHideFlags: 0
@@ -2172,6 +2178,7 @@ MonoBehaviour:
   yellowEffectAreaMaterial: {fileID: 2100000, guid: e26614fb422e11d44aa4783b7d4e8aa9, type: 2}
   whiteEffectAreaMaterial: {fileID: 2100000, guid: e9e17af4333fb3f4d9c2728817ab2c7d, type: 2}
   winUI: {fileID: 627182255}
+  inGameUIManager: {fileID: 717618883}
 --- !u!4 &1142940857
 Transform:
   m_ObjectHideFlags: 0

@@ -2,10 +2,12 @@ using DG.Tweening;
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIAnimationManager : MonoBehaviour
 {
+
     [Header("Coin Settings")]
     [SerializeField] private GameObject coinPrefab;
     [SerializeField] private RectTransform coinSpawnOrigin;
@@ -43,13 +45,84 @@ public class UIAnimationManager : MonoBehaviour
         {
             ShowRewardedAd(() =>
             {
-                CollectCoins(coinRewardAmount * 2);
+                //CollectCoins(coinRewardAmount * 2);
+                CollectCoinsAndProceed(coinRewardAmount * 2);
             });
         }
         else
         {
-            CollectCoins(coinRewardAmount);
+            //CollectCoins(coinRewardAmount);
+            CollectCoinsAndProceed(coinRewardAmount);
         }
+
+        
+    }
+
+    private void CollectCoinsAndProceed(int amount)
+    {
+        // 1. Yeni seviye kilidini açma mantýðýný BURAYA TAÞIYIN
+        int currentLevel = SaveManager.LoadCurrentLevel();
+        int unlockedLevel = SaveManager.LoadLevel();
+
+        // Eðer bitirdiðimiz seviye, en son açýlan seviyeye eþitse, bir sonrakini aç.
+        if (currentLevel >= unlockedLevel)
+        {
+            SaveManager.SaveLevel(currentLevel + 1);
+            Debug.Log($"Yeni seviye açýldý: {currentLevel + 1}");
+        }
+
+        // 2. Coin animasyonunu baþlat
+        int visualCoinCount = Mathf.Min(20, amount);
+        float moveTime = 1f;
+        float delayStep = 0.05f;
+
+        // Eðer hiç coin gösterilmeyecekse direkt menüye dön.
+        if (visualCoinCount == 0)
+        {
+            SceneManager.LoadScene("MenuScene");
+            return;
+        }
+
+        for (int i = 0; i < visualCoinCount; i++)
+        {
+            // ... (Mevcut coin animasyon kodunuz burada kalabilir)
+            GameObject coin = Instantiate(coinPrefab, coinSpawnOrigin.transform.parent);
+            coin.transform.position = coinSpawnOrigin.position;
+            Vector3 initialScale = Vector3.zero;
+            Vector3 punchScale = Vector3.one * 1.5f;
+            Vector3 finalScale = Vector3.one * 0.4f;
+            Vector2 randomOffset = Random.insideUnitCircle.normalized * 60f;
+            Vector3 spreadPosition = coinSpawnOrigin.position + new Vector3(randomOffset.x, randomOffset.y + 50f, 0);
+            coin.transform.localScale = initialScale;
+            float delay = i * delayStep;
+
+            Sequence seq = DOTween.Sequence();
+            seq.AppendInterval(delay);
+            seq.Append(coin.transform.DOScale(punchScale, 0.3f).SetEase(Ease.OutBack));
+            seq.Join(coin.transform.DOMove(spreadPosition, 0.3f).SetEase(Ease.OutQuad));
+            seq.Append(coin.transform.DOMove(coinTarget.position, moveTime).SetEase(Ease.InQuad));
+            seq.Join(coin.transform.DOScale(finalScale, moveTime));
+            seq.OnComplete(() => Destroy(coin));
+
+            DOVirtual.DelayedCall(delay + 0.3f, () => audioSource.PlayOneShot(coinCollectSound));
+
+            // 3. SADECE SON coin animasyonu bittiðinde menüye dön
+            if (i == visualCoinCount - 1)
+            {
+                seq.OnComplete(() =>
+                {
+                    Destroy(coin);
+                    // Animasyon bitti, þimdi menüye dönebiliriz.
+                    SceneManager.LoadScene("MenuScene");
+                });
+            }
+        }
+
+        // TODO: totalCoins'i PlayerPrefs ile kaydetmelisiniz.
+        // int savedCoins = PlayerPrefs.GetInt("TotalCoins", 0);
+        // PlayerPrefs.SetInt("TotalCoins", savedCoins + amount);
+        totalCoins += amount;
+        Debug.Log("Total Coins: " + totalCoins);
     }
 
     private void ShowRewardedAd(System.Action onComplete)
@@ -65,6 +138,7 @@ public class UIAnimationManager : MonoBehaviour
         onComplete?.Invoke();
     }
 
+    //Collect Coins And return menuscene and unlock next level
     public void CollectCoins(int amount)
     {
         int visualCoinCount = Mathf.Min(20, amount);
@@ -104,6 +178,11 @@ public class UIAnimationManager : MonoBehaviour
             {
                 audioSource.PlayOneShot(coinCollectSound); // AudioManager.Instance.PlayOneShot("");
             });
+
+            /*
+            levelSelectController.UnlockNextLevel();
+            SceneManager.LoadScene("MenuScene");
+            */
         }
 
         totalCoins += amount;

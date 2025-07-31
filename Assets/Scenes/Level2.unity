@@ -1779,7 +1779,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 583963158147634577, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
       propertyPath: m_Name
-      value: WinLoseCanvas
+      value: "W\u0131nLoseUICanvas"
       objectReference: {fileID: 0}
     - target: {fileID: 2666914477227652912, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
       propertyPath: m_Pivot.x
@@ -1958,6 +1958,7 @@ MonoBehaviour:
   yellowEffectAreaMaterial: {fileID: 2100000, guid: e26614fb422e11d44aa4783b7d4e8aa9, type: 2}
   whiteEffectAreaMaterial: {fileID: 2100000, guid: e9e17af4333fb3f4d9c2728817ab2c7d, type: 2}
   winUI: {fileID: 1115720947}
+  inGameUIManager: {fileID: 1322025594}
 --- !u!4 &1142940857
 Transform:
   m_ObjectHideFlags: 0
@@ -2135,6 +2136,52 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+--- !u!1 &1322025593
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1322025595}
+  - component: {fileID: 1322025594}
+  m_Layer: 0
+  m_Name: UIManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1322025594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322025593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6a38caae2a5863e4c9d0ed259172c34f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  winUI: {fileID: 1115720947}
+  gameCanvas: {fileID: 1837955054}
+--- !u!4 &1322025595
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1322025593}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -70.6516, y: 613.24695, z: -9.079426}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1323146903 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
@@ -2837,6 +2884,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7123319565829428070, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7123319565829428070, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7123319565829428070, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7123319565829428070, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7496934758644590258, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -2853,11 +2916,28 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8689928447218868296, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8689928447218868296, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8689928447218868296, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+--- !u!1 &1837955054 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 744750946127697797, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+  m_PrefabInstance: {fileID: 1837955053}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1864081998
 GameObject:
   m_ObjectHideFlags: 0
@@ -3104,3 +3184,4 @@ SceneRoots:
   - {fileID: 82598351}
   - {fileID: 1837955053}
   - {fileID: 1115720946}
+  - {fileID: 1322025595}

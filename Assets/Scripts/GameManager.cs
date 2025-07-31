@@ -87,6 +87,10 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Material yellowEffectAreaMaterial;
     [SerializeField] private Material whiteEffectAreaMaterial;
 
+    [Header("UI")]
+    [SerializeField] private GameObject winUI;
+    [SerializeField] private InGameUIManager inGameUIManager;
+
     // --- Özel Deðiþkenler ---
     private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
 
@@ -106,9 +110,7 @@ public class GameManager : MonoBehaviour
 
     private SeatController lastValidSeatTarget = null;
     private HoldingSlotController lastValidHoldingSlotTarget = null; // YENÝ
-
-    private InGameUIManager InGameUIManager;
-
+    
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -123,7 +125,6 @@ public class GameManager : MonoBehaviour
         gridSystem = new GridSystem(seatParent, gridOriginReference, gridCellSize);
         _animalManager = new AnimalManager();
         animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
-        InGameUIManager = GetComponent<InGameUIManager>();
 
         // 2. Editörde atanan başlangıç hayvanlarını sahneye yerleştir
         PlaceStartingAnimals();
@@ -486,8 +487,6 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
         // TODO: "Tekrar Dene" UI panelini göster.
     }
-
-    [SerializeField] private GameObject winUI;
   
     private void CheckWinCondition()
     {
@@ -496,11 +495,21 @@ public class GameManager : MonoBehaviour
             Debug.Log("TEBRÝKLER! SEVÝYE TAMAMLANDI!");
             // TODO: "Seviye Geçildi" UI panelini göster.
 
+            if (inGameUIManager != null)
+            {
+                inGameUIManager.WinUIAnimation();
+            }
+            else
+            {
+                Debug.LogError("InGameUIManager referansı atanmamış!");
+            }
+
+            /*
             winUI.SetActive(true);
             // Paneli aktif edip animasyonla göster
             winUI.GetComponent<PanelWinUIAnimator>().Show();
-
-        }
+            */
+            }
     }
     #endregion
 

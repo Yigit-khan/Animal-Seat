@@ -13,6 +13,11 @@ public class LevelSelectController : MonoBehaviour
     private int unlockedLevel = 1; //henü açýlmamýþ leveli tutuyor
     private const int maxLevel = 20; //þimdilik böyle
 
+    private void Awake()
+    {
+        //SaveManager.ResetProgress();
+    }
+
     private void Start()
     {
         // SaveManager üzerinden veri yükle -- en son kaldýðýmýz level yükleniyor
