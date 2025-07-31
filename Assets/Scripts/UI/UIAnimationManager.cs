@@ -1,67 +1,112 @@
 using DG.Tweening;
+using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIAnimationManager : MonoBehaviour
 {
+    [Header("Coin Settings")]
     [SerializeField] private GameObject coinPrefab;
-    [SerializeField] private RectTransform coinSpawnOrigin; // Coin’lerin çýkýþ noktasý
-    [SerializeField] private RectTransform coinTarget; // Rewards/icon objesi
-    [SerializeField] private TMP_Text coinText; // Altýn sayýsýný gösteren text
-    [SerializeField] private int coinsToCollect = 20;
-    [SerializeField] private int currentCoins = 1000;
+    [SerializeField] private RectTransform coinSpawnOrigin;
+    [SerializeField] private RectTransform coinTarget;
+    [SerializeField] private TMP_Text coinText;
+    [SerializeField] private int coinRewardAmount = 100;
 
-    public void OnEnable()
+    [Header("Win UI Buttons")]
+    [SerializeField] private Button buttonContinue;
+    [SerializeField] private Button button2xContinue;
+    private int totalCoins = 0;
+
+    [Header("Lose UI Buttons")]
+    [SerializeField] private Button buttonRetry;
+    [SerializeField] private Button buttonExit;
+
+    [Header("Silinecek")]
+    //Silinecek
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip coinCollectSound;
+
+    void Start()
     {
-        CollectCoins();
+        coinText.text = coinRewardAmount.ToString();
+        buttonContinue.onClick.AddListener(() => OnContinueClicked(false));
+        button2xContinue.onClick.AddListener(() => OnContinueClicked(true));
     }
-    public void CollectCoins(bool x2 = false)
+
+    public void OnContinueClicked(bool isDouble)
     {
-        float spawnRadius = 60f;
-        int collectedCoins = 0;
-        int animCount = x2 ? coinsToCollect * 2 : coinsToCollect;
-        int coinCount = currentCoins;
-        int decrement = (animCount > 0) ? Mathf.CeilToInt((float)currentCoins / animCount) : 1;
+        buttonContinue.interactable = false;
+        button2xContinue.interactable = false;
 
-        float spawnInterval = 0.03f;
-        float moveTime = 1f;
-        float delayMultiplier = 0.2f;
-
-        coinText.text = currentCoins.ToString("N0");
-
-        for (int i = 0; i < animCount; i++)
+        if (isDouble)
         {
-            GameObject coin = Instantiate(coinPrefab, coinSpawnOrigin.parent);
-            float angle = i * (360f / 10);
-            float radians = angle * Mathf.Deg2Rad;
-
-            Vector3 spawnOffset = new Vector3(
-                Mathf.Cos(radians) * spawnRadius,
-                Mathf.Sin(radians) * spawnRadius,
-                0
-            );
-            coin.transform.position = coinSpawnOrigin.position + spawnOffset;
-
-            Vector3 targetPosition = coinTarget.position;
-            float delay = i * delayMultiplier;
-
-            coin.transform.DOMove(targetPosition, moveTime)
-                .SetDelay(delay / 5).SetEase(Ease.InOutBack)
-                .OnComplete(() =>
-                {
-                    Destroy(coin);
-                    coinCount -= decrement;
-                    if (coinCount < 0) coinCount = 0;
-                    collectedCoins++;
-
-                    coinText.text = coinCount.ToString("N0");
-
-                    if (collectedCoins >= animCount)
-                    {
-                        Debug.Log("Coin animation complete");
-                    }
-                });
+            ShowRewardedAd(() =>
+            {
+                CollectCoins(coinRewardAmount * 2);
+            });
+        }
+        else
+        {
+            CollectCoins(coinRewardAmount);
         }
     }
-}
 
+    private void ShowRewardedAd(System.Action onComplete)
+    {
+        Debug.Log("Reklam gösteriliyor...");
+        StartCoroutine(SimulateAd(onComplete));
+    }
+
+    private IEnumerator SimulateAd(System.Action onComplete)
+    {
+        yield return new WaitForSeconds(2f);
+        Debug.Log("Reklam bitti!");
+        onComplete?.Invoke();
+    }
+
+    public void CollectCoins(int amount)
+    {
+        int visualCoinCount = Mathf.Min(20, amount);
+        float spawnRadius = 60f;
+        float moveTime = 1f;
+        float delayStep = 0.05f;
+
+        for (int i = 0; i < visualCoinCount; i++)
+        {
+            GameObject coin = Instantiate(coinPrefab, coinSpawnOrigin.transform.parent);
+            coin.transform.position = coinSpawnOrigin.position;
+
+            Vector3 initialScale = Vector3.zero;
+            Vector3 punchScale = Vector3.one * 1.5f;
+            Vector3 finalScale = Vector3.one * 0.4f;
+
+            Vector2 randomOffset = Random.insideUnitCircle.normalized * spawnRadius;
+            Vector3 spreadPosition = coinSpawnOrigin.position + new Vector3(randomOffset.x, randomOffset.y + 50f, 0);
+
+            coin.transform.localScale = initialScale;
+            float delay = i * delayStep;
+
+            Sequence seq = DOTween.Sequence();
+            seq.AppendInterval(delay);
+            seq.Append(coin.transform.DOScale(punchScale, 0.3f).SetEase(Ease.OutBack));
+            seq.Join(coin.transform.DOMove(spreadPosition, 0.3f).SetEase(Ease.OutQuad));
+            seq.Append(coin.transform.DOMove(coinTarget.position, moveTime).SetEase(Ease.InQuad));
+            seq.Join(coin.transform.DOScale(finalScale, moveTime));
+            
+            seq.OnComplete(() =>
+            {
+                Destroy(coin);
+            });
+
+            //Audio delayli
+            DOVirtual.DelayedCall(delay + 0.3f, () =>
+            {
+                audioSource.PlayOneShot(coinCollectSound); // AudioManager.Instance.PlayOneShot("");
+            });
+        }
+
+        totalCoins += amount;
+        Debug.Log("Total Coins: " + totalCoins);
+    }
+}
