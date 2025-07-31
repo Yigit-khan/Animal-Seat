@@ -34,6 +34,42 @@ public class UIAnimationManager : MonoBehaviour
         coinText.text = coinRewardAmount.ToString();
         buttonContinue.onClick.AddListener(() => OnContinueClicked(false));
         button2xContinue.onClick.AddListener(() => OnContinueClicked(true));
+
+        // Butonlara týklandýðýnda hangi fonksiyonlarýn çalýþacaðýný ata.
+        if (buttonRetry != null)
+            buttonRetry.onClick.AddListener(OnRetryButtonPressed);
+
+        if (buttonExit != null)
+            buttonExit.onClick.AddListener(GoToMenu);
+    }
+
+    private void OnRetryButtonPressed()
+    {
+        // Tekrar týklamayý önlemek için butonlarý devre dýþý býrak.
+        buttonContinue.interactable = false;
+        buttonExit.interactable = false;
+
+        // Önce reklam göster, reklam bittiðinde ödülü ver.
+        ShowRewardedAd(() =>
+        {
+            // --- ÖDÜL KISMI ---
+            // 1. GameManager'ý bul ve 1 can eklemesini söyle.
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.AddOneLife();
+            }
+
+            // 2. Oyunu normale döndür ve level'ý yeniden baþlat.
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        });
+    }
+
+    public void GoToMenu()
+    {
+        // Oyunu normale döndür ve menüye git.
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MenuScene");
     }
 
     public void OnContinueClicked(bool isDouble)
