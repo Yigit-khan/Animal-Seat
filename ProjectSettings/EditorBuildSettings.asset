@@ -5,24 +5,27 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
-    path: Assets/Scenes/SampleScene.unity
-    guid: 99c9720ab356a0642a771bea13969a05
-  - enabled: 1
-    path: Assets/Scenes/UIScene.unity
-    guid: a5972ad032d9fc640bf9f09f59f77041
-  - enabled: 1
-    path: Assets/Scenes/Level1.unity
-    guid: c563858444d0d3e4a8bc12677b454497
-  - enabled: 1
-    path: Assets/Scenes/Level2.unity
-    guid: 3cc1ae23787cead428b42d50e8c08187
-  - enabled: 1
-    path: Assets/Scenes/Level3.unity
-    guid: c3f4b9d479c31b6468388f5a5600b009
   - enabled: 0
     path: Assets/Scripts/UI/Level1.unity
     guid: f0d6afcb63197024c9f9507f74336f3a
+  - enabled: 1
+    path: Assets/Scenes/MenuScene.unity
+    guid: a18d1533fb92af047859616ae3986768
+  - enabled: 1
+    path: Assets/Scenes/Level1.unity
+    guid: acfdeeae066637f47b6077c0a97b5e7d
+  - enabled: 1
+    path: Assets/Scenes/Level2.unity
+    guid: c0da744921ede474b98278679eece52c
+  - enabled: 1
+    path: Assets/Scenes/Level3.unity
+    guid: f155e8e3b4817c74faac2ef0d57fd453
+  - enabled: 1
+    path: Assets/Scenes/Level4.unity
+    guid: cbb209696793d3b458544f9d218002ef
+  - enabled: 1
+    path: Assets/Scenes/Level5.unity
+    guid: 2d9ffde03421ba04f8d17c7e7933b605
   m_configObjects:
     com.unity.adaptiveperformance.simulator.provider_settings: {fileID: 11400000, guid: e516a49ea4cee7647b55c7bd0be693ae, type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
