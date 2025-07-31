@@ -82,4 +82,64 @@ public class AnimalManager
         }
         return true;
     }
+
+    // AnimalManager.cs içine eklenecek YENİ fonksiyon
+
+    /// <summary>
+    /// Verilen bekleme listesindeki herhangi bir hayvanın, verilen boş koltuklardan herhangi birine
+    /// geçerli bir şekilde yerleştirilip yerleştirilemeyeceğini kontrol eder.
+    /// </summary>
+    /// <param name="waitingAnimals">Kuyrukta bekleyen hayvanların SO'ları.</param>
+    /// <param name="emptySeats">Tahtadaki tüm boş koltuklar.</param>
+    /// <param name="seatedAnimals">Tahtada hali hazırda oturan hayvanların SO'ları.</param>
+    /// <returns>Yerleştirilecek bir hamle varsa 'false' (kilitli değil), yoksa 'true' (kilitli) döner.</returns>
+    public bool IsSoftLocked(List<AnimalSO> waitingAnimals, List<SeatController> emptySeats, List<AnimalSO> seatedAnimals)
+    {
+        // 1. Olası hamle için hiç boş koltuk yoksa, kesinlikle kilitlenmiştir.
+        if (emptySeats == null || emptySeats.Count == 0)
+        {
+            // Not: Burada boş bekleme slotu olup olmadığını da ayrıca kontrol etmek gerekebilir,
+            // ama şimdilik sadece ana koltuklara odaklanıyoruz.
+            return true;
+        }
+
+        // Her bir bekleyen hayvanı...
+        foreach (var animalToTest in waitingAnimals)
+        {
+            // ...her bir boş koltuğa yerleştirmeyi simüle et.
+            foreach (var seatToTest in emptySeats)
+            {
+                // --- SİMÜLASYON BAŞLANGICI ---
+
+                // A) Kural kontrolü için tahtanın geçici bir kopyasını oluştur.
+                // Bu kopya, oturan hayvanları VE test ettiğimiz hayvanı içerir.
+                var hypotheticalBoardState = new List<AnimalSO>(seatedAnimals);
+                hypotheticalBoardState.Add(animalToTest);
+
+                // B) Hayvanın pozisyonunu geçici olarak değiştir.
+                Vector2Int originalPos = animalToTest.gridOriginPos;
+                animalToTest.gridOriginPos = seatToTest.GridPosition;
+
+                // C) Kural motorunu bu geçici durum için ayarla ve kontrol et.
+                //_animalDatas = hypotheticalBoardState;
+                if (IsAllInteractionsValid(hypotheticalBoardState))
+                {
+                    // GEÇERLİ BİR HAMLE BULUNDU!
+                    Debug.Log($"[Soft-Lock Check] GEÇERLİ HAMLE: '{animalToTest._animalName}' hayvanı [{seatToTest.GridPosition}] pozisyonuna yerleştirilebilir.");
+
+                    // Simülasyonu temizle ve kilitlenme olmadığını bildir.
+                    animalToTest.gridOriginPos = originalPos;
+                    return false; // false -> Kilitlenme YOK.
+                }
+
+                // --- SİMÜLASYON SONU ---
+                // Bu hamle geçerli değildi, bir sonrakini denemeden önce pozisyonu sıfırla.
+                animalToTest.gridOriginPos = originalPos;
+            }
+        }
+
+        // Eğer tüm döngüler bitti ve hiçbir geçerli hamle bulunamadıysa...
+        Debug.Log("[Soft-Lock Check] KİLİTLENDİ: Bekleyen hiçbir hayvan hiçbir boş koltuğa yerleştirilemiyor.");
+        return true; // true -> Kilitlenme VAR.
+    }
 }

@@ -4,6 +4,8 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using System.Linq;
 using Unity.VisualScripting;
 using DG.Tweening;
+using JetBrains.Annotations;
+
 
 
 
@@ -378,6 +380,8 @@ public class GameManager : MonoBehaviour
             placedSuccessfully = TryPlaceOnHoldingSlot(lastValidHoldingSlotTarget);
         }
 
+
+
         // 3. Eðer hiçbir yere yerleþemediyse, orijinal pozisyonuna geri dön.
         if (!placedSuccessfully)
         {
@@ -385,7 +389,7 @@ public class GameManager : MonoBehaviour
             ReturnAnimalToOrigin();
         }
 
-        
+           
         selectedAnimal.gameObject.layer = selectedAnimal.originalLayer;
         selectedAnimal = null;
         lastValidSeatTarget = null;
@@ -407,7 +411,12 @@ public class GameManager : MonoBehaviour
 
         // Kurallar uygunsa, hayvaný bu hedefe yerleþtir.
         PlaceAnimalOnSeat(selectedAnimal, targetSeat);
+
+
         
+
+
+
         return true; // Yerleþtirme baþarýlý.
     }
 
@@ -502,7 +511,17 @@ public class GameManager : MonoBehaviour
   
     private void CheckWinCondition()
     {
-        if (animalQueue.Count == 0)
+        bool isHoldingSlotsOccipied = false;
+        foreach (var slot in holdingSlots)
+        {
+            if (slot.CurrentState == SlotState.Occupied)
+            {
+                isHoldingSlotsOccipied = true;
+                break;
+            }
+        }
+
+        if (animalQueue.Count == 0 && !isHoldingSlotsOccipied)
         {
             Debug.Log("TEBRÝKLER! SEVÝYE TAMAMLANDI!");
             // TODO: "Seviye Geçildi" UI panelini göster.
@@ -521,7 +540,19 @@ public class GameManager : MonoBehaviour
             // Paneli aktif edip animasyonla göster
             winUI.GetComponent<PanelWinUIAnimator>().Show();
             */
+        }
+        else
+        {
+            List<AnimalSO> waitingAnimals = animalQueue.Select(a => a.animalSO).ToList();
+            List<AnimalSO> seatedSOs = animalSOs.Where(so => so.gridOriginPos.x >= 0).ToList();
+            bool isSoftLocked = _animalManager.IsSoftLocked(waitingAnimals, gridSystem.GetAllEmptySeats(), seatedSOs);
+            if (isSoftLocked)
+            {
+                Debug.LogWarning("Soft lock BULUNDU! Game over...");
+                GameOver();
             }
+        }
+
     }
     #endregion
 

@@ -100,4 +100,18 @@ public class GridSystem
     {
         return grid;
     }
+
+    public List<SeatController> GetAllEmptySeats()
+    {
+        List<SeatController> emptySeats = new List<SeatController>();
+        foreach (var seatController in grid)
+        {
+            if (!seatController.Value.isOccupied)
+            {
+                Debug.Log(seatController.Key);
+                emptySeats.Add(seatController.Value);
+            }
+        }
+        return emptySeats;
+    }
 }
