@@ -8421,6 +8421,7 @@ MonoBehaviour:
   - {fileID: 6987193089625691855}
   - {fileID: 5061890229129920166}
   - {fileID: 6226170152092400962}
+  unlockedLevel: 1
 --- !u!1 &3984628513621862111
 GameObject:
   m_ObjectHideFlags: 0
@@ -10354,7 +10355,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 869.69836, y: -75}
-  m_SizeDelta: {x: 219, y: 64}
+  m_SizeDelta: {x: 0, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3461971525722142221
 CanvasRenderer:
@@ -10512,7 +10513,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 480.5, y: -75}
-  m_SizeDelta: {x: 316.19, y: 76.8809}
+  m_SizeDelta: {x: 0, y: 76.8809}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6125997112554688956
 CanvasRenderer:

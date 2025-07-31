@@ -6456,7 +6456,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 50, y: -112}
-  m_SizeDelta: {x: 219, y: 64}
+  m_SizeDelta: {x: 0, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1411314183438233107
 CanvasRenderer:
@@ -8646,6 +8646,7 @@ MonoBehaviour:
   coinPlusButton: {fileID: 30518672033214136}
   exitButtonSettings: {fileID: 906923307895608700}
   levelInfo: {fileID: 3594287909499696883}
+  levelSelectController: {fileID: 0}
 --- !u!1 &5476673518546542376
 GameObject:
   m_ObjectHideFlags: 0

@@ -17,7 +17,7 @@ MonoBehaviour:
   antiToEveryTrait: 1
   antiTraits: []
   effectRanges:
-    up: 0
-    down: 0
+    up: 1
+    down: 1
     right: 1
     left: 1
