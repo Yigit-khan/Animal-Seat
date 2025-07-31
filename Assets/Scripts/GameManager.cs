@@ -1,77 +1,109 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
+using Unity.VisualScripting.Antlr3.Runtime.Tree;
+using System.Linq;
+using Unity.VisualScripting;
+
+
 
 
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
-
+[System.Serializable]
+public struct RuleIconData
+{
+    [Tooltip("Hangi hayvan karakteristiÄŸi (trait) iÃ§in olduÄŸu.")]
+    public AnimalTraitSO trait;
+    [Tooltip("Bu karakteristiÄŸi temsil edecek ikon.")]
+    public Sprite icon;
+}
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     [Header("Seviye Verileri")]
-    [SerializeField] private List<AnimalData> currentLevelAnimals;
+    [SerializeField] private List<GameObject> currentLevelAnimals;
 
-    [Header("Sahne ve Prefab Referansları")]
-    [SerializeField] private GameObject animalPrefab3D;
+    [Header("Sahne ve Prefab ReferanslarÃ½")]
     [SerializeField] private LayerMask seatLayer;
     [SerializeField] private LayerMask animalLayer;
 
-    [Header("Grid Sistemi Ayarları")]
+    [Header("Grid Sistemi AyarlarÃ½")]
     [SerializeField] private Transform seatParent;
     [SerializeField] private Transform gridOriginReference;
     [SerializeField] private Vector2 gridCellSize = new Vector2(1.2f, 1.2f);
+    [SerializeField] private bool activateSeatHighlight;
 
-    [Header("Fiziksel Kuyruk ve Sürükleme Ayarları")]
+
+    [Header("Fiziksel Kuyruk ve SÃ¼rÃ¼kleme AyarlarÃ½")]
     [SerializeField] private Transform[] queuePositions;
     [SerializeField] private float dragLiftHeight = 1.5f;
     [SerializeField] private float queueMoveSpeed = 8f;
     [SerializeField] private float seatHeightOffset = 0.1f;
+    [SerializeField] private float dragZOffset = -2f;
+    [SerializeField] private Vector3 downwardRayOffset = new Vector3(0, 0, 0.5f);
 
-    [Header("Düşünce Balonu Ayarları")]
+    [Header("DÃ¼ÅŸÃ¼nce Balonu AyarlarÄ±")]
     [SerializeField] private GameObject thoughtBubblePrefab;
+    // LÄ°STENÄ°N TÃœRÃœNÃœ DEÄÄ°ÅTÄ°RÄ°N:
     [SerializeField] private List<RuleIconData> allRuleIcons;
-    [SerializeField] private Vector3 bubbleOffset = new Vector3(0, 1.5f, 0);
+    // BU DEÄÄ°ÅKENÄ° PUBLÄ°C YAPIN:
+    public Vector3 bubbleOffset = new Vector3(0, 1.5f, 0);
 
-    [Header("Can Sistemi Ayarları")]
-    [Tooltip("Oyuncunun başlangıçtaki can sayısı.")]
+
+    [Header("Can Sistemi AyarlarÃ½")]
+    [Tooltip("Oyuncunun baÃ¾langÃ½Ã§taki can sayÃ½sÃ½.")]
     [SerializeField] private int maxLives = 5;
-    [Tooltip("Can ikonlarının oluşturulacağı UI parent'ı.")]
+    [Tooltip("Can ikonlarÃ½nÃ½n oluÃ¾turulacaÃ°Ã½ UI parent'Ã½.")]
     [SerializeField] private Transform heartsContainer;
-    [Tooltip("Bir canı temsil eden UI prefab'ı.")]
+    [Tooltip("Bir canÃ½ temsil eden UI prefab'Ã½.")]
     [SerializeField] private GameObject heartIconPrefab;
 
-    [Header("Bekleme Koltuğu Ayarları")]
-    // Bu diziye artık gerek yok, çünkü slotları kodla oluşturacağız.
+    [Header("Bekleme KoltuÃ°u AyarlarÃ½")]
+    // Bu diziye artÃ½k gerek yok, Ã§Ã¼nkÃ¼ slotlarÃ½ kodla oluÃ¾turacaÃ°Ã½z.
     // [SerializeField] private HoldingSlotController[] holdingSlots; 
-    [Tooltip("Bekleme slotlarının oluşturulacağı parent obje.")]
+    [Tooltip("Bekleme slotlarÃ½nÃ½n oluÃ¾turulacaÃ°Ã½ parent obje.")]
     [SerializeField] private Transform holdingSlotsParent;
-    [Tooltip("Normal, kilitsiz bekleme koltuğu prefab'ı.")]
+    [Tooltip("Normal, kilitsiz bekleme koltuÃ°u prefab'Ã½.")]
     [SerializeField] private GameObject holdingSlotPrefab;
-    [Tooltip("Kilitli bekleme koltuğu prefab'ı.")]
+    [Tooltip("Kilitli bekleme koltuÃ°u prefab'Ã½.")]
     [SerializeField] private GameObject lockedSlotPrefab;
-    [Tooltip("Toplam kaç adet bekleme koltuğu olacak.")]
+    [Tooltip("Toplam kaÃ§ adet bekleme koltuÃ°u olacak.")]
     [SerializeField] private int totalHoldingSlots = 4;
-    [Tooltip("Başlangıçta kaç adet koltuğun kilitsiz olacağı.")]
+    [Tooltip("BaÃ¾langÃ½Ã§ta kaÃ§ adet koltuÃ°un kilitsiz olacaÃ°Ã½.")]
     [SerializeField] private int unlockedSlotsAtStart = 2;
-    [Tooltip("Slotlar arasındaki dikey mesafe.")]
+    [Tooltip("Slotlar arasÃ½ndaki dikey mesafe.")]
     [SerializeField] private float holdingSlotSpacing = 2.0f;
     private List<HoldingSlotController> holdingSlots = new List<HoldingSlotController>();
-    [SerializeField] private LayerMask holdingSlotLayer; // Hata 1'in çözümü
+    [SerializeField] private LayerMask holdingSlotLayer; // Hata 1'in Ã§Ã¶zÃ¼mÃ¼
 
-    // --- Sistemler ve Özel Değişkenler ---
+    [Header("Etki AlanÃ½ GÃ¶sterme AyarlarÃ½")]
+    [Tooltip("Etki alanÃ½ndaki koltuklarÃ½ renklendirmek iÃ§in kullanÃ½lacak materyal.")]
+    [SerializeField] private Material greenEffectAreaMaterial;
+    [SerializeField] private Material redEffectAreaMaterial;
+    [SerializeField] private Material yellowEffectAreaMaterial;
+    [SerializeField] private Material whiteEffectAreaMaterial;
+
+    // --- Ã–zel DeÃ°iÃ¾kenler ---
+    private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
+
+    // --- Sistemler ve Ã–zel DeÃ°iÃ¾kenler ---
     private GridSystem gridSystem;
     private List<AnimalController> animalQueue = new List<AnimalController>();
     private AnimalController selectedAnimal = null;
     private Plane dragPlane;
     private Vector3 offset;
+    
     private int currentLives;
     private List<GameObject> heartIcons = new List<GameObject>();
+    private AnimalManager _animalManager;
+    private List<AnimalSO> animalSOs;
 
     private Transform startParentOfSelectedAnimal;
 
+    private SeatController lastValidSeatTarget = null;
+    private HoldingSlotController lastValidHoldingSlotTarget = null; // YENÃ
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -80,12 +112,23 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        Time.timeScale = 1f; // Oyun yeniden başladığında zamanı normale döndür.
+        Time.timeScale = 1f;
+
+        // 1. Sistemleri kur
         gridSystem = new GridSystem(seatParent, gridOriginReference, gridCellSize);
+        _animalManager = new AnimalManager();
+        animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacaÄŸÄ± listeyi baÅŸlat
+
+        // 2. EditÃ¶rde atanan baÅŸlangÄ±Ã§ hayvanlarÄ±nÄ± sahneye yerleÅŸtir
+        PlaceStartingAnimals();
+
+        // 3. DiÄŸer sistemleri kurmaya devam et
         SetupHoldingSlots();
         SetupLives();
         InitializeAnimalQueue();
+        SetupAnimalSOs(); // Kuyruktaki hayvanlarÄ±n SO'larÄ±nÄ± ayarla
     }
+
 
     private void Update()
     {
@@ -95,17 +138,18 @@ public class GameManager : MonoBehaviour
 
     #region Public Fonksiyonlar
 
-    public List<RuleIconData> GetRulesForAnimal(AnimalType animalType)
+    public Sprite GetIconForTrait(AnimalTraitSO traitToFind)
     {
-        List<RuleIconData> rules = new List<RuleIconData>();
         foreach (var rule in allRuleIcons)
         {
-            if (rule.SourceAnimal == animalType && rule.Interaction == InteractionType.Dislikes)
+            if (rule.trait == traitToFind)
             {
-                rules.Add(rule);
+                return rule.icon;
             }
         }
-        return rules;
+        // EÄŸer eÅŸleÅŸen bir ikon bulunamazsa, uyarÄ± ver ve null dÃ¶ndÃ¼r.
+        Debug.LogWarning($"'{traitToFind.name}' iÃ§in bir ikon bulunamadÄ±. GameManager'daki 'All Rule Icons' listesini kontrol edin.");
+        return null;
     }
 
     public GameObject CreateThoughtBubble(Sprite icon, string description)
@@ -121,7 +165,7 @@ public class GameManager : MonoBehaviour
 
     #endregion
 
-    #region Özel Fonksiyonlar
+    #region Ã–zel Fonksiyonlar
 
     private void SetupLives()
     {
@@ -135,32 +179,64 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void SetupAnimalSOs()
+    {
+        // BU FONKSÄ°YON ARTIK SADECE KUYRUKTAKÄ° HAYVANLAR Ä°Ã‡Ä°N Ã‡ALIÅIR.
+        // BaÅŸlangÄ±Ã§ hayvanlarÄ±nÄ±n SO'larÄ± PlaceStartingAnimals iÃ§inde zaten ayarlandÄ±.
+        foreach (var ac in animalQueue)
+        {
+            if (ac.animalSO == null)
+                continue;
+
+            AnimalSO runtimeSO = ScriptableObject.Instantiate(ac.animalSO);
+            runtimeSO.gridOriginPos = new Vector2Int(-1, -1); // Kuyruktaki hayvanlarÄ±n pozisyonu yoktur
+            ac.animalSO = runtimeSO;
+            animalSOs.Add(runtimeSO);
+        }
+    }
     private void InitializeAnimalQueue()
     {
-        for (int i = 0; i < currentLevelAnimals.Count; i++)
+        animalQueue.Clear();
+        // currentLevelAnimals listesinden kuyruÄŸa hayvan ekle.
+        // Not: Seviye baÅŸÄ±nda yerleÅŸtirdiÄŸiniz hayvanlarÄ± bu listeden Ã§Ä±karabilirsiniz,
+        // bÃ¶ylece aynÄ± hayvanlar hem oturup hem de kuyrukta olmaz.
+        int count = Mathf.Min(currentLevelAnimals.Count, queuePositions.Length);
+        for (int i = 0; i < count; i++)
         {
-            if (i < queuePositions.Length)
+            GameObject prefab = currentLevelAnimals[i];
+            if (prefab == null) continue;
+
+            var animalController = Instantiate(
+                prefab,
+                queuePositions[i].position,
+                Quaternion.identity
+            ).GetComponent<AnimalController>();
+
+            if (animalController != null)
             {
-                var animalController = Instantiate(animalPrefab3D, queuePositions[i].position, Quaternion.identity)
-                    .GetComponent<AnimalController>();
-                animalController.Initialize(currentLevelAnimals[i]);
+                animalController.Initialize();
+
+                // --- Ä°ÅTE YENÄ° EKLENEN SATIR ---
+                // Sadece kuyruÄŸa eklenen hayvanlarÄ±n kurallarÄ±nÄ±/balonlarÄ±nÄ± gÃ¶ster.
+                animalController.DisplayMyRules();
+
                 animalQueue.Add(animalController);
             }
         }
     }
-
     private void UpdateAnimalQueuePositions()
     {
-        for (int i = 0; i < animalQueue.Count; i++)
+        int maxIndex = Mathf.Min(animalQueue.Count, queuePositions.Length);
+
+        for (int i = 0; i < maxIndex; i++)
         {
-            if (animalQueue[i] != selectedAnimal)
-            {
-                animalQueue[i].transform.position = Vector3.Lerp(
-                    animalQueue[i].transform.position,
-                    queuePositions[i].position,
-                    Time.deltaTime * queueMoveSpeed
-                );
-            }
+            if (animalQueue[i] == selectedAnimal) continue;
+
+            animalQueue[i].transform.position = Vector3.Lerp(
+                animalQueue[i].transform.position,
+                queuePositions[i].position,
+                Time.deltaTime * queueMoveSpeed
+            );
         }
     }
 
@@ -173,49 +249,39 @@ public class GameManager : MonoBehaviour
 
     private void HandleMouseDown()
     {
+        // EÃ°er zaten bir hayvan seÃ§iliyse, yeni bir tÃ½klama iÃ¾lemi yapma.
+        if (selectedAnimal != null) return;
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        // 1. Bekleme koltuğundaki bir hayvana mı tıklandı?
-        // Önce animalLayer'a ışın göndererek dolu bir slottaki hayvanı arıyoruz.
+        // 1. Bekleme koltuÃ°undaki bir hayvana mÃ½ tÃ½klandÃ½?
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
         {
             foreach (var slot in holdingSlots)
             {
-                // Eğer slot doluysa VE slottaki hayvanın objesi tıkladığımız objeyle aynıysa...
                 if (slot.CurrentState == SlotState.Occupied && slot.OccupyingAnimal != null && slot.OccupyingAnimal.gameObject == hit.collider.gameObject)
                 {
-                    PickUpResult result = slot.PickUpAnimal();
-                    if (result.Success)
-                    {
-                        selectedAnimal = result.Animal;
-                        startParentOfSelectedAnimal = slot.transform;
-                        StartDraggingSelectedAnimal();
-                        return;
-                    }
+                    selectedAnimal = slot.PickUpAnimal().Animal;
+                    startParentOfSelectedAnimal = slot.transform;
+                    StartDraggingSelectedAnimal();
+                    return;
                 }
             }
         }
 
-        // 2. Kuyruktaki hayvana mı tıklandı?
-        // Eğer yukarıda bir eşleşme bulunamadıysa, tekrar ışın gönderip kuyruğu kontrol et.
+        // 2. Kuyruktaki hayvana mÃ½ tÃ½klandÃ½?
         if (Physics.Raycast(ray, out hit, 100f, animalLayer))
         {
             if (animalQueue.Count > 0 && hit.collider.gameObject == animalQueue[0].gameObject)
             {
-                // Kuyruktaki ilk hayvanı seç.
                 selectedAnimal = animalQueue[0];
-
-                // Hayvanın kuyruktan alındığını belirtmek için başlangıç parent'ını null yap.
                 startParentOfSelectedAnimal = null;
-
-                // Sürükleme işlemini başlat.
                 StartDraggingSelectedAnimal();
                 return;
             }
         }
 
-        // 3. Kilitli bir slota mı tıklandı?
-        // Eğer hiçbir hayvan seçilmediyse, kilitli slotları kontrol et.
+        // 3. Kilitli bir slota mÃ½ tÃ½klandÃ½?
         if (Physics.Raycast(ray, out hit, 100f, holdingSlotLayer))
         {
             if (hit.collider.TryGetComponent<HoldingSlotController>(out var slotController) && slotController.CurrentState == SlotState.Locked)
@@ -227,65 +293,119 @@ public class GameManager : MonoBehaviour
 
     private void HandleMouseDrag()
     {
+        // 1. HayvanÃ½n Pozisyonunu SÃ¼rÃ¼kleyerek GÃ¼ncelle
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (dragPlane.Raycast(mouseRay, out float enter))
         {
-            selectedAnimal.transform.position = mouseRay.GetPoint(enter) + offset;
+            Vector3 targetPosition = mouseRay.GetPoint(enter) + offset;
+            targetPosition.y = dragLiftHeight;
+            selectedAnimal.transform.position = targetPosition;
+        }
+
+        // 2. Hedef Tespiti ve GÃ¶rsel Geri Bildirim
+        Ray downwardRay = new Ray(selectedAnimal.transform.position + downwardRayOffset, Vector3.down);
+        bool foundTarget = false;
+        Debug.DrawRay(downwardRay.origin, downwardRay.direction * 50, Color.green);
+
+        // Ã–nce, hayvanÃ½n altÃ½nda bir ANA KOLTUK var mÃ½?
+        if (Physics.Raycast(downwardRay, out RaycastHit hit, 20f, seatLayer))
+        {
+
+            if (hit.collider.TryGetComponent<SeatController>(out SeatController targetSeat))
+            {
+                foundTarget = true;
+                lastValidHoldingSlotTarget = null; // DiÃ°er hedefi temizle
+                if (lastValidSeatTarget != targetSeat)
+                {
+                    
+                    ShowEffectArea(selectedAnimal.animalSO, targetSeat);
+                    lastValidSeatTarget = targetSeat;
+                }
+            }
+        }
+
+        // EÃ°er ana koltuk bulunamadÃ½ysa, BEKLEME KOLTUÃU var mÃ½?
+        if (!foundTarget && Physics.Raycast(downwardRay, out hit, 20f, holdingSlotLayer))
+        {
+            if (hit.collider.TryGetComponent<HoldingSlotController>(out HoldingSlotController targetHoldingSlot))
+            {
+                if (targetHoldingSlot.CurrentState == SlotState.Unlocked)
+                {
+                    foundTarget = true;
+                    ResetAllHighlights(); // Etki alanÃ½ yok
+                    lastValidSeatTarget = null; // DiÃ°er hedefi temizle
+                    lastValidHoldingSlotTarget = targetHoldingSlot;
+
+                    // ÃsteÃ°e baÃ°lÃ½: Bekleme koltuÃ°u iÃ§in de bir highlight efekti eklenebilir.
+                    // targetHoldingSlot.Highlight();
+                }
+            }
+        }
+
+        // EÃ°er hiÃ§bir hedefin Ã¼zerinde deÃ°ilse...
+        if (!foundTarget)
+        {
+            ResetAllHighlights();
+            lastValidSeatTarget = null;
+            lastValidHoldingSlotTarget = null;
         }
     }
 
     private void HandleMouseUp()
     {
-        // Eğer sürüklenen bir hayvan yoksa, hiçbir şey yapma.
         if (selectedAnimal == null) return;
+        ResetAllHighlights();
 
-        // Hayvanı yerleştirmeyi sırayla dene.
-        bool placedOnSeat = TryPlaceOnSeat();
-        bool placedOnHoldingSlot = false;
+        bool placedSuccessfully = false;
 
-        // Eğer ana koltuğa yerleşemediyse, bekleme koltuğunu dene.
-        if (!placedOnSeat)
+        // 1. Ã–NCELÃK: HafÃ½zada geÃ§erli bir ana koltuk hedefi var mÃ½?
+        if (lastValidSeatTarget != null)
         {
-            placedOnHoldingSlot = TryPlaceOnHoldingSlot();
+            placedSuccessfully = TryPlaceOnSeat(lastValidSeatTarget);
+        }
+        // 2. Ã–NCELÃK: HafÃ½zada geÃ§erli bir bekleme koltuÃ°u hedefi var mÃ½?
+        else if (lastValidHoldingSlotTarget != null)
+        {
+            placedSuccessfully = TryPlaceOnHoldingSlot(lastValidHoldingSlotTarget);
         }
 
-        // Eğer HİÇBİR geçerli yere yerleşemediyse...
-        if (!placedOnSeat && !placedOnHoldingSlot)
+        // 3. EÃ°er hiÃ§bir yere yerleÃ¾emediyse, orijinal pozisyonuna geri dÃ¶n.
+        if (!placedSuccessfully)
         {
-            // Hayvanı orijinal pozisyonuna geri döndür.
+            selectedAnimal.animalSO.gridOriginPos = new Vector2Int(-1, -1);
             ReturnAnimalToOrigin();
         }
 
-        // Her durumda, hayvanın layer'ını orijinaline çevir.
+        
         selectedAnimal.gameObject.layer = selectedAnimal.originalLayer;
-
-        // Seçimi bırak.
         selectedAnimal = null;
+        lastValidSeatTarget = null;
+        lastValidHoldingSlotTarget = null;
     }
 
-    private bool TryPlaceOnSeat()
+    private bool TryPlaceOnSeat(SeatController targetSeat)
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, seatLayer))
+        // Hedefin geÃ§erli olduÃ°undan emin ol (gÃ¼venlik kontrolÃ¼).
+        if (targetSeat == null) return false;
+
+        // Kural kontrolÃ¼nÃ¼ doÃ°rudan bu hedefe gÃ¶re yap.
+        bool isValid = IsPlacementValid(targetSeat);
+        if (!isValid)
         {
-            if (hit.collider.TryGetComponent<SeatController>(out SeatController targetSeat))
-            {
-                string validationError = IsPlacementValid(selectedAnimal.data, targetSeat);
-                if (!string.IsNullOrEmpty(validationError))
-                {
-                    Debug.LogWarning("KURAL İHLALİ: " + validationError);
-                    LoseLife();
-                    return false;
-                }
-                PlaceAnimalOnSeat(selectedAnimal, targetSeat);
-                return true;
-            }
+            LoseLife();
+            return false; // YerleÃ¾tirme baÃ¾arÃ½sÃ½z.
         }
-        return false;
+
+        // Kurallar uygunsa, hayvanÃ½ bu hedefe yerleÃ¾tir.
+        PlaceAnimalOnSeat(selectedAnimal, targetSeat);
+        
+        return true; // YerleÃ¾tirme baÃ¾arÃ½lÃ½.
     }
 
     private void PlaceAnimalOnSeat(AnimalController animal, SeatController seat)
     {
+        animal.isSeated = true; // Hayvan artÄ±k oturuyor.
+        
         animal.ClearMyBubbles();
         animal.transform.position = seat.transform.position + new Vector3(0, seatHeightOffset, 0);
         seat.Occupy(animal);
@@ -294,37 +414,50 @@ public class GameManager : MonoBehaviour
         CheckWinCondition();
     }
 
-    private string IsPlacementValid(AnimalData animalToPlace, SeatController targetSeat)
+    private bool IsPlacementValid(SeatController targetSeat)
     {
-        if (targetSeat.isOccupied) return "Bu koltuk zaten dolu!";
-
-        if (animalToPlace.kapladigiKoltukSayisi > 1)
+        if (selectedAnimal == null)
         {
-            SeatController adjacentSeat = gridSystem.GetSeatAt(targetSeat.GridPosition + Vector2Int.right);
-            if (adjacentSeat == null || adjacentSeat.isOccupied) return "Fil'in sığması için yandaki koltuk boş değil!";
+            Debug.LogError("IsPlacementValid Ã§aÄŸrÄ±ldÄ± ancak selectedAnimal null!");
+            return false;
         }
 
-        if (animalToPlace.turu == AnimalType.Yirtici)
+        // 1) CurrentLevelAnimals iÃ§indeki prefab'lar deÄŸil,
+        //    runtime'daki AnimalController'lar Ã¼zerinden veri toplayÄ±n.
+        //    Aksi taktirde prefab.GetComponent<AnimalController>() null dÃ¶ner.
+
+
+        // 2) Ã–nce koltuÄŸu alÄ±p null kontrolÃ¼ yapÄ±n!
+        Vector2Int checkPos = targetSeat.GridPosition;
+        SeatController adjacentSeat = gridSystem.GetSeatAt(checkPos);
+        if (adjacentSeat == null)
         {
-            foreach (var neighbor in gridSystem.GetNeighbors(targetSeat, 1))
-            {
-                if (neighbor.isOccupied && neighbor.occupiedBy.data.turu == AnimalType.Otobur)
-                    return "Yırtıcı, otoburun yanına oturamaz!";
-            }
+            Debug.LogWarning($"Soldaki komÅŸu koltuk bulunamadÄ±: [{checkPos.x},{checkPos.y}]");
+            return false;
         }
 
-        if (animalToPlace.turu == AnimalType.Otobur)
+        // 3) Burada SeatController.GridPositionâ€™Ä± doÄŸrudan deÄŸiÅŸtirmek yerine
+        //    yeni bir Vector2Int ile gridOriginPosâ€™u hesaplayÄ±n:
+        Vector2Int newOrigin = new Vector2Int(
+            adjacentSeat.GridPosition.x,
+            adjacentSeat.GridPosition.y
+        );
+
+        // 4) animalSOâ€™nun null olmadÄ±ÄŸÄ±ndan emin olun
+        var animalController = selectedAnimal;
+        if (animalController.animalSO == null)
         {
-            foreach (var neighbor in gridSystem.GetNeighbors(targetSeat, 1))
-            {
-                if (neighbor.isOccupied && neighbor.occupiedBy.data.turu == AnimalType.Yirtici)
-                    return "Otobur, yırtıcının hemen yanına oturamaz!";
-            }
+            Debug.LogError($"{animalController.name} Ã¼zerinde AnimalSO yok!");
+            return false;
         }
 
-        // Diğer kurallar buraya eklenebilir...
+        animalController.animalSO.gridOriginPos = newOrigin;
+        //Debug.Log($"{animalController.animalSO._animalName} yeni gridOriginPos: {newOrigin}");
 
-        return string.Empty; // Hiçbir kural ihlal edilmedi.
+        // 5) Interaction testi iÃ§in doÄŸru listeyi kullanÄ±n
+        bool isValid = _animalManager.IsAllInteractionsValid(animalSOs);
+        //Debug.Log("isValid: " + isValid);
+        return isValid;
     }
 
     private void LoseLife()
@@ -341,17 +474,17 @@ public class GameManager : MonoBehaviour
 
     private void GameOver()
     {
-        Debug.LogError("OYUN BİTTİ! Tüm canlarını kaybettin.");
+        Debug.LogError("OYUN BÃTTÃ! TÃ¼m canlarÃ½nÃ½ kaybettin.");
         Time.timeScale = 0f;
-        // TODO: "Tekrar Dene" UI panelini göster.
+        // TODO: "Tekrar Dene" UI panelini gÃ¶ster.
     }
 
     private void CheckWinCondition()
     {
         if (animalQueue.Count == 0)
         {
-            Debug.Log("TEBRİKLER! SEVİYE TAMAMLANDI!");
-            // TODO: "Seviye Geçildi" UI panelini göster.
+            Debug.Log("TEBRÃKLER! SEVÃYE TAMAMLANDI!");
+            // TODO: "Seviye GeÃ§ildi" UI panelini gÃ¶ster.
         }
     }
     #endregion
@@ -381,26 +514,26 @@ public class GameManager : MonoBehaviour
 
     private void SetupHoldingSlots()
     {
-        // Önce eski slotları temizle (seviye yeniden başlarsa)
+        // Ã–nce eski slotlarÃ½ temizle (seviye yeniden baÃ¾larsa)
         foreach (Transform child in holdingSlotsParent)
         {
             Destroy(child.gameObject);
         }
         holdingSlots.Clear();
 
-        // Toplam slot sayısı kadar döngüye gir.
+        // Toplam slot sayÃ½sÃ½ kadar dÃ¶ngÃ¼ye gir.
         for (int i = 0; i < totalHoldingSlots; i++)
         {
-            // --- DEĞİŞİKLİK BURADA ---
-            // Pozisyonu X eksenine göre hesapla (yan yana dizilecekler)
+            // --- DEÃÃÃÃKLÃK BURADA ---
+            // Pozisyonu X eksenine gÃ¶re hesapla (yan yana dizilecekler)
             Vector3 position = holdingSlotsParent.position + new Vector3(i * holdingSlotSpacing, 0, 0);
 
-            // Geri kalan mantık aynı.
+            // Geri kalan mantÃ½k aynÃ½.
 
-            // Eğer bu slot kilitli olacaksa...
+            // EÃ°er bu slot kilitli olacaksa...
             if (i >= unlockedSlotsAtStart)
             {
-                // Kilitli prefab'ı oluştur.
+                // Kilitli prefab'Ã½ oluÃ¾tur.
                 GameObject slotObj = Instantiate(lockedSlotPrefab, position, Quaternion.identity, holdingSlotsParent);
                 HoldingSlotController controller = slotObj.GetComponent<HoldingSlotController>();
                 if (controller != null)
@@ -409,10 +542,10 @@ public class GameManager : MonoBehaviour
                     holdingSlots.Add(controller);
                 }
             }
-            // Eğer bu slot açık olacaksa...
+            // EÃ°er bu slot aÃ§Ã½k olacaksa...
             else
             {
-                // Normal prefab'ı oluştur.
+                // Normal prefab'Ã½ oluÃ¾tur.
                 GameObject slotObj = Instantiate(holdingSlotPrefab, position, Quaternion.identity, holdingSlotsParent);
                 HoldingSlotController controller = slotObj.GetComponent<HoldingSlotController>();
                 if (controller != null)
@@ -426,93 +559,218 @@ public class GameManager : MonoBehaviour
 
     private void StartDraggingSelectedAnimal()
     {
+        if (selectedAnimal == null) return;
+
         selectedAnimal.ClearMyBubbles();
         selectedAnimal.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 
+        // SÃ¼rÃ¼kleme dÃ¼zlemini Y ekseninde, kaldÃ½rma yÃ¼ksekliÃ°inde oluÃ¾tur.
         dragPlane = new Plane(Vector3.up, new Vector3(0, dragLiftHeight, 0));
+
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (dragPlane.Raycast(mouseRay, out float enter))
         {
-            Vector3 liftedPos = new Vector3(selectedAnimal.transform.position.x, dragLiftHeight, selectedAnimal.transform.position.z);
-            selectedAnimal.transform.position = liftedPos;
-            offset = selectedAnimal.transform.position - mouseRay.GetPoint(enter);
+            // HayvanÃ½n baÃ¾langÃ½Ã§ pozisyonunu al.
+            Vector3 animalStartPosition = selectedAnimal.transform.position;
+
+            // Mouse'un dÃ¼zlemdeki baÃ¾langÃ½Ã§ noktasÃ½nÃ½ al.
+            Vector3 planeHitPoint = mouseRay.GetPoint(enter);
+
+            // Hem Y hem de Z ofsetini tek seferde hesapla.
+            // HayvanÃ½n son pozisyonu = (DÃ¼zlemdeki Nokta + Z Ofseti) + (BaÃ¾langÃ½Ã§taki Fark)
+            // Offset = BaÃ¾langÃ½Ã§ Pozisyonu - (DÃ¼zlemdeki Nokta + Z Ofseti)
+            offset = animalStartPosition - (planeHitPoint + new Vector3(0, 0, dragZOffset));
         }
     }
     private void TryUnlockSlot(HoldingSlotController lockedSlot)
     {
-        Debug.Log("Kilitli slota tıklandı! Kilit açılıyor...");
+        Debug.Log("Kilitli slota tÃ½klandÃ½! Kilit aÃ§Ã½lÃ½yor...");
 
-        // TODO: Para kontrolü mantığı buraya eklenebilir.
+        // TODO: Para kontrolÃ¼ mantÃ½Ã°Ã½ buraya eklenebilir.
         // if (playerCoins < unlockCost) return;
         // playerCoins -= unlockCost;
 
-        // 1. Mevcut kilitli slotun pozisyonunu ve parent'ını kaydet.
+        // 1. Mevcut kilitli slotun pozisyonunu ve parent'Ã½nÃ½ kaydet.
         Vector3 position = lockedSlot.transform.position;
         Transform parent = lockedSlot.transform.parent;
-        int index = holdingSlots.IndexOf(lockedSlot); // Listenin neresinde olduğunu bul
+        int index = holdingSlots.IndexOf(lockedSlot); // Listenin neresinde olduÃ°unu bul
 
         // 2. Eski kilitli slot objesini yok et.
         holdingSlots.Remove(lockedSlot);
         Destroy(lockedSlot.gameObject);
 
-        // 3. Aynı yere yeni, normal bir slot oluştur.
+        // 3. AynÃ½ yere yeni, normal bir slot oluÃ¾tur.
         GameObject newSlotObj = Instantiate(holdingSlotPrefab, position, Quaternion.identity, parent);
         HoldingSlotController newController = newSlotObj.GetComponent<HoldingSlotController>();
         newController.Initialize(SlotState.Unlocked);
 
-        // 4. Yeni slotu, listenin aynı sırasına ekle.
+        // 4. Yeni slotu, listenin aynÃ½ sÃ½rasÃ½na ekle.
         if (index != -1)
         {
             holdingSlots.Insert(index, newController);
         }
         else
         {
-            holdingSlots.Add(newController); // Güvenlik önlemi
+            holdingSlots.Add(newController); // GÃ¼venlik Ã¶nlemi
         }
     }
-    private bool TryPlaceOnHoldingSlot()
+    private bool TryPlaceOnHoldingSlot(HoldingSlotController targetSlot)
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f, holdingSlotLayer))
+        // Hedefin geÃ§erli olduÃ°undan emin ol.
+        if (targetSlot == null || targetSlot.CurrentState != SlotState.Unlocked)
         {
-            if (hit.collider.TryGetComponent<HoldingSlotController>(out var slotController))
-            {
-                if (slotController.CurrentState == SlotState.Unlocked)
-                {
-                    // Hayvanı slota yerleştir
-                    slotController.PlaceAnimal(selectedAnimal);
-                    selectedAnimal.transform.position = slotController.transform.position + new Vector3(0, seatHeightOffset, 0);
-
-                    // Hayvanı kuyruktan kalıcı olarak çıkar
-                    animalQueue.Remove(selectedAnimal);
-
-                    return true;
-                }
-            }
+            return false;
         }
-        return false;
+
+        // HayvanÃ½ bu hedefe yerleÃ¾tir.
+        targetSlot.PlaceAnimal(selectedAnimal);
+        selectedAnimal.transform.position = targetSlot.transform.position + new Vector3(0, seatHeightOffset, 0);
+        animalQueue.Remove(selectedAnimal);
+        return true;
     }
 
     private void ReturnAnimalToOrigin()
     {
-        // Eğer hayvan bir bekleme slotundan alındıysa...
+        selectedAnimal.isSeated = false; // ArtÄ±k oturmuyor.
+        // EÃ°er hayvan bir bekleme slotundan alÃ½ndÃ½ysa...
         if (startParentOfSelectedAnimal != null && startParentOfSelectedAnimal.TryGetComponent<HoldingSlotController>(out var slot))
         {
-            // Onu tekrar aynı slota geri koy.
+            // Onu tekrar aynÃ½ slota geri koy.
             slot.PlaceAnimal(selectedAnimal);
             selectedAnimal.transform.position = slot.transform.position + new Vector3(0, seatHeightOffset, 0);
         }
-        // Eğer hayvan kuyruktan alındıysa...
+        // EÃ°er hayvan kuyruktan alÃ½ndÃ½ysa...
         else
         {
-            // Kuyrukta zaten yoksa, sıranın en başına tekrar ekle.
+            // Kuyrukta zaten yoksa, sÃ½ranÃ½n en baÃ¾Ã½na tekrar ekle.
             if (!animalQueue.Contains(selectedAnimal))
             {
                 animalQueue.Insert(0, selectedAnimal);
             }
         }
 
-        // Hatalı yerleştirmeden sonra hayvanın kurallarını tekrar göster.
+        // HatalÃ½ yerleÃ¾tirmeden sonra hayvanÃ½n kurallarÃ½nÃ½ tekrar gÃ¶ster.
         selectedAnimal.DisplayMyRules();
+    }
+
+    private void ShowEffectArea(AnimalSO animalSO, SeatController potentialSeat)
+    {
+        // Ã–nce varsa eski highlight'larÃ½ temizle.
+        ResetAllHighlights();
+
+        List<SeatController> neighbors = new List<SeatController>();
+        foreach (var trait in animalSO.traits)
+        {
+            var effectPoints = trait.GetTraitEffectPoints(potentialSeat.GridPosition, animalSO.size);
+            //print(string.Join(", ", effectPoints));
+            foreach (var point in effectPoints)
+            {
+                if (point != null)
+                {
+                    var seat = gridSystem.GetSeatAt(point);
+                    if (seat != null)
+                        neighbors.Add(seat);
+                }
+            }
+        }
+
+        if (!activateSeatHighlight)
+        {
+            if (!potentialSeat.isOccupied)
+            {
+                potentialSeat.Highlight(yellowEffectAreaMaterial);
+                currentlyHighlightedSeats.Add(potentialSeat);
+                foreach (var neighbor in neighbors)
+                {
+                    neighbor.Highlight(whiteEffectAreaMaterial);
+                    currentlyHighlightedSeats.Add(neighbor);
+                }
+            }
+            return;
+        }
+
+        selectedAnimal.animalSO.gridOriginPos = potentialSeat.GridPosition;
+        if (!_animalManager.IsAllInteractionsValid(animalSOs))
+        {
+            potentialSeat.Highlight(redEffectAreaMaterial);
+            currentlyHighlightedSeats.Add(potentialSeat);
+            return;
+        }
+
+        potentialSeat.Highlight(greenEffectAreaMaterial);
+        currentlyHighlightedSeats.Add(potentialSeat);
+
+        foreach (var neighbor in neighbors)
+        {
+            neighbor.Highlight(greenEffectAreaMaterial);
+            currentlyHighlightedSeats.Add(neighbor);
+        }
+    }
+
+    // TÃ¼m renklendirilmiÃ¾ koltuklarÃ½ orijinal rengine dÃ¶ndÃ¼rÃ¼r.
+    private void ResetAllHighlights()
+    {
+        foreach (var seat in currentlyHighlightedSeats)
+        {
+            if (seat != null) seat.ResetHighlight();
+        }
+        currentlyHighlightedSeats.Clear();
+
+        
+    }
+
+    private void PlaceStartingAnimals()
+    {
+        // Grid sistemindeki tÃ¼m koltuklarÄ± al
+        Dictionary<Vector2Int, SeatController> allSeats = gridSystem.GetFullGrid();
+        foreach (var seatPair in allSeats)
+        {
+            SeatController seat = seatPair.Value;
+            if (seat.startingAnimalPrefab != null && !seat.isOccupied)
+            {
+                GameObject animalObj = Instantiate(
+                    seat.startingAnimalPrefab,
+                    seat.transform.position + new Vector3(0, seatHeightOffset, 0),
+                    Quaternion.identity
+                );
+                if (animalObj.TryGetComponent<AnimalController>(out var animalController))
+                {
+                    // Bu fonksiyon artÄ±k balon OLUÅTURMUYOR, bu yÃ¼zden burada Ã§aÄŸÄ±rmak gÃ¼venli.
+                    animalController.Initialize();
+
+                    animalController.isSeated = true;
+
+                    // 3. Kural sisteminin kullanmasÄ± iÃ§in AnimalSO'dan bir RUNTIME KOPYASI oluÅŸtur
+                    AnimalSO runtimeSO = ScriptableObject.Instantiate(animalController.animalSO);
+                    runtimeSO.gridOriginPos = seat.GridPosition; // Grid pozisyonunu bu kopyaya ata
+                    animalController.animalSO = runtimeSO; // Controller'Ä±n artÄ±k bu kopyayÄ± kullanmasÄ±nÄ± saÄŸla
+                    animalSOs.Add(runtimeSO); // HayvanÄ±, kural yÃ¶neticisinin listesine ekle
+
+                    // 4. HayvanÄ±n boyutuna gÃ¶re kapladÄ±ÄŸÄ± TÃœM koltuklarÄ± "dolu" olarak iÅŸaretle
+                    Vector2Int size = runtimeSO.size;
+                    for (int x = 0; x < size.x; x++)
+                    {
+                        for (int y = 0; y < size.y; y++)
+                        {
+                            // Not: Grid'inizin Y ekseninin nasÄ±l Ã§alÄ±ÅŸtÄ±ÄŸÄ±na gÃ¶re (aÅŸaÄŸÄ± mÄ± yukarÄ± mÄ± artÄ±yor)
+                            // buradaki 'seat.GridPosition.y + y' ifadesini '- y' olarak deÄŸiÅŸtirmeniz gerekebilir.
+                            // Genellikle +y doÄŸrudur.
+                            Vector2Int currentPos = new Vector2Int(seat.GridPosition.x + x, seat.GridPosition.y + y);
+                            SeatController occupiedSeat = gridSystem.GetSeatAt(currentPos);
+                            if (occupiedSeat != null)
+                            {
+                                occupiedSeat.Occupy(animalController);
+                            }
+                        }
+                    }
+                    Debug.Log($"BaÅŸlangÄ±Ã§ hayvanÄ± '{runtimeSO._animalName}', grid pozisyonu [{seat.GridPosition.x},{seat.GridPosition.y}]'e yerleÅŸtirildi.");
+                }
+                else
+                {
+                    Debug.LogError($"{seat.startingAnimalPrefab.name} prefab'Ä±nda AnimalController componenti bulunamadÄ±! Hayvan yerleÅŸtirilemedi.");
+                    Destroy(animalObj);
+                }
+            }
+        }
     }
 }

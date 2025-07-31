@@ -2,38 +2,37 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+// Artýk EventSystems arayüzüne ihtiyacýmýz yok.
+// using UnityEngine.EventSystems;
+
 public class ThoughtBubbleController : MonoBehaviour
 {
+    [Header("Bileþen Referanslarý")]
     [SerializeField] private Image iconImage;
     [SerializeField] private GameObject descriptionPanel;
     [SerializeField] private TextMeshProUGUI descriptionText;
 
-    // Artýk targetToFollow ve offset deðiþkenlerine ihtiyacýmýz yok.
-    // Update fonksiyonuna da ihtiyacýmýz yok.
-
-    // Initialize metodu da basitleþiyor.
     public void Initialize(Sprite icon, string description)
     {
-        iconImage.sprite = icon;
-        descriptionText.text = description;
+        if (iconImage != null)
+            iconImage.sprite = icon;
 
-        descriptionPanel.SetActive(false);
+        if (descriptionText != null)
+            descriptionText.text = description;
+
+        if (descriptionPanel != null)
+            descriptionPanel.SetActive(false);
     }
 
-    // Bu fonksiyon ayný kalýr.
-    public void OnBubbleClicked()
+    // --- YENÝ FONKSÝYON ---
+    // Bu fonksiyonu public yaparak Button'ýn OnClick olayýna baðlayacaðýz.
+    // Artýk IPointerClickHandler'dan gelen OnPointerClick metoduna ihtiyacýmýz yok.
+    public void ToggleDescriptionPanel()
     {
-        descriptionPanel.SetActive(!descriptionPanel.activeSelf);
-    }
-
-    // Hayvan yok olduðunda balonun da yok olmasýný saðlamak için
-    // parent'ý kaybolursa kendini yok etmesi faydalý olabilir.
-    void Update()
-    {
-        // Eðer bir parent'ý yoksa (hayvan silinmiþse), kendini yok et.
-        if (transform.parent == null)
+        if (descriptionPanel != null)
         {
-            Destroy(gameObject);
+            // Panelin mevcut durumunun tersini ayarla (açýksa kapat, kapalýysa aç).
+            descriptionPanel.SetActive(!descriptionPanel.activeSelf);
         }
     }
 }
