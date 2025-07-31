@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Can Sistemi Ayarlarý")]
     [Tooltip("Oyuncunun baþlangýçtaki can sayýsý.")]
-    [SerializeField] private int maxLives = 5;
+    private int maxLives = 2;
     [Tooltip("Can ikonlarýnýn oluþturulacaðý UI parent'ý.")]
     [SerializeField] private Transform heartsContainer;
     [Tooltip("Bir caný temsil eden UI prefab'ý.")]
@@ -274,6 +274,9 @@ public class GameManager : MonoBehaviour
                 {
                     selectedAnimal = slot.PickUpAnimal().Animal;
                     startParentOfSelectedAnimal = slot.transform;
+
+                    SoundManager.Instance.PlaySFX("AnimalGrab");
+
                     StartDraggingSelectedAnimal();
                     return;
                 }
@@ -287,6 +290,9 @@ public class GameManager : MonoBehaviour
             {
                 selectedAnimal = animalQueue[0];
                 startParentOfSelectedAnimal = null;
+
+                SoundManager.Instance.PlaySFX("AnimalGrab");
+
                 StartDraggingSelectedAnimal();
                 return;
             }
@@ -405,9 +411,13 @@ public class GameManager : MonoBehaviour
         bool isValid = IsPlacementValid(targetSeat);
         if (!isValid)
         {
+            SoundManager.Instance.PlaySFX("PlacementWrong");
+
             LoseLife();
             return false; // Yerleþtirme baþarýsýz.
         }
+
+        SoundManager.Instance.PlaySFX("PlacementCorrect");
 
         // Kurallar uygunsa, hayvaný bu hedefe yerleþtir.
         PlaceAnimalOnSeat(selectedAnimal, targetSeat);
@@ -493,8 +503,9 @@ public class GameManager : MonoBehaviour
 
     private void GameOver()
     {
-        Debug.LogError("OYUN BÝTTÝ! Tüm canlarýný kaybettin.");
-        Time.timeScale = 0f;
+        SoundManager.Instance.PlaySFX("LevelFail");
+       
+       
         // TODO: "Tekrar Dene" UI panelini göster.
 
         if (inGameUIManager != null)
@@ -516,18 +527,22 @@ public class GameManager : MonoBehaviour
         {
             if (slot.CurrentState == SlotState.Occupied)
             {
-                isHoldingSlotsOccipied = true;
+                
+               isHoldingSlotsOccipied = true;
                 break;
             }
         }
 
         if (animalQueue.Count == 0 && !isHoldingSlotsOccipied)
         {
+            SoundManager.Instance.PlaySFX("LevelWin");
+
             Debug.Log("TEBRÝKLER! SEVÝYE TAMAMLANDI!");
             // TODO: "Seviye Geçildi" UI panelini göster.
 
             if (inGameUIManager != null)
             {
+
                 inGameUIManager.WinUIAnimation();
             }
             else
@@ -535,11 +550,7 @@ public class GameManager : MonoBehaviour
                 Debug.LogError("InGameUIManager referansı atanmamış!");
             }
 
-            /*
-            winUI.SetActive(true);
-            // Paneli aktif edip animasyonla göster
-            winUI.GetComponent<PanelWinUIAnimator>().Show();
-            */
+           
         }
         else
         {
@@ -688,6 +699,8 @@ public class GameManager : MonoBehaviour
         {
             return false;
         }
+
+        SoundManager.Instance.PlaySFX("PlaceToHoldingSlot");
 
         // Hayvaný bu hedefe yerleþtir.
         targetSlot.PlaceAnimal(selectedAnimal);

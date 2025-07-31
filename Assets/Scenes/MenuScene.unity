@@ -295,7 +295,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &553554854
 RectTransform:
   m_ObjectHideFlags: 0
@@ -410,6 +410,100 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 553554853}
   m_CullTransparentMesh: 1
+--- !u!1 &620770010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 620770012}
+  - component: {fileID: 620770011}
+  m_Layer: 0
+  m_Name: SoundManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &620770011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620770010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a27830f6a2c8b54b8e8350d21b41939, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  musicTracks: []
+  sfxSounds:
+  - name: ButtonClick
+    clip: {fileID: 8300000, guid: f9c19e51062188e4fac09a0bcf15db43, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: AnimalGrab
+    clip: {fileID: 8300000, guid: 3e5dbf79b5191364d8381765a464f029, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: PlacementWrong
+    clip: {fileID: 8300000, guid: 40b0c40145977824ea1b05a8ee21420c, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: PlacementCorrect
+    clip: {fileID: 8300000, guid: 6b1c7c239774ad44fb3062654255c6a3, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: LevelFail
+    clip: {fileID: 8300000, guid: dec647fd11338f24f9889c638f48ddc8, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: LevelWin
+    clip: {fileID: 8300000, guid: 87ae439584504714d961b5d89645bac6, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: PlaceToHoldingSlot
+    clip: {fileID: 8300000, guid: 6b1c7c239774ad44fb3062654255c6a3, type: 3}
+    volume: 1
+    pitch: 1
+    loop: 0
+    source: {fileID: 0}
+  - name: UiCloseSound
+    clip: {fileID: 8300000, guid: 3e5dbf79b5191364d8381765a464f029, type: 3}
+    volume: 1
+    pitch: 2.3
+    loop: 0
+    source: {fileID: 0}
+--- !u!4 &620770012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 620770010}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 95.32261, y: 383.86078, z: -30.690807}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1801781621
 GameObject:
   m_ObjectHideFlags: 0
@@ -15139,14 +15233,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.509434, g: 0.4719473, b: 0.4719473, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 299a90a20014649b08b2b908b2cd9f01, type: 3}
+  m_Sprite: {fileID: 21300000, guid: fb4ddd419e9fb4bcd8d3c4ded642e4f4, type: 3}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -15599,7 +15693,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 869.69836, y: -75}
-  m_SizeDelta: {x: 219, y: 64}
+  m_SizeDelta: {x: 0, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &6216896104595807748
 RectTransform:
@@ -18900,3 +18994,4 @@ SceneRoots:
   - {fileID: 996720746733367433}
   - {fileID: 9117369538813027020}
   - {fileID: 236853165}
+  - {fileID: 620770012}

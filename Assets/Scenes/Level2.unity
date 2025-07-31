@@ -586,6 +586,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3845013912592358678, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3861654424339707959, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -626,6 +630,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 627182256}
   m_SourcePrefab: {fileID: 100100000, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
+--- !u!1 &196767932 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3861654424339707959, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
+  m_PrefabInstance: {fileID: 196767931}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &210134043
 GameObject:
   m_ObjectHideFlags: 0
@@ -1623,7 +1632,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   winUI: {fileID: 627182255}
-  loseUI: {fileID: 0}
+  loseUI: {fileID: 196767932}
   gameCanvas: {fileID: 879444494}
 --- !u!4 &717618884
 Transform:

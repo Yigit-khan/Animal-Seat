@@ -32,8 +32,9 @@ public class tutorialAnimScript : MonoBehaviour
 
     void ClosePanel()
     {
+        SoundManager.Instance.PlaySFX("UiCloseSound");
         isClosing = true;
-
+        
         RectTransform rectTransform = GetComponent<RectTransform>();
         Vector2 hidePosition = targetPosition - new Vector2(0, slideOffsetY);
 
