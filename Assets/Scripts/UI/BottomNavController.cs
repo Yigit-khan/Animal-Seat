@@ -11,8 +11,8 @@ public class BottomNavController : MonoBehaviour
     }
 
     public NavItem[] navItems;
-    private float selectedY = 125f;   // Týklanan butonun çýkacaðý yükseklik
-    public float normalY = 0f;      // Normal konum
+    private float selectedY = 150f;   // Týklanan butonun çýkacaðý yükseklik
+    private float normalY = 120f;      // Normal konum
 
     private int selectedIndex = 0;
 
@@ -27,6 +27,7 @@ public class BottomNavController : MonoBehaviour
         UpdateNavUI();
     }
 
+    //alt kýsýmdaki butonlardan hangisine týklanýyosa o buton yukarý çýkýyor ve text'i açýlýyor
     void UpdateNavUI()
     {
         for (int i = 0; i < navItems.Length; i++)

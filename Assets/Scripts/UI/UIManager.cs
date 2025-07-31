@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-
+using TMPro;
 public class UIManager: MonoBehaviour
 {
     [Header("Panels")]
@@ -18,28 +18,33 @@ public class UIManager: MonoBehaviour
     public Button exitButtonLife;
 
     [SerializeField]
-    private int lifeCount = 3;
+    private int lifeCount = 3; //denemek için böyle verdim
 
     [Header("Texts")]
-    public Text lifeText;
-    public Text lifeTimerText;
+    public TMP_Text lifeText;
+    public TMP_Text lifeTimerText;
 
     private float lifeCoolDown = 1800f; //sayaç için 30dk
     private Coroutine lifeCoroutine;
     private void Start()
     {
+        //butonlara fonksiyon atamasý
         settingsButton.onClick.AddListener(OpensettingsPopUp);
         lifePlusButton.onClick.AddListener(OpenLifePopUp);
 
         exitButtonSettings.onClick.AddListener(CloseSettingsPopUp);
         exitButtonLife.onClick.AddListener(CloseLifePopUp);
 
-        //oyunun baþýnda zamanlayýcýyý baþlatmak amaçlý
-        if(lifeCount < 5 && lifeCoroutine == null)
+        
+        UpdateLifeUI();
+
+        // Oyun baþýnda zamanlayýcýyý baþlatýyoruz
+        if (lifeCount < 5 && lifeCoroutine == null)
         {
             lifeCoroutine = StartCoroutine(LifeTimerCoroutine());
         }
     }
+
 
     public void OpensettingsPopUp()
     {
@@ -84,12 +89,12 @@ public class UIManager: MonoBehaviour
     {
         if (lifeCount >= 5)
         {
-            lifeText.text = "Full";
+            lifeText.text = "5/5";
             lifeTimerText.text = "";
         }
         else
         {
-            lifeText.text = lifeCount.ToString();
+            lifeText.text = lifeCount.ToString() + "/5";
         }
     }
 
@@ -110,7 +115,7 @@ public class UIManager: MonoBehaviour
             UpdateLifeUI();
         }
 
-        lifeTimerText.text = "Full";
+        lifeTimerText.text = "00:00";
         lifeCoroutine = null;
     }
 }

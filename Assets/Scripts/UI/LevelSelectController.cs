@@ -1,42 +1,49 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
+using TMPro;
 
 public class LevelSelectController : MonoBehaviour
 {
     [Header("UI References")]
-    public Text levelDisplayText;      // Play butonunun üstündeki LEVEL X yazýsý
-    public Text[] levelNumberText;     // Altýgenlerdeki LEVEL numaralarý (3 tane olmalý)
+    public TMP_Text levelDisplayText; //butonun üstündeki text
+    public TMP_Text[] levelNumberText; //altýgenlerin üstündeki textler
 
-    private int currentLevelIndex = 1;
-    private int unlockedLevel = 1;
-    private const int maxLevel = 20;
+    private int currentLevelIndex = 1; //þu anki leveli tutuyor
+    [SerializeField]
+    private int unlockedLevel = 1; //henü açýlmamýþ leveli tutuyor
+    private const int maxLevel = 20; //þimdilik böyle
 
     private void Start()
     {
-        // PlayerPrefs'ten en son geçilen bölümü alýyorum
-        unlockedLevel = PlayerPrefs.GetInt("UnlockedLevel", 1);
+        // SaveManager üzerinden veri yükle -- en son kaldýðýmýz level yükleniyor
+        unlockedLevel = SaveManager.LoadLevel();
         currentLevelIndex = unlockedLevel;
 
+        //butonun ve altýgenlerin üstündeki yazýlar güncelleniyor
         UpdateLevelDisplay();
         UpdateHexNumbers();
     }
-
-    // Play butonuna basýldýðýnda sahneyi yükle
+    
+    //menüdeki play butonuna basýnca çalýþýyor
     public void OnPlayButtonPressed()
     {
-        Debug.Log("LEVEL " + currentLevelIndex + " sahnesi yükleniyor...");
-        SceneManager.LoadScene("Level" + currentLevelIndex);
+        //en son geldiðimiz leveli atadýk
+        currentLevelIndex = unlockedLevel;
+        SaveManager.SaveCurrentLevel(currentLevelIndex);  // Sadece seçili level kaydedilir
+        string sceneName = "Level" + currentLevelIndex;
+        Debug.Log("Yükleniyor: " + sceneName);
+        SceneManager.LoadScene(sceneName);
     }
 
-    // UI veya baþka yerden level seçmek için
     public void SetLevel(int level)
     {
         if (level <= unlockedLevel)
         {
             currentLevelIndex = level;
+            SaveManager.SaveCurrentLevel(currentLevelIndex); // Level seçildiðinde kaydet
             UpdateLevelDisplay();
             UpdateHexNumbers();
+            Debug.Log("Seçilen Level: " + level);
         }
         else
         {
@@ -44,47 +51,41 @@ public class LevelSelectController : MonoBehaviour
         }
     }
 
-    // Level geçildiðinde çaðrýlacak
+    //bu fonksiyon level baþarýyla geçilince çaðrýlacak
     public void UnlockNextLevel()
     {
         if (unlockedLevel < maxLevel)
         {
             unlockedLevel++;
-            PlayerPrefs.SetInt("UnlockedLevel", unlockedLevel);
-            PlayerPrefs.Save();
+            SaveManager.SaveLevel(unlockedLevel);
+
+            // En son açýlan level seçili olsun
+            currentLevelIndex = unlockedLevel;
+
+            // UI güncelle
+            UpdateLevelDisplay();
+            UpdateHexNumbers();
         }
 
         Debug.Log("Yeni level açýldý: " + unlockedLevel);
-
-        // Hex numaralarýný güncelle
-        UpdateHexNumbers();
     }
 
+    //butonun üstündeki yazýyý güncelliyor
     private void UpdateLevelDisplay()
     {
         levelDisplayText.text = "LEVEL " + currentLevelIndex;
     }
 
+    //altýgenlerin üstündeki yazýlarý güncelliyor
     private void UpdateHexNumbers()
     {
         for (int i = 0; i < levelNumberText.Length; i++)
         {
             int displayedLevel = currentLevelIndex + i;
-
             if (displayedLevel <= maxLevel)
                 levelNumberText[i].text = displayedLevel.ToString();
             else
-                levelNumberText[i].text = "-"; // Max level sonrasý boþ göster
+                levelNumberText[i].text = "-";
         }
-    }
-
-    public int GetCurrentLevel()
-    {
-        return currentLevelIndex;
-    }
-
-    public int GetUnlockedLevel()
-    {
-        return unlockedLevel;
     }
 }
