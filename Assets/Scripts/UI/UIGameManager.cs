@@ -33,18 +33,24 @@ public class UIGameManager : MonoBehaviour
 
     public void OpensettingsPopUp()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
         settingsPopUp.SetActive(true);
         darkBackground.SetActive(true);
     }
 
     public void OpenReplayPopUp()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
         replayPopUp.SetActive(true);
         darkBackground.SetActive(true);
     }
 
     public void CloseSettingsPopUp()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
         settingsPopUp.SetActive(false);
         darkBackground.SetActive(false);
     }

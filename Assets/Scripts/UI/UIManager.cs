@@ -50,24 +50,32 @@ public class UIManager: MonoBehaviour
 
     public void OpensettingsPopUp()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
         settingsPopUp.SetActive(true);
         darkBackground.SetActive(true);
     }
 
     public void OpenLifePopUp()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
         lifePopUp.SetActive(true);
         darkBackground.SetActive(true);
     }
 
     public void CloseSettingsPopUp()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
         settingsPopUp.SetActive(false);
         darkBackground.SetActive(false);
     }
 
     public void CloseLifePopUp()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
         lifePopUp.SetActive(false);
         darkBackground.SetActive(false);
     }

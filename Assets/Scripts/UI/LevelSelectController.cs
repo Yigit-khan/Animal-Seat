@@ -32,6 +32,7 @@ public class LevelSelectController : MonoBehaviour
     //menüdeki play butonuna basýnca çalýþýyor
     public void OnPlayButtonPressed()
     {
+        SoundManager.Instance.PlaySFX("ButtonClick");
         //en son geldiðimiz leveli atadýk
         currentLevelIndex = unlockedLevel;
         SaveManager.SaveCurrentLevel(currentLevelIndex);  // Sadece seçili level kaydedilir

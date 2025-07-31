@@ -274,6 +274,9 @@ public class GameManager : MonoBehaviour
                 {
                     selectedAnimal = slot.PickUpAnimal().Animal;
                     startParentOfSelectedAnimal = slot.transform;
+
+                    SoundManager.Instance.PlaySFX("AnimalGrab");
+
                     StartDraggingSelectedAnimal();
                     return;
                 }
@@ -287,6 +290,9 @@ public class GameManager : MonoBehaviour
             {
                 selectedAnimal = animalQueue[0];
                 startParentOfSelectedAnimal = null;
+
+                SoundManager.Instance.PlaySFX("AnimalGrab");
+
                 StartDraggingSelectedAnimal();
                 return;
             }
@@ -405,9 +411,13 @@ public class GameManager : MonoBehaviour
         bool isValid = IsPlacementValid(targetSeat);
         if (!isValid)
         {
+            SoundManager.Instance.PlaySFX("PlacementWrong");
+
             LoseLife();
             return false; // Yerleþtirme baþarýsýz.
         }
+
+        SoundManager.Instance.PlaySFX("PlacementCorrect");
 
         // Kurallar uygunsa, hayvaný bu hedefe yerleþtir.
         PlaceAnimalOnSeat(selectedAnimal, targetSeat);
