@@ -9,6 +9,7 @@ public class UIManager: MonoBehaviour
     public GameObject settingsPopUp;
     public GameObject lifePopUp;
     public GameObject darkBackground;
+    
 
     [Header("Buttons")]
     public Button settingsButton;
@@ -26,6 +27,8 @@ public class UIManager: MonoBehaviour
 
     private float lifeCoolDown = 1800f; //sayaç için 30dk
     private Coroutine lifeCoroutine;
+
+    
     private void Start()
     {
         //butonlara fonksiyon atamasý
@@ -118,4 +121,6 @@ public class UIManager: MonoBehaviour
         lifeTimerText.text = "00:00";
         lifeCoroutine = null;
     }
+
+    
 }

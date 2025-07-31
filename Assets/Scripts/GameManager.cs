@@ -3,6 +3,8 @@ using UnityEngine;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using System.Linq;
 using Unity.VisualScripting;
+using DG.Tweening;
+
 
 
 
@@ -104,6 +106,9 @@ public class GameManager : MonoBehaviour
 
     private SeatController lastValidSeatTarget = null;
     private HoldingSlotController lastValidHoldingSlotTarget = null; // YENÝ
+
+    private InGameUIManager InGameUIManager;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -118,6 +123,7 @@ public class GameManager : MonoBehaviour
         gridSystem = new GridSystem(seatParent, gridOriginReference, gridCellSize);
         _animalManager = new AnimalManager();
         animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
+        InGameUIManager = GetComponent<InGameUIManager>();
 
         // 2. Editörde atanan başlangıç hayvanlarını sahneye yerleştir
         PlaceStartingAnimals();
@@ -127,6 +133,8 @@ public class GameManager : MonoBehaviour
         SetupLives();
         InitializeAnimalQueue();
         SetupAnimalSOs(); // Kuyruktaki hayvanların SO'larını ayarla
+
+        
     }
 
 
@@ -479,12 +487,19 @@ public class GameManager : MonoBehaviour
         // TODO: "Tekrar Dene" UI panelini göster.
     }
 
+    [SerializeField] private GameObject winUI;
+  
     private void CheckWinCondition()
     {
         if (animalQueue.Count == 0)
         {
             Debug.Log("TEBRÝKLER! SEVÝYE TAMAMLANDI!");
             // TODO: "Seviye Geçildi" UI panelini göster.
+
+            winUI.SetActive(true);
+            // Paneli aktif edip animasyonla göster
+            winUI.GetComponent<PanelWinUIAnimator>().Show();
+
         }
     }
     #endregion
