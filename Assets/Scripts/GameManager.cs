@@ -471,6 +471,7 @@ public class GameManager : MonoBehaviour
 
     private void LoseLife()
     {
+        Debug.Log("LoseLife ÇAĞRILDI. Mevcut Can: " + (currentLives - 1)); 
         if (currentLives <= 0) return;
         currentLives--;
         if (heartIcons.Count > 0)
@@ -486,6 +487,17 @@ public class GameManager : MonoBehaviour
         Debug.LogError("OYUN BÝTTÝ! Tüm canlarýný kaybettin.");
         Time.timeScale = 0f;
         // TODO: "Tekrar Dene" UI panelini göster.
+
+        if (inGameUIManager != null)
+        {
+            // Kaybetme ekranını göstermesi için InGameUIManager'a komut gönder
+            inGameUIManager.ShowLoseUI();
+        }
+        else
+        {
+            // Eğer referans atanmamışsa, konsolda net bir hata göster.
+            Debug.LogError("GameManager'daki 'In Game UI Manager' referansı atanmamış! Kaybetme ekranı gösterilemiyor.");
+        }
     }
   
     private void CheckWinCondition()

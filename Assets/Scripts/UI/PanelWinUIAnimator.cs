@@ -30,7 +30,7 @@ public class PanelWinUIAnimator : MonoBehaviour
 
         gameObject.SetActive(true);
 
-        Sequence seq = DOTween.Sequence();
+        Sequence seq = DOTween.Sequence().SetUpdate(true);
         seq.Append(panel.DOScale(1f, 0.4f).SetEase(Ease.OutBack));
         seq.Join(panel.DOAnchorPos(originalPos, 0.4f).SetEase(Ease.OutCubic));
         seq.Join(canvasGroup.DOFade(1f, 0.4f));
@@ -47,10 +47,15 @@ public class PanelWinUIAnimator : MonoBehaviour
     {
         foreach (CanvasGroup cg in elementsToFadeIn)
         {
+            // Önce alpha'yý sýfýrla ve objenin aktif olduðundan emin ol
             cg.alpha = 0;
             cg.gameObject.SetActive(true);
-            cg.DOFade(1f, 0.3f);
-            yield return new WaitForSeconds(elementDelay);
+
+            // 1. DEÐÝÞÝKLÝK: Bu animasyonu da zamandan baðýmsýz yap
+            cg.DOFade(1f, 0.3f).SetUpdate(true);
+
+            // 2. DEÐÝÞÝKLÝK: Zamana baðlý bekleme yerine, gerçek zamana baðlý bekle
+            yield return new WaitForSecondsRealtime(elementDelay);
         }
     }
 }

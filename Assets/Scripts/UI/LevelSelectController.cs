@@ -15,7 +15,7 @@ public class LevelSelectController : MonoBehaviour
 
     private void Awake()
     {
-        //SaveManager.ResetProgress();
+        //SaveManager.ResetProgress(); //Sýfýrlamaya yaýyor save manageri
     }
 
     private void Start()
