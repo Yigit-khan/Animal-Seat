@@ -174,6 +174,24 @@ public class GameManager : MonoBehaviour
         return bubbleObj;
     }
 
+    public void AddOneLife()
+    {
+        // Eğer canlar zaten maksimumda değilse...
+        if (currentLives < maxLives)
+        {
+            currentLives++;
+
+            // UI'da yeni bir kalp ikonu oluştur.
+            if (heartIconPrefab != null && heartsContainer != null)
+            {
+                GameObject heart = Instantiate(heartIconPrefab, heartsContainer);
+                heartIcons.Add(heart);
+            }
+
+            Debug.Log("1 can eklendi. Mevcut can: " + currentLives);
+        }
+    }
+
     #endregion
 
     #region Özel Fonksiyonlar
