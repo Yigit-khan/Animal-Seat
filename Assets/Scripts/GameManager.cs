@@ -239,6 +239,7 @@ public class GameManager : MonoBehaviour
 
     private void SetupAnimalSOs()
     {
+
         // BU FONKSİYON ARTIK SADECE KUYRUKTAKİ HAYVANLAR İÇİN ÇALIŞIR.
         // Başlangıç hayvanlarının SO'ları PlaceStartingAnimals içinde zaten ayarlandı.
         foreach (var ac in animalQueue)
@@ -903,6 +904,7 @@ public class GameManager : MonoBehaviour
                     animalController.Initialize();
 
                     animalController.isSeated = true;
+                    animalController.isRecallable = false;
 
                     // 3. Kural sisteminin kullanması için AnimalSO'dan bir RUNTIME KOPYASI oluştur
                     AnimalSO runtimeSO = ScriptableObject.Instantiate(animalController.animalSO);
@@ -980,8 +982,11 @@ public class GameManager : MonoBehaviour
             // Tıklanan objenin bir hayvan olup olmadığını ve oturup oturmadığını kontrol et.
             if (hit.collider.TryGetComponent<AnimalController>(out var animal) && animal.isSeated)
             {
-                // Başarılı! Hayvanı geri çağır.
-                RecallAnimal(animal);
+                if (animal.isRecallable)
+                {
+                    // Başarılı! Hayvanı geri çağır.
+                    RecallAnimal(animal);
+                }
             }
             else
             {
@@ -1034,31 +1039,26 @@ public class GameManager : MonoBehaviour
 
     private void StartShakingSeatedAnimals()
     {
-        // animalSOs listesi, hem oturan hem de kuyruktaki hayvanları içerir.
-        // Sadece oturanları (grid pozisyonu olanları) filtrele.
-        foreach (var so in animalSOs)
-        {
-            if (so != null && so.gridOriginPos.x != -1) // gridOriginPos kontrolü yerine isSeated de kullanılabilir
-            {
-                // Hayvanın controller'ını bulmamız lazım.
-                // animalSOs listesi SO'ları tuttuğu için, controller'ı bulmak için sahneyi taramalıyız.
-                // DAHA İYİ YÖNTEM: Hayvanların kendilerini bir listeye kaydetmesini sağlamak.
-                // Ama şimdilik basit bir çözümle ilerleyelim.
-            }
-        }
-
-        // Yukarıdaki yöntem karmaşık. DAHA BASİT VE GÜVENİLİR YÖNTEM:
         // Sahnede AnimalController component'ine sahip tüm objeleri bul.
         AnimalController[] allAnimalsOnScene = FindObjectsOfType<AnimalController>();
+
         foreach (var animal in allAnimalsOnScene)
         {
-            if (animal.isSeated)
+            // Sadece oturan hayvanları hedef al.
+            if (animal.isSeated && animal.isRecallable)
             {
-                // DOTween'in PunchRotation'ı mükemmel bir titreme efekti verir.
-                // "animal" objesinin transform'una bir tween ID'si ("shake") atıyoruz ki daha sonra durdurabilelim.
-                animal.transform.DOPunchRotation(new Vector3(0, 0, 5f), 1f, 10, 1)
-                    .SetLoops(-1, LoopType.Restart) // Sonsuz döngü
-                    .SetId("shake");
+                // DOTween'in DOShakeRotation'ı ile daha yumuşak ve sürekli bir sallanma efekti.
+                // Bu animasyona özel bir kimlik ("shake") atıyoruz ki daha sonra kolayca durdurabilelim.
+                animal.transform.DOShakeRotation(
+                    duration: 2f,      // Bir tam sallanma döngüsü ne kadar sürsün (saniye).
+                    strength: 5f,      // Ne kadar güçlü sallanacağı (derece cinsinden).
+                    vibrato: 5,        // Ne kadar titreşimli/sık sallanacağı.
+                    randomness: 45f,   // Sallanmanın ne kadar rastgele olacağı (0-180).
+                    fadeOut: false     // Animasyon sonunda yavaşça durmasın.
+                )
+                .SetEase(Ease.InOutSine) // Yumuşak başla, yumuşak bitir.
+                .SetLoops(-1, LoopType.Yoyo) // Sonsuz döngü ve Yoyo ile ileri-geri salınım.
+                .SetId("shake");
             }
         }
     }

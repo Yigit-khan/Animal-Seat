@@ -1,14 +1,17 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class AnimalController : MonoBehaviour
 {
-    [Tooltip("Bu hayvanın tüm verilerini ve karakteristiklerini tutan ScriptableObject.")]
+    [Tooltip("Bu hayvanÃ½n tÃ¼m verilerini ve karakteristiklerini tutan ScriptableObject.")]
     public AnimalSO animalSO;
 
-    // --- YENİ DEĞİŞKEN ---
-    [Tooltip("Bu hayvanın bir koltuğa oturup oturmadığını belirtir.")]
-    public bool isSeated = false; // Varsayılan olarak false.
+    // --- YENÃ DEÃÃÃKEN ---
+    [Tooltip("Bu hayvanÃ½n bir koltuÃ°a oturup oturmadÃ½Ã°Ã½nÃ½ belirtir.")]
+    public bool isSeated = false; // VarsayÃ½lan olarak false.
+
+    [Tooltip("Bu hayvanÄ±n 'Geri Alma' power-up'Ä± ile geri Ã§aÄŸrÄ±lÄ±p Ã§aÄŸrÄ±lamayacaÄŸÄ±nÄ± belirtir.")]
+    public bool isRecallable = true; // VarsayÄ±lan olarak tÃ¼m hayvanlar geri Ã§aÄŸrÄ±labilir.
 
     public int originalLayer { get; private set; }
     private List<GameObject> myBubbles = new List<GameObject>();
@@ -20,23 +23,23 @@ public class AnimalController : MonoBehaviour
     }
 
     /// <summary>
-    /// Bu hayvanın sahip olduğu tüm karakteristikler (trait) için düşünce balonları oluşturur.
+    /// Bu hayvanÃ½n sahip olduÃ°u tÃ¼m karakteristikler (trait) iÃ§in dÃ¼Ã¾Ã¼nce balonlarÃ½ oluÃ¾turur.
     /// </summary>
     public void DisplayMyRules()
     {
-        // 1. KONTROL: Eğer hayvan "oturuyor" olarak işaretlenmişse, ASLA balon oluşturma.
+        // 1. KONTROL: EÃ°er hayvan "oturuyor" olarak iÃ¾aretlenmiÃ¾se, ASLA balon oluÃ¾turma.
         if (isSeated)
         {
-            ClearMyBubbles(); // Hatta varsa eski balonları da sil.
-            return;           // Fonksiyondan hemen çık.
+            ClearMyBubbles(); // Hatta varsa eski balonlarÃ½ da sil.
+            return;           // Fonksiyondan hemen Ã§Ã½k.
         }
 
-        // Önceki balonları temizle
+        // Ã–nceki balonlarÃ½ temizle
         ClearMyBubbles();
 
         if (animalSO == null || animalSO.traits == null) return;
 
-        // Balon oluşturma mantığı (sadece oturmayan hayvanlar için çalışacak)
+        // Balon oluÃ¾turma mantÃ½Ã°Ã½ (sadece oturmayan hayvanlar iÃ§in Ã§alÃ½Ã¾acak)
         foreach (var trait in animalSO.traits)
         {
             Sprite icon = GameManager.Instance.GetIconForTrait(trait);
@@ -54,7 +57,7 @@ public class AnimalController : MonoBehaviour
     }
 
     /// <summary>
-    /// Hayvanın üzerindeki tüm düşünce balonlarını siler.
+    /// HayvanÃ½n Ã¼zerindeki tÃ¼m dÃ¼Ã¾Ã¼nce balonlarÃ½nÃ½ siler.
     /// </summary>
     public void ClearMyBubbles()
     {

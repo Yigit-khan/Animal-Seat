@@ -16,6 +16,13 @@ public class PowerUpController : MonoBehaviour
     [Tooltip("Kalan power-up sayýsýný gösteren TextMeshPro metni.")]
     [SerializeField] private TMP_Text recallCountText;
 
+    [Header("UI Referanslarý")]
+    [Tooltip("Geri alma power-up'ýný tetikleyen buton.")]
+    [SerializeField] private Button eyepatchButton;
+    [Tooltip("Kalan power-up sayýsýný gösteren TextMeshPro metni.")]
+    [SerializeField] private TMP_Text eyepatchText;
+
+
     [Header("Ayarlar")]
     [Tooltip("Oyuncunun her seviye baþýnda sahip olacaðý geri alma hakký sayýsý.")]
     [SerializeField] private int startingRecallCount = 2;

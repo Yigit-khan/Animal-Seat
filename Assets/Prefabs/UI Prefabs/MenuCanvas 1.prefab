@@ -4155,6 +4155,7 @@ MonoBehaviour:
   lifeCount: 3
   lifeText: {fileID: 3732058142889287699}
   lifeTimerText: {fileID: 294699972268711227}
+  coinText: {fileID: 0}
 --- !u!1 &4700729177676292208
 GameObject:
   m_ObjectHideFlags: 0
@@ -10792,7 +10793,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10308, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: e823cd5b5d27c0f4b8256e7c12ee3e6d, type: 2}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -16342,7 +16343,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10308, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: e823cd5b5d27c0f4b8256e7c12ee3e6d, type: 2}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -17390,6 +17391,7 @@ MonoBehaviour:
   - {fileID: 633609060157967733}
   - {fileID: 2942721317867284041}
   - {fileID: 9046032204263516663}
+  unlockedLevel: 1
 --- !u!1 &8061945804246521794
 GameObject:
   m_ObjectHideFlags: 0
