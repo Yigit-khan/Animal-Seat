@@ -33,31 +33,35 @@ public class InGameUIManager : MonoBehaviour
         else Debug.LogError("InGameUIManager'da 'Win UI' referansý atanmamýþ!");
     }
 
-    // --- YENÝ FONKSÝYON ---
-    public void ShowLoseUI()
+    // --- YENÝ FONKSÝYON 
+    public void ShowLoseUI(string loseReason)
     {
-        Debug.Log("--- SHOWLOSEUI FONKSÝYONU InGameUIManager'DA TETÝKLENDÝ! ---"); // Bu s
-        // 1. Oyun içi ana canvas'ý kapat
         if (gameCanvas != null)
         {
             gameCanvas.SetActive(false);
         }
 
-        // 2. Kaybetme ekranýný (LoseUI) göster
         if (loseUI != null)
         {
+            // LoseUI panelini aktifleþtir.
             loseUI.SetActive(true);
-            // Not: Eðer LoseUI için de özel bir animatörünüz varsa, 
-            // WinUI'daki gibi burada tetikleyebilirsiniz.
+
+            // Panel üzerindeki UIAnimationManager'ý bul.
+            UIAnimationManager losePanelController = loseUI.GetComponent<UIAnimationManager>();
+            if (losePanelController != null)
+            {
+                // Metni ayarlamasý için ona komut gönder.
+                losePanelController.SetupLoseScreen(loseReason); // YENÝ: Metni paslýyoruz.
+            }
+
             PanelWinUIAnimator animator = loseUI.GetComponent<PanelWinUIAnimator>();
             if (animator != null) animator.Show();
             else Debug.LogError("LoseUI objesinde 'PanelWinUIAnimator' script'i bulunamadý!");
         }
         else
         {
-            Debug.LogError("InGameUIManager'da 'Lose UI' referansý atanmamýþ! Kaybetme ekraný gösterilemiyor.");
+            Debug.LogError("InGameUIManager'da 'Lose UI' referansý atanmamýþ!");
         }
     }
-
 
 }

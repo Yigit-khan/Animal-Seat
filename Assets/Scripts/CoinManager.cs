@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 /// <summary>
 /// Oyuncunun coin verisini yöneten ve oyun oturumları arasında saklayan Singleton sistemi.
@@ -14,6 +15,8 @@ public class CoinManager : MonoBehaviour
     /// Oyuncunun mevcut coin miktarı. Dışarıdan sadece okunabilir.
     /// </summary>
     public int CurrentCoins { get; private set; }
+
+    public static event Action<int> OnCoinsChanged;
 
     // Coin verisini PlayerPrefs'te saklamak için kullanılacak anahtar.
     private const string COINS_SAVE_KEY = "PlayerTotalCoins";
@@ -42,12 +45,22 @@ public class CoinManager : MonoBehaviour
     /// Oyuncunun coin miktarını artırır ve yeni değeri kaydeder.
     /// </summary>
     /// <param name="amount">Eklenecek coin miktarı.</param>
+    /*
     public void AddCoins(int amount)
     {
         if (amount < 0) return; 
 
         CurrentCoins += amount;
         SaveCoins();
+    }
+    */
+    public void AddCoins(int amount)
+    {
+        if (amount <= 0) return;
+        CurrentCoins += amount;
+        SaveCoins();
+        // Event'i tetikle!
+        OnCoinsChanged?.Invoke(CurrentCoins);
     }
 
     /// <summary>
@@ -85,6 +98,8 @@ public class CoinManager : MonoBehaviour
     /// </summary>
     private void LoadCoins()
     {
-        CurrentCoins = PlayerPrefs.GetInt(COINS_SAVE_KEY, 0);
+        CurrentCoins = PlayerPrefs.GetInt("PlayerTotalCoins", 0);
+        OnCoinsChanged?.Invoke(CurrentCoins);
+
     }
 }

@@ -24,6 +24,10 @@ public class UIAnimationManager : MonoBehaviour
     [SerializeField] private Button buttonRetry;
     [SerializeField] private Button buttonExit;
 
+    [Header("UI Text References")]
+    [Tooltip("Kaybetme ekranýnda gösterilecek ana baþlýk (FAILED / NO MOVES LEFT)")]
+    [SerializeField] private TMP_Text loseTitleText; // YENÝ
+
     private CoinManager _coinManager;
 
     [Header("Silinecek")]
@@ -68,6 +72,13 @@ public class UIAnimationManager : MonoBehaviour
         });
     }
 
+    public void SetupLoseScreen(string title)
+    {
+        if (loseTitleText != null)
+        {
+            loseTitleText.text = title;
+        }
+    }
     public void GoToMenu()
     {
         // Oyunu normale döndür ve menüye git.

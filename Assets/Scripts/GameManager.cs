@@ -5,6 +5,8 @@ using System.Linq;
 using Unity.VisualScripting;
 using DG.Tweening;
 using JetBrains.Annotations;
+using UnityEngine.SceneManagement;
+
 
 
 
@@ -114,6 +116,10 @@ public class GameManager : MonoBehaviour
     private HoldingSlotController lastValidHoldingSlotTarget = null; // YENÝ
     private CoinManager _coinManager;
 
+    //Kazanma ve kaybetme durumu kontrolü
+    private bool isWinSequenceStarted = false;
+    private bool isGameOverSequenceStarted = false;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -129,6 +135,9 @@ public class GameManager : MonoBehaviour
         _animalManager = new AnimalManager();
         animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
         _coinManager = CoinManager.Instance;
+        
+        isWinSequenceStarted = false;
+        isGameOverSequenceStarted = false;
 
         // 2. Editörde atanan başlangıç hayvanlarını sahneye yerleştir
         PlaceStartingAnimals();
@@ -190,6 +199,25 @@ public class GameManager : MonoBehaviour
 
             Debug.Log("1 can eklendi. Mevcut can: " + currentLives);
         }
+    }
+
+    public void ResetLevelForContinue()
+    {
+        // ... kazanma kaybetme durumu kontrolü.
+        isWinSequenceStarted = false; // Seviye sıfırlandığında da sıfırla
+        isGameOverSequenceStarted = false;
+    }
+
+    public void RestartCurrentLevel()
+    {
+        // Oyunu durdurmuş olabilecek herhangi bir durumu normale döndür.
+        Time.timeScale = 1f;
+
+        // Aktif olan sahnenin adını al ve yeniden yükle.
+        string currentSceneName = SceneManager.GetActiveScene().name;
+        SceneManager.LoadScene(currentSceneName);
+
+        Debug.Log(currentSceneName + " sahnesi yeniden başlatılıyor...");
     }
 
     #endregion
@@ -509,61 +537,78 @@ public class GameManager : MonoBehaviour
             Destroy(heartIcons[heartIcons.Count - 1]);
             heartIcons.RemoveAt(heartIcons.Count - 1);
         }
-        if (currentLives <= 0) GameOver();
+        if (currentLives <= 0) GameOver(false);
     }
 
-    private void GameOver()
+    // GameManager.cs
+
+    private void GameOver(bool isSoftLock) // DEĞİŞTİ: Parametre eklendi.
     {
-        SoundManager.Instance.PlaySFX("LevelFail");
-       
-       
-        // TODO: "Tekrar Dene" UI panelini göster.
+        if (isGameOverSequenceStarted) return;
+        isGameOverSequenceStarted = true;
 
-        if (inGameUIManager != null)
+        // Neye göre kaybedildiğine bağlı olarak metni belirle.
+        string loseReasonText = isSoftLock ? "NO MOVES LEFT" : "FAILED"; // YENİ
+
+        float loseDelay = 0.5f;
+        DOVirtual.DelayedCall(loseDelay, () =>
         {
-            // Kaybetme ekranını göstermesi için InGameUIManager'a komut gönder
-            inGameUIManager.ShowLoseUI();
-        }
-        else
-        {
-            // Eğer referans atanmamışsa, konsolda net bir hata göster.
-            Debug.LogError("GameManager'daki 'In Game UI Manager' referansı atanmamış! Kaybetme ekranı gösterilemiyor.");
-        }
+            SoundManager.Instance.PlaySFX("LevelFail");
+
+            if (inGameUIManager != null)
+            {
+                // Belirlediğimiz metni UI yöneticisine gönder.
+                inGameUIManager.ShowLoseUI(loseReasonText); // DEĞİŞTİ
+            }
+            else
+            {
+                Debug.LogError("GameManager'daki 'In Game UI Manager' referansı atanmamış!");
+            }
+        }).SetUpdate(true);
     }
-  
+
     private void CheckWinCondition()
     {
+        // Eğer kazanma süreci zaten başlamışsa, tekrar kontrol etme.
+        if (isWinSequenceStarted) return;
+
         bool isHoldingSlotsOccipied = false;
         foreach (var slot in holdingSlots)
         {
             if (slot.CurrentState == SlotState.Occupied)
             {
-                
-               isHoldingSlotsOccipied = true;
+                isHoldingSlotsOccipied = true;
                 break;
             }
         }
 
+        // Kazanma koşulu sağlandı mı?
         if (animalQueue.Count == 0 && !isHoldingSlotsOccipied)
         {
-            SoundManager.Instance.PlaySFX("LevelWin");
+            // Kazanma sürecini başlat ve tekrar başlatılmasını engelle.
+            isWinSequenceStarted = true;
 
-            Debug.Log("TEBRÝKLER! SEVÝYE TAMAMLANDI!");
-            // TODO: "Seviye Geçildi" UI panelini göster.
-
-            if (inGameUIManager != null)
+            // --- DOTWEEN GECİKMESİ BURADA ---
+            float winDelay = 0.5f; // 0.5 saniye gecikme
+            DOVirtual.DelayedCall(winDelay, () =>
             {
-                inGameUIManager.WinUIAnimation();
-            }
-            else
-            {
-                Debug.LogError("InGameUIManager referansı atanmamış!");
-            }
+                // Bu kod, 0.5 saniye sonra çalışacak.
+                SoundManager.Instance.PlaySFX("LevelWin");
+                Debug.Log("TEBRİKLER! SEVİYE TAMAMLANDI!");
 
-           
+                if (inGameUIManager != null)
+                {
+                    inGameUIManager.WinUIAnimation();
+                }
+                else
+                {
+                    Debug.LogError("InGameUIManager referansı atanmamış!");
+                }
+            });
         }
         else
         {
+            // Soft-lock kontrolü olduğu gibi kalabilir.
             List<AnimalSO> waitingAnimals = animalQueue.Select(a => a.animalSO).ToList();
             List<AnimalSO> seatedSOs = animalSOs.Where(so => so.gridOriginPos.x >= 0).ToList();
             foreach (var animal in holdingSlots)
@@ -574,10 +619,9 @@ public class GameManager : MonoBehaviour
             if (isSoftLocked)
             {
                 Debug.LogWarning("Soft lock BULUNDU! Game over...");
-                GameOver();
+                GameOver(true);
             }
         }
-
     }
     #endregion
 

@@ -14,10 +14,17 @@ public class UIGameManager : MonoBehaviour
     public Button coinPlusButton;
     public Button exitButtonSettings;
 
+    // --- YENÝ BUTONLAR ---
+    [Header("Replay Popup Buttons")]
+    [Tooltip("Popup'taki 'Stay' butonu")]
+    public Button buttonStay;
+    [Tooltip("Popup'taki 'Restart' butonu")]
+    public Button buttonRestart;
+
     [Header("Texts")]
     public TMP_Text levelInfo;
 
-    public LevelSelectController levelSelectController;
+    //public LevelSelectController levelSelectController;
 
     private void Start()
     {
@@ -25,6 +32,12 @@ public class UIGameManager : MonoBehaviour
         settingsButton.onClick.AddListener(OpensettingsPopUp);
         ReplayButton.onClick.AddListener(OpenReplayPopUp);
         exitButtonSettings.onClick.AddListener(CloseSettingsPopUp);
+
+        if (buttonStay != null)
+            buttonStay.onClick.AddListener(CloseReplayPopUp); // Stay butonu sadece popup'ý kapatýr.
+
+        if (buttonRestart != null)
+            buttonRestart.onClick.AddListener(OnRestartButtonPressed); // Restart butonu seviyeyi yeniden baþlatýr.
 
         int currentLevel = SaveManager.LoadCurrentLevel();
         levelInfo.text = "Level " + currentLevel;
@@ -53,6 +66,25 @@ public class UIGameManager : MonoBehaviour
 
         settingsPopUp.SetActive(false);
         darkBackground.SetActive(false);
+    }
+
+    public void CloseReplayPopUp()
+    {
+        replayPopUp.SetActive(false);
+        darkBackground.SetActive(false);
+    }
+
+    public void OnRestartButtonPressed()
+    {
+        // Görevi GameManager'a devret.
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RestartCurrentLevel();
+        }
+        else
+        {
+            Debug.LogError("GameManager.Instance bulunamadý! Seviye yeniden baþlatýlamýyor.");
+        }
     }
 
 }
