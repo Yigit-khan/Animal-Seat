@@ -120,6 +120,7 @@ public class GameManager : MonoBehaviour
     private bool isWinSequenceStarted = false;
     private bool isGameOverSequenceStarted = false;
 
+    private bool isRecallModeActive = false;
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -306,6 +307,13 @@ public class GameManager : MonoBehaviour
 
     private void HandleMouseDown()
     {
+
+        if (isRecallModeActive)
+        {
+            HandleRecallClick();
+            return;
+        }
+
         // Eðer zaten bir hayvan seçiliyse, yeni bir týklama iþlemi yapma.
         if (selectedAnimal != null) return;
 
@@ -469,13 +477,31 @@ public class GameManager : MonoBehaviour
         return true; // Yerleþtirme baþarýlý.
     }
 
-    private void PlaceAnimalOnSeat(AnimalController animal, SeatController seat)
+    private void PlaceAnimalOnSeat(AnimalController animal, SeatController mainSeat)
     {
-        animal.isSeated = true; // Hayvan artık oturuyor.
-        
+        animal.isSeated = true;
         animal.ClearMyBubbles();
-        animal.transform.position = seat.transform.position + new Vector3(0, seatHeightOffset, 0);
-        seat.Occupy(animal);
+        animal.transform.position = mainSeat.transform.position + new Vector3(0, seatHeightOffset, 0);
+
+        // --- YENİ EKLENEN KISIM ---
+        // Hayvanın hangi koltukları işgal ettiğini listesine kaydet.
+        animal.occupiedSeats.Clear();
+        Vector2Int size = animal.animalSO.size;
+        for (int x = 0; x < size.x; x++)
+        {
+            for (int y = 0; y < size.y; y++)
+            {
+                Vector2Int pos = new Vector2Int(mainSeat.GridPosition.x + x, mainSeat.GridPosition.y + y);
+                SeatController currentSeat = gridSystem.GetSeatAt(pos);
+                if (currentSeat != null)
+                {
+                    currentSeat.Occupy(animal);
+                    animal.occupiedSeats.Add(currentSeat); // Listeye ekle
+                }
+            }
+        }
+        // --- BİTİŞ ---
+
         animalQueue.Remove(animal);
         animal.gameObject.layer = animal.originalLayer;
         CheckWinCondition();
@@ -911,4 +937,150 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    #region Power-Up Fonksiyonları
+
+    /// <summary>
+    /// Power-up butonuna basıldığında çağrılır ve geri alma modunu başlatır.
+    /// </summary>
+    public void ActivateRecallMode()
+    {
+        // Eğer seçili bir hayvan varsa veya power-up yoksa modu aktif etme.
+        if (selectedAnimal != null || PowerUpController.Instance.GetPowerUpCount() <= 0)
+        {
+            SoundManager.Instance.PlaySFX("RecallFail"); // Hata sesi çal
+            return;
+        }
+
+        isRecallModeActive = true;
+        PowerUpController.Instance.SetRecallModeActiveVisuals(true); // UI'ı güncelle
+        StartShakingSeatedAnimals(); 
+        SoundManager.Instance.PlaySFX("PowerUpActivate"); // Mod aktif sesi çal
+        Debug.Log("Geri Alma Modu Aktif. Geri alınacak hayvanı seçin.");
+    }
+
+    /// <summary>
+    /// Geri alma modunu iptal eder.
+    /// </summary>
+    private void DeactivateRecallMode()
+    {
+        isRecallModeActive = false;
+        PowerUpController.Instance.SetRecallModeActiveVisuals(false);
+        StopShakingSeatedAnimals();
+    }
+
+    /// <summary>
+    /// Geri alma modu aktifken yapılan tıklamaları yönetir.
+    /// </summary>
+    private void HandleRecallClick()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
+        {
+            // Tıklanan objenin bir hayvan olup olmadığını ve oturup oturmadığını kontrol et.
+            if (hit.collider.TryGetComponent<AnimalController>(out var animal) && animal.isSeated)
+            {
+                // Başarılı! Hayvanı geri çağır.
+                RecallAnimal(animal);
+            }
+            else
+            {
+                // Oturmayan bir hayvana veya boş bir yere tıklandıysa modu iptal et.
+                DeactivateRecallMode();
+            }
+        }
+        else
+        {
+            // Herhangi bir şeye tıklanmadıysa modu iptal et.
+            DeactivateRecallMode();
+        }
+    }
+
+    /// <summary>
+    /// Belirtilen hayvanı oturduğu yerden kaldırıp kuyruğun başına ekler.
+    /// </summary>
+    private void RecallAnimal(AnimalController animalToRecall)
+    {
+        animalToRecall.transform.DOKill();
+        animalToRecall.transform.rotation = Quaternion.identity;
+
+        // 1. Power-up'ı kullan ve sayıyı düşür.
+        PowerUpController.Instance.UsePowerUp();
+
+        // 2. Hayvanın oturduğu tüm koltukları boşalt.
+        foreach (var seat in animalToRecall.occupiedSeats)
+        {
+            if (seat != null) seat.Vacate();
+        }
+        animalToRecall.occupiedSeats.Clear();
+
+        // 3. Hayvanın durumunu güncelle.
+        animalToRecall.isSeated = false;
+        animalToRecall.animalSO.gridOriginPos = new Vector2Int(-1, -1);
+
+        // 4. Hayvanı kuyruğun en başına ekle.
+        animalQueue.Insert(0, animalToRecall);
+
+        // 5. Kurallarını tekrar göster.
+        animalToRecall.DisplayMyRules();
+
+        // 6. Geri alma modunu kapat.
+        DeactivateRecallMode();
+
+        // 7. Başarı sesi çal.
+        SoundManager.Instance.PlaySFX("RecallSuccess");
+        Debug.Log($"{animalToRecall.animalSO._animalName} geri çağrıldı!");
+    }
+
+    private void StartShakingSeatedAnimals()
+    {
+        // animalSOs listesi, hem oturan hem de kuyruktaki hayvanları içerir.
+        // Sadece oturanları (grid pozisyonu olanları) filtrele.
+        foreach (var so in animalSOs)
+        {
+            if (so != null && so.gridOriginPos.x != -1) // gridOriginPos kontrolü yerine isSeated de kullanılabilir
+            {
+                // Hayvanın controller'ını bulmamız lazım.
+                // animalSOs listesi SO'ları tuttuğu için, controller'ı bulmak için sahneyi taramalıyız.
+                // DAHA İYİ YÖNTEM: Hayvanların kendilerini bir listeye kaydetmesini sağlamak.
+                // Ama şimdilik basit bir çözümle ilerleyelim.
+            }
+        }
+
+        // Yukarıdaki yöntem karmaşık. DAHA BASİT VE GÜVENİLİR YÖNTEM:
+        // Sahnede AnimalController component'ine sahip tüm objeleri bul.
+        AnimalController[] allAnimalsOnScene = FindObjectsOfType<AnimalController>();
+        foreach (var animal in allAnimalsOnScene)
+        {
+            if (animal.isSeated)
+            {
+                // DOTween'in PunchRotation'ı mükemmel bir titreme efekti verir.
+                // "animal" objesinin transform'una bir tween ID'si ("shake") atıyoruz ki daha sonra durdurabilelim.
+                animal.transform.DOPunchRotation(new Vector3(0, 0, 5f), 1f, 10, 1)
+                    .SetLoops(-1, LoopType.Restart) // Sonsuz döngü
+                    .SetId("shake");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Hayvanlardaki tüm titreme animasyonlarını durdurur.
+    /// </summary>
+    private void StopShakingSeatedAnimals()
+    {
+        // "shake" ID'sine sahip tüm DOTween animasyonlarını durdur.
+        DOTween.Kill("shake");
+
+        // Her ihtimale karşı hayvanların rotasyonunu sıfırla.
+        AnimalController[] allAnimalsOnScene = FindObjectsOfType<AnimalController>();
+        foreach (var animal in allAnimalsOnScene)
+        {
+            if (animal.isSeated)
+            {
+                animal.transform.DORotate(Vector3.zero, 0.1f);
+            }
+        }
+    }
+
+    #endregion
 }

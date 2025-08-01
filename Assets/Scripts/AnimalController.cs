@@ -13,7 +13,7 @@ public class AnimalController : MonoBehaviour
     public int originalLayer { get; private set; }
     private List<GameObject> myBubbles = new List<GameObject>();
 
-
+    public List<SeatController> occupiedSeats = new List<SeatController>();
     public void Initialize()
     {
         originalLayer = gameObject.layer;
