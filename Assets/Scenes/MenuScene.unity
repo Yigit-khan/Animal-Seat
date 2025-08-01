@@ -524,7 +524,7 @@ MonoBehaviour:
   - name: PlaceToHoldingSlot
     clip: {fileID: 8300000, guid: 6b1c7c239774ad44fb3062654255c6a3, type: 3}
     volume: 1
-    pitch: 1
+    pitch: 0.5
     loop: 0
     source: {fileID: 0}
   - name: UiCloseSound
