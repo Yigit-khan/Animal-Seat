@@ -1,5 +1,5 @@
 // InGameUIManager.cs
-
+using TMPro;
 using UnityEngine;
 
 public class InGameUIManager : MonoBehaviour
@@ -16,6 +16,9 @@ public class InGameUIManager : MonoBehaviour
     [SerializeField] private GameObject gameCanvas;
 
     // --- WinUIAnimation fonksiyonu olduðu gibi kalýyor ---
+
+
+   
     public void WinUIAnimation()
     {
         // ... (deðiþiklik yok)
@@ -55,4 +58,6 @@ public class InGameUIManager : MonoBehaviour
             Debug.LogError("InGameUIManager'da 'Lose UI' referansý atanmamýþ! Kaybetme ekraný gösterilemiyor.");
         }
     }
+
+
 }

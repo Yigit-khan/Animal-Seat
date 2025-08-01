@@ -24,7 +24,7 @@ public class CoinManager : MonoBehaviour
         if (Instance != null && Instance != this)
         {
             // Eğer sahnede zaten bir CoinManager varsa, bu yenisini yok et.
-            Destroy(this.gameObject);
+            // Destroy(this.gameObject);
         }
         else
         {

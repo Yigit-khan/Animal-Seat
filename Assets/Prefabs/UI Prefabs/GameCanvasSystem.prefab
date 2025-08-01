@@ -351,7 +351,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2660703277881840503}
-  - component: {fileID: 1176091043205162448}
   m_Layer: 0
   m_Name: GameCanvasSystem
   m_TagString: Untagged
@@ -375,18 +374,6 @@ Transform:
   - {fileID: 2212205928443149272}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1176091043205162448
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 744750946127697797}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 23675e50e8932ad46b3a71b98471010b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &836418714790834883
 GameObject:
   m_ObjectHideFlags: 0
@@ -677,6 +664,7 @@ GameObject:
   - component: {fileID: 9103699860602079702}
   - component: {fileID: 8737425961318380146}
   - component: {fileID: 4251426960770195332}
+  - component: {fileID: 7737944752449938423}
   m_Layer: 5
   m_Name: Stats_Gold (1)
   m_TagString: Untagged
@@ -784,6 +772,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_HorizontalFit: 2
   m_VerticalFit: 0
+--- !u!114 &7737944752449938423
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1283777157026035388}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 23675e50e8932ad46b3a71b98471010b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1386438349329488847
 GameObject:
   m_ObjectHideFlags: 0
@@ -833,7 +833,7 @@ GameObject:
   - component: {fileID: 7761831500814182854}
   - component: {fileID: 6542650048570257475}
   m_Layer: 5
-  m_Name: Text_Value
+  m_Name: CoinText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -8061,9 +8061,9 @@ MonoBehaviour:
     m_Top: 0
     m_Bottom: 0
   m_ChildAlignment: 4
-  m_Spacing: 5
+  m_Spacing: 30
   m_ChildForceExpandWidth: 0
-  m_ChildForceExpandHeight: 1
+  m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
   m_ChildScaleWidth: 0
