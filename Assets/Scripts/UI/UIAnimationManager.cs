@@ -24,6 +24,8 @@ public class UIAnimationManager : MonoBehaviour
     [SerializeField] private Button buttonRetry;
     [SerializeField] private Button buttonExit;
 
+    private CoinManager _coinManager;
+
     [Header("Silinecek")]
     //Silinecek
     [SerializeField] private AudioSource audioSource;
@@ -31,6 +33,7 @@ public class UIAnimationManager : MonoBehaviour
 
     void Start()
     {
+        _coinManager = CoinManager.Instance;
         coinText.text = coinRewardAmount.ToString();
         buttonContinue.onClick.AddListener(() => OnContinueClicked(false));
         button2xContinue.onClick.AddListener(() => OnContinueClicked(true));
@@ -60,6 +63,9 @@ public class UIAnimationManager : MonoBehaviour
 
     private void CollectCoinsAndProceed(int amount)
     {
+        _coinManager.AddCoins(amount);
+        Debug.Log("Current coins: " + _coinManager.CurrentCoins);
+
         // 1. Yeni seviye kilidini açma mantýðýný BURAYA TAÞIYIN
         int currentLevel = SaveManager.LoadCurrentLevel();
         int unlockedLevel = SaveManager.LoadLevel();

@@ -407,6 +407,14 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 627355057573213005, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -24.789093
+      objectReference: {fileID: 0}
+    - target: {fileID: 1540825960152441880, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -24.789093
+      objectReference: {fileID: 0}
     - target: {fileID: 2568971627899380625, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -526,6 +534,14 @@ PrefabInstance:
     - target: {fileID: 5922693449023154723, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
       propertyPath: elementDelay
       value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6695668396737688557, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -24.789093
+      objectReference: {fileID: 0}
+    - target: {fileID: 7180037423654568961, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -24.789093
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2062,7 +2078,6 @@ MonoBehaviour:
   - trait: {fileID: 11400000, guid: 99fcffd4ab7203945ae546c96636d9aa, type: 2}
     icon: {fileID: 21300000, guid: c4c52439d4dbf584d87a420fd6acee9c, type: 3}
   bubbleOffset: {x: 0, y: 1.351, z: 0.404}
-  maxLives: 3
   heartsContainer: {fileID: 1880595636}
   heartIconPrefab: {fileID: 6376916222732492553, guid: ed2ae119050d6c84489a5eb380e827b5, type: 3}
   holdingSlotsParent: {fileID: 503636855}

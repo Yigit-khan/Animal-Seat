@@ -112,7 +112,8 @@ public class GameManager : MonoBehaviour
 
     private SeatController lastValidSeatTarget = null;
     private HoldingSlotController lastValidHoldingSlotTarget = null; // YENÝ
-    
+    private CoinManager _coinManager;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -127,6 +128,7 @@ public class GameManager : MonoBehaviour
         gridSystem = new GridSystem(seatParent, gridOriginReference, gridCellSize);
         _animalManager = new AnimalManager();
         animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
+        _coinManager = CoinManager.Instance;
 
         // 2. Editörde atanan başlangıç hayvanlarını sahneye yerleştir
         PlaceStartingAnimals();
@@ -136,8 +138,6 @@ public class GameManager : MonoBehaviour
         SetupLives();
         InitializeAnimalQueue();
         SetupAnimalSOs(); // Kuyruktaki hayvanların SO'larını ayarla
-
-        
     }
 
 
@@ -386,8 +386,6 @@ public class GameManager : MonoBehaviour
             placedSuccessfully = TryPlaceOnHoldingSlot(lastValidHoldingSlotTarget);
         }
 
-
-
         // 3. Eðer hiçbir yere yerleþemediyse, orijinal pozisyonuna geri dön.
         if (!placedSuccessfully)
         {
@@ -421,11 +419,6 @@ public class GameManager : MonoBehaviour
 
         // Kurallar uygunsa, hayvaný bu hedefe yerleþtir.
         PlaceAnimalOnSeat(selectedAnimal, targetSeat);
-
-
-        
-
-
 
         return true; // Yerleþtirme baþarýlý.
     }
@@ -542,7 +535,6 @@ public class GameManager : MonoBehaviour
 
             if (inGameUIManager != null)
             {
-
                 inGameUIManager.WinUIAnimation();
             }
             else
@@ -556,6 +548,10 @@ public class GameManager : MonoBehaviour
         {
             List<AnimalSO> waitingAnimals = animalQueue.Select(a => a.animalSO).ToList();
             List<AnimalSO> seatedSOs = animalSOs.Where(so => so.gridOriginPos.x >= 0).ToList();
+            foreach (var animal in holdingSlots)
+                if (animal.OccupyingAnimal != null && animal.OccupyingAnimal.animalSO != null)
+                    waitingAnimals.Add(animal.OccupyingAnimal.animalSO);
+
             bool isSoftLocked = _animalManager.IsSoftLocked(waitingAnimals, gridSystem.GetAllEmptySeats(), seatedSOs);
             if (isSoftLocked)
             {

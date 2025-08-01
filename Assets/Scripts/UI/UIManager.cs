@@ -23,9 +23,11 @@ public class UIManager: MonoBehaviour
     [Header("Texts")]
     public TMP_Text lifeText;
     public TMP_Text lifeTimerText;
+    public TMP_Text coinText;
 
     private float lifeCoolDown = 1800f; //sayaç için 30dk
     private Coroutine lifeCoroutine;
+    private CoinManager _coinManager;
 
     
     private void Start()
@@ -37,8 +39,10 @@ public class UIManager: MonoBehaviour
         exitButtonSettings.onClick.AddListener(CloseSettingsPopUp);
         exitButtonLife.onClick.AddListener(CloseLifePopUp);
 
+        _coinManager = CoinManager.Instance;
         
         UpdateLifeUI();
+        UpdateCoins();
 
         // Oyun baþýnda zamanlayýcýyý baþlatýyoruz
         if (lifeCount < 5 && lifeCoroutine == null)
@@ -106,6 +110,11 @@ public class UIManager: MonoBehaviour
         {
             lifeText.text = lifeCount.ToString() + "/5";
         }
+    }
+    
+    void UpdateCoins()
+    {
+        coinText.text = _coinManager.CurrentCoins.ToString();
     }
 
     IEnumerator LifeTimerCoroutine()
