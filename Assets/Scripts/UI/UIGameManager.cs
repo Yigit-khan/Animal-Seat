@@ -1,6 +1,7 @@
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 public class UIGameManager : MonoBehaviour
 {
     [Header("Panels")]
@@ -13,8 +14,9 @@ public class UIGameManager : MonoBehaviour
     public Button ReplayButton;
     public Button coinPlusButton;
     public Button exitButtonSettings;
+    [Tooltip("Ayarlar popup'ýndaki 'Ana Menü' butonu")]
+    public Button mainMenuExitButton; // Yeni buton referans
 
-    // --- YENÝ BUTONLAR ---
     [Header("Replay Popup Buttons")]
     [Tooltip("Popup'taki 'Stay' butonu")]
     public Button buttonStay;
@@ -39,6 +41,9 @@ public class UIGameManager : MonoBehaviour
         if (buttonRestart != null)
             buttonRestart.onClick.AddListener(OnRestartButtonPressed); // Restart butonu seviyeyi yeniden baþlatýr.
 
+        if (mainMenuExitButton != null)
+            mainMenuExitButton.onClick.AddListener(GoToMainMenu);
+
         int currentLevel = SaveManager.LoadCurrentLevel();
         levelInfo.text = "Level " + currentLevel;
     }
@@ -48,6 +53,8 @@ public class UIGameManager : MonoBehaviour
     {
         SoundManager.Instance.PlaySFX("ButtonClick");
 
+        GameManager.Instance.PauseGame(); //oyunu duraklat
+
         settingsPopUp.SetActive(true);
         darkBackground.SetActive(true);
     }
@@ -55,6 +62,8 @@ public class UIGameManager : MonoBehaviour
     public void OpenReplayPopUp()
     {
         SoundManager.Instance.PlaySFX("ButtonClick");
+
+        GameManager.Instance.PauseGame();  //oyunu duraklat
 
         replayPopUp.SetActive(true);
         darkBackground.SetActive(true);
@@ -64,18 +73,23 @@ public class UIGameManager : MonoBehaviour
     {
         SoundManager.Instance.PlaySFX("ButtonClick");
 
+        GameManager.Instance.ResumeGame();
+
         settingsPopUp.SetActive(false);
         darkBackground.SetActive(false);
     }
 
     public void CloseReplayPopUp()
     {
+        GameManager.Instance.ResumeGame();
+
         replayPopUp.SetActive(false);
         darkBackground.SetActive(false);
     }
 
     public void OnRestartButtonPressed()
     {
+        
         // Görevi GameManager'a devret.
         if (GameManager.Instance != null)
         {
@@ -85,6 +99,19 @@ public class UIGameManager : MonoBehaviour
         {
             Debug.LogError("GameManager.Instance bulunamadý! Seviye yeniden baþlatýlamýyor.");
         }
+        
+    }
+
+    public void GoToMainMenu()
+    {
+        // Ses efekti çal (isteðe baðlý)
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
+        // Oyunu durdurmuþ olabilecek herhangi bir durumu normale döndür.
+        Time.timeScale = 1f;
+
+        // "MenuScene" adlý sahneyi yükle. Sahne adýnýn doðru olduðundan emin ol.
+        SceneManager.LoadScene("MenuScene");
     }
 
 }
