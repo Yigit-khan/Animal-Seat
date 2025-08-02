@@ -64,11 +64,7 @@ public class AnimalManager
     {
         if (emptySeats == null || emptySeats.Count == 0 && waitingAnimals.Count > 0) return true;
 
-<<<<<<< Updated upstream
         //int validCount = 0;
-=======
-        int validCount = 0;
->>>>>>> Stashed changes
         foreach (var animalToTest in waitingAnimals)
         {
             foreach (var seatToTest in emptySeats)
@@ -80,25 +76,15 @@ public class AnimalManager
                 if (IsAllInteractionsValid(hypotheticalBoardState))
                 {
                     animalToTest.gridOriginPos = originalPos;
-<<<<<<< Updated upstream
                     //validCount++;
                     return false;
-=======
-                    validCount++;
-                    break;
->>>>>>> Stashed changes
                 }
 
                 animalToTest.gridOriginPos = originalPos;
             }
         }
-<<<<<<< Updated upstream
         return waitingAnimals.Count > 0;
         //Debug.Log(waitingAnimals.Count + " --- " + validCount);
         //return !(waitingAnimals.Count == validCount);
-=======
-        Debug.Log(waitingAnimals.Count + " --- " + validCount);
-        return !(waitingAnimals.Count == validCount);
->>>>>>> Stashed changes
     }
 }
