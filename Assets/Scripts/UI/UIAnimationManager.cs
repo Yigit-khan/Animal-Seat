@@ -95,24 +95,29 @@ public class UIAnimationManager : MonoBehaviour
         {
             ShowRewardedAd(() =>
             {
-                //CollectCoins(coinRewardAmount * 2);
+                // Oyuncu reklamý izledi, þimdi ekstra ödülü ver.
+                // Zaten 100 coin'i kazanmýþtý, þimdi bir 100 daha ekliyoruz.
+                _coinManager.AddCoins(coinRewardAmount);
+                // Animasyonu 200 coin için göster.
                 CollectCoinsAndProceed(coinRewardAmount * 2);
             });
         }
         else
         {
-            //CollectCoins(coinRewardAmount);
+            // Normal devam etme. Sadece animasyonu 100 coin için göster.
             CollectCoinsAndProceed(coinRewardAmount);
         }
-
-        
     }
 
     private void CollectCoinsAndProceed(int amount)
     {
+        /* gamemanagera taþýndý
         _coinManager.AddCoins(amount);
         Debug.Log("Current coins: " + _coinManager.CurrentCoins);
+        */
 
+
+        /* Burasý gamemanager içerisinde taþýnacak
         // 1. Yeni seviye kilidini açma mantýðýný BURAYA TAÞIYIN
         int currentLevel = SaveManager.LoadCurrentLevel();
         int unlockedLevel = SaveManager.LoadLevel();
@@ -123,6 +128,7 @@ public class UIAnimationManager : MonoBehaviour
             SaveManager.SaveLevel(currentLevel + 1);
             Debug.Log($"Yeni seviye açýldý: {currentLevel + 1}");
         }
+        */
 
         // 2. Coin animasyonunu baþlat
         int visualCoinCount = Mathf.Min(20, amount);
@@ -189,56 +195,5 @@ public class UIAnimationManager : MonoBehaviour
         yield return new WaitForSeconds(2f);
         Debug.Log("Reklam bitti!");
         onComplete?.Invoke();
-    }
-
-    //Collect Coins And return menuscene and unlock next level
-    public void CollectCoins(int amount)
-    {
-        int visualCoinCount = Mathf.Min(20, amount);
-        float spawnRadius = 60f;
-        float moveTime = 1f;
-        float delayStep = 0.05f;
-
-        for (int i = 0; i < visualCoinCount; i++)
-        {
-            GameObject coin = Instantiate(coinPrefab, coinSpawnOrigin.transform.parent);
-            coin.transform.position = coinSpawnOrigin.position;
-
-            Vector3 initialScale = Vector3.zero;
-            Vector3 punchScale = Vector3.one * 1.5f;
-            Vector3 finalScale = Vector3.one * 0.4f;
-
-            Vector2 randomOffset = Random.insideUnitCircle.normalized * spawnRadius;
-            Vector3 spreadPosition = coinSpawnOrigin.position + new Vector3(randomOffset.x, randomOffset.y + 50f, 0);
-
-            coin.transform.localScale = initialScale;
-            float delay = i * delayStep;
-
-            Sequence seq = DOTween.Sequence();
-            seq.AppendInterval(delay);
-            seq.Append(coin.transform.DOScale(punchScale, 0.3f).SetEase(Ease.OutBack));
-            seq.Join(coin.transform.DOMove(spreadPosition, 0.3f).SetEase(Ease.OutQuad));
-            seq.Append(coin.transform.DOMove(coinTarget.position, moveTime).SetEase(Ease.InQuad));
-            seq.Join(coin.transform.DOScale(finalScale, moveTime));
-            
-            seq.OnComplete(() =>
-            {
-                Destroy(coin);
-            });
-
-            //Audio delayli
-            DOVirtual.DelayedCall(delay + 0.3f, () =>
-            {
-                audioSource.PlayOneShot(coinCollectSound); // AudioManager.Instance.PlayOneShot("");
-            });
-
-            /*
-            levelSelectController.UnlockNextLevel();
-            SceneManager.LoadScene("MenuScene");
-            */
-        }
-
-        totalCoins += amount;
-        Debug.Log("Total Coins: " + totalCoins);
     }
 }
