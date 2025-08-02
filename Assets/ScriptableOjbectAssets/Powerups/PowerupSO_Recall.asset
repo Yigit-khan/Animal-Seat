@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PowerupSO_Recall
   m_EditorClassIdentifier: 
   powerupName: Recall
-  remainingUse: 2
+  defaultUses: 2
   buttonScaleAmount: 1.2
   buttonAnimationDuration: 0.3
-  recallButtonInitialScale: {x: 1, y: 1, z: 1}
+  recallButtonInitialScale: {x: 0, y: 0, z: 0}
   soundFileName: Recall

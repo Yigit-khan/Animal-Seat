@@ -971,7 +971,7 @@ public class GameManager : MonoBehaviour
     public void ActivateRecallMode()
     {
         // Eğer zaten seçili bir hayvan varsa veya hakkınız kalmadıysa başarısız
-        if (selectedAnimal != null || _recallPowerUpSO.remainingUse <= 0)
+        if (selectedAnimal != null || _recallPowerUpSO.RemainingUse <= 0)
         {
             SoundManager.Instance.PlaySFX("RecallFail");
             return;
@@ -1057,7 +1057,7 @@ public class GameManager : MonoBehaviour
     public void ActivateEyepatchMode()
     {
         // Eğer zaten seçili bir hayvan varsa veya hakkınız kalmadıysa başarısız
-        if (selectedAnimal != null || _eyepatchPowerUpSO.remainingUse <= 0)
+        if (selectedAnimal != null || _eyepatchPowerUpSO.RemainingUse <= 0)
         {
             SoundManager.Instance.PlaySFX("EyepatchFail");
             return;

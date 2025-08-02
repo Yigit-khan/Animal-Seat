@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
-using UnityEditor.VisionOS;
 public class UIManager : MonoBehaviour
 {
     [Header("Panels")]

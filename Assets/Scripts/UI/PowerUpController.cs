@@ -83,14 +83,14 @@ public class PowerUpController : MonoBehaviour
             entry.uiButton.onClick.AddListener(() => OnPowerUpClick(entry));
 
             // 3) UI’ı başlangıç değeriyle güncelle
-            entry.uiText.text = entry.so.remainingUse.ToString();
+            entry.uiText.text = entry.so.RemainingUse.ToString();
         }
     }
 
     private void OnPowerUpClick(PowerUpUIReference entry)
     {
         var so = entry.so;
-        if (so.remainingUse <= 0)
+        if (so.RemainingUse <= 0)
             return;
 
         // b) Doğru power-up modunu başlat
@@ -147,8 +147,7 @@ public class PowerUpController : MonoBehaviour
         PowerUpUIReference reference = GetReferenceByName(powerup.powerupName);
 
         // a) Kalan hakkı düşür ve UI’ı güncelle
-        powerup.remainingUse--;
-        reference.uiText.text = powerup.remainingUse.ToString();
+        powerup.RemainingUse--;
+        reference.uiText.text = powerup.RemainingUse.ToString();
     }
-
 }

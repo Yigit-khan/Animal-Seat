@@ -130,7 +130,7 @@ GameObject:
   - component: {fileID: 17774093}
   - component: {fileID: 17774095}
   - component: {fileID: 17774094}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Text (TMP)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -511,7 +511,7 @@ GameObject:
   - component: {fileID: 223704509}
   - component: {fileID: 223704508}
   - component: {fileID: 223704507}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Image (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -632,7 +632,7 @@ GameObject:
   - component: {fileID: 305067005}
   - component: {fileID: 305067007}
   - component: {fileID: 305067006}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Image (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -966,7 +966,7 @@ GameObject:
   - component: {fileID: 471263003}
   - component: {fileID: 471263002}
   - component: {fileID: 471263001}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Canvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1612,7 +1612,7 @@ GameObject:
   - component: {fileID: 959180263}
   - component: {fileID: 959180265}
   - component: {fileID: 959180264}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2022,7 +2022,7 @@ GameObject:
   - component: {fileID: 1287078062}
   - component: {fileID: 1287078061}
   - component: {fileID: 1287078060}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Tutorial_Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2354,7 +2354,7 @@ GameObject:
   - component: {fileID: 1785268452}
   - component: {fileID: 1785268454}
   - component: {fileID: 1785268453}
-  m_Layer: 5
+  m_Layer: 0
   m_Name: Image (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
