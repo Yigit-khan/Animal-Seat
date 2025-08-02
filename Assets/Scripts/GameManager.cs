@@ -1037,7 +1037,6 @@ public class GameManager : MonoBehaviour
         // Durumu güncelle
         animal.isSeated = false;
         animal.animalSO.gridOriginPos = new Vector2Int(-1, -1);
-        animal.animalSO.effectedBySkill = true;
 
         // Kuyruğun başına ekle
         animalQueue.Insert(0, animal);
