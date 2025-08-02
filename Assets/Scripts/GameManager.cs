@@ -142,6 +142,8 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
+        dragZOffset = -.4f;
+
         Time.timeScale = 1f;
 
         // 1. Sistemleri kur
