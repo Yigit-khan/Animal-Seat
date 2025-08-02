@@ -3,8 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
-using UnityEditor.VisionOS;
-public class UIManager: MonoBehaviour
+public class UIManager : MonoBehaviour
 {
     [Header("Panels")]
     public GameObject settingsPopUp;
@@ -16,7 +15,7 @@ public class UIManager: MonoBehaviour
     [Header("Buttons")]
     public Button settingsButton;
     public Button lifePlusButton;
-    public Button coinPlusButton; 
+    public Button coinPlusButton;
     public Button exitButtonSettings;
     public Button exitButtonLife;
     public Button cupButton;
@@ -54,7 +53,7 @@ public class UIManager: MonoBehaviour
         shopButton.onClick.AddListener(OpenShopPanel);
 
         _coinManager = CoinManager.Instance;
-        
+
         UpdateLifeUI();
         UpdateCoins();
 
@@ -170,10 +169,10 @@ public class UIManager: MonoBehaviour
             yield return null;
         }
 
-       
+
         leaderBoardPanel.SetActive(false);
         shopPanel.SetActive(false);
-      
+
         t = 0;
         while (t < fadeDuration)
         {
@@ -210,7 +209,7 @@ public class UIManager: MonoBehaviour
             lifeText.text = lifeCount.ToString() + "/5";
         }
     }
-    
+
     void UpdateCoins()
     {
         coinText.text = _coinManager.CurrentCoins.ToString();
@@ -237,7 +236,7 @@ public class UIManager: MonoBehaviour
         lifeCoroutine = null;
     }
 
-   
+
 
 
 }

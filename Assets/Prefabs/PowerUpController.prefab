@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   powerUps:
-  - so: {fileID: 11400000, guid: 678dfe432a65b5448ab683376a7a4e5a, type: 2}
+  - so: {fileID: 11400000, guid: 3779d663515a14144a018ef3a27bf4c9, type: 2}
     uiButtonObjectName: Skill_Recall
     uiTextObjectName: RecallText
     uiButton: {fileID: 0}

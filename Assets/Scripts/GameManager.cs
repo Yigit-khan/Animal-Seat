@@ -24,6 +24,10 @@ public struct RuleIconData
     [Tooltip("Bu karakteristiği temsil edecek ikon.")]
     public Sprite icon;
 }
+
+//Akif : Oyun durumu kontrolü, lose ekranı geldiğinde hayvanlar hareket ettirilemesin diye oyunun durumunu kontrol için ekledim
+public enum GameState { Playing, Paused, Won, Lost }
+
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
@@ -94,7 +98,7 @@ public class GameManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameObject winUI;
     [SerializeField] private InGameUIManager inGameUIManager;
-
+    
     // --- Özel Deðiþkenler ---
     private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
 
@@ -115,12 +119,21 @@ public class GameManager : MonoBehaviour
     private SeatController lastValidSeatTarget = null;
     private HoldingSlotController lastValidHoldingSlotTarget = null; // YENÝ
     private CoinManager _coinManager;
+    private PowerupSO _recallPowerUpSO;
+    private PowerupSO _eyepatchPowerUpSO;
+
 
     //Kazanma ve kaybetme durumu kontrolü
     private bool isWinSequenceStarted = false;
     private bool isGameOverSequenceStarted = false;
 
     private bool isRecallModeActive = false;
+    private bool isEyepatchModeActive = false;
+
+    // Mevcut oyun durumunu tutacak değişken
+    public static GameState CurrentGameState { get; private set; }
+
+
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -137,6 +150,10 @@ public class GameManager : MonoBehaviour
         animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
         _coinManager = CoinManager.Instance;
         
+        //Oyun her başladığında durumu playing olarak ayarlıyoruz.
+        CurrentGameState = GameState.Playing;
+        Time.timeScale = 1f;
+
         isWinSequenceStarted = false;
         isGameOverSequenceStarted = false;
 
@@ -148,6 +165,7 @@ public class GameManager : MonoBehaviour
         SetupLives();
         InitializeAnimalQueue();
         SetupAnimalSOs(); // Kuyruktaki hayvanların SO'larını ayarla
+        SetupPowerupSOs();
     }
 
 
@@ -211,14 +229,29 @@ public class GameManager : MonoBehaviour
 
     public void RestartCurrentLevel()
     {
-        // Oyunu durdurmuş olabilecek herhangi bir durumu normale döndür.
+        CurrentGameState = GameState.Playing; // Tekrar oynanabilir yap
         Time.timeScale = 1f;
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
 
-        // Aktif olan sahnenin adını al ve yeniden yükle.
-        string currentSceneName = SceneManager.GetActiveScene().name;
-        SceneManager.LoadScene(currentSceneName);
+    public void PauseGame()
+    {
+        if (CurrentGameState == GameState.Playing)
+        {
+            CurrentGameState = GameState.Paused;
+            Time.timeScale = 0f; // Zamanı durdur (animasyonlar vb. için)
+            Debug.Log("Oyun Duraklatıldı.");
+        }
+    }
 
-        Debug.Log(currentSceneName + " sahnesi yeniden başlatılıyor...");
+    public void ResumeGame()
+    {
+        if (CurrentGameState == GameState.Paused)
+        {
+            CurrentGameState = GameState.Playing;
+            Time.timeScale = 1f; // Zamanı normale döndür
+            Debug.Log("Oyun Devam Ediyor.");
+        }
     }
 
     #endregion
@@ -252,6 +285,13 @@ public class GameManager : MonoBehaviour
             ac.animalSO = runtimeSO;
             animalSOs.Add(runtimeSO);
         }
+    }
+
+    private void SetupPowerupSOs()
+    {
+        _recallPowerUpSO = ScriptableObject.Instantiate(PowerUpController.Instance.GetReferenceByName("Recall").so);
+        _eyepatchPowerUpSO = ScriptableObject.Instantiate(PowerUpController.Instance.GetReferenceByName("Eyepatch").so);
+
     }
     private void InitializeAnimalQueue()
     {
@@ -301,6 +341,12 @@ public class GameManager : MonoBehaviour
 
     private void HandlePlayerInput()
     {
+        // Eğer oyun oynanış durumunda değilse, hiçbir oyuncu girdisini işleme alma.
+        if (CurrentGameState != GameState.Playing)
+        {
+            return;
+        }
+
         if (Input.GetMouseButtonDown(0)) HandleMouseDown();
         if (Input.GetMouseButton(0) && selectedAnimal != null) HandleMouseDrag();
         if (Input.GetMouseButtonUp(0) && selectedAnimal != null) HandleMouseUp();
@@ -312,6 +358,11 @@ public class GameManager : MonoBehaviour
         if (isRecallModeActive)
         {
             HandleRecallClick();
+            return;
+        }
+        else if (isEyepatchModeActive)
+        {
+            HandleEyepatchClick();
             return;
         }
 
@@ -484,7 +535,12 @@ public class GameManager : MonoBehaviour
         animal.ClearMyBubbles();
         animal.transform.position = mainSeat.transform.position + new Vector3(0, seatHeightOffset, 0);
 
-        // --- YENİ EKLENEN KISIM ---
+        if (animal.TryGetComponent<Animator>(out var animator))
+        {
+            animator.SetBool("isSeated", true);
+        }
+
+
         // Hayvanın hangi koltukları işgal ettiğini listesine kaydet.
         animal.occupiedSeats.Clear();
         Vector2Int size = animal.animalSO.size;
@@ -507,6 +563,7 @@ public class GameManager : MonoBehaviour
         animal.gameObject.layer = animal.originalLayer;
         CheckWinCondition();
     }
+
 
     private bool IsPlacementValid(SeatController targetSeat)
     {
@@ -554,17 +611,50 @@ public class GameManager : MonoBehaviour
         return isValid;
     }
 
+    // GameManager.cs
+
     private void LoseLife()
     {
-        Debug.Log("LoseLife ÇAĞRILDI. Mevcut Can: " + (currentLives - 1)); 
+        Debug.Log("LoseLife ÇAĞRILDI. Mevcut Can: " + (currentLives - 1));
         if (currentLives <= 0) return;
+
         currentLives--;
         if (heartIcons.Count > 0)
         {
             Destroy(heartIcons[heartIcons.Count - 1]);
             heartIcons.RemoveAt(heartIcons.Count - 1);
         }
-        if (currentLives <= 0) GameOver(false);
+
+        // Eğer canlar bittiyse, oyunu bitir.
+        if (currentLives <= 0)
+        {
+            GameOver(false); // Can kaybı nedeniyle oyun bitti.
+            return; // Fonksiyondan çık, alttaki kontrolü yapma.
+        }
+
+        // --- YENİ EKLENEN KISIM ---
+        // Canlar bitmedi, ama acaba bu son hamle oyunu kilitledi mi?
+        // CheckWinCondition'daki soft-lock mantığının bir kopyasını buraya alıyoruz.
+        List<AnimalSO> waitingAnimals = animalQueue.Select(a => a.animalSO).ToList();
+        List<AnimalSO> seatedSOs = animalSOs.Where(so => so.gridOriginPos.x >= 0).ToList();
+
+        // Bekleme slotlarındaki hayvanları da bekleyenler listesine ekle.
+        foreach (var slot in holdingSlots)
+        {
+            if (slot.CurrentState == SlotState.Occupied && slot.OccupyingAnimal != null)
+            {
+                waitingAnimals.Add(slot.OccupyingAnimal.animalSO);
+            }
+        }
+
+        // Soft-lock kontrolünü yap.
+        bool isSoftLocked = _animalManager.IsSoftLocked(waitingAnimals, gridSystem.GetAllEmptySeats(), seatedSOs);
+        if (isSoftLocked)
+        {
+            Debug.LogWarning("CAN KAYBINDAN SONRA Soft lock TESPİT EDİLDİ! Oyun bitiriliyor...");
+            GameOver(true); // Soft-lock nedeniyle oyun bitti.
+        }
+        // --- YENİ KISMIN SONU ---
     }
 
     // GameManager.cs
@@ -573,6 +663,8 @@ public class GameManager : MonoBehaviour
     {
         if (isGameOverSequenceStarted) return;
         isGameOverSequenceStarted = true;
+
+        CurrentGameState = GameState.Lost; //oyun kaybedildi oalrak gamestati güncelle
 
         // Neye göre kaybedildiğine bağlı olarak metni belirle.
         string loseReasonText = isSoftLock ? "NO MOVES LEFT" : "FAILED"; // YENİ
@@ -615,10 +707,29 @@ public class GameManager : MonoBehaviour
             // Kazanma sürecini başlat ve tekrar başlatılmasını engelle.
             isWinSequenceStarted = true;
 
+            CurrentGameState = GameState.Won; //Gamestate kazandı
+
             // --- DOTWEEN GECİKMESİ BURADA ---
             float winDelay = 0.5f; // 0.5 saniye gecikme
             DOVirtual.DelayedCall(winDelay, () =>
             {
+
+                int currentLevel = SaveManager.LoadCurrentLevel();
+                int unlockedLevel = SaveManager.LoadLevel();
+                if (currentLevel >= unlockedLevel)
+                {
+                    SaveManager.SaveLevel(currentLevel + 1);
+                    // Konsolda seviye kilidinin açıldığını net bir şekilde görelim.
+                    Debug.Log($"SEVİYE {currentLevel + 1} KİLİDİ AÇILDI!");
+                }
+
+                int levelCoinReward = 100; // Örnek bir ödül miktarı //sonradan levela göre al
+                if (_coinManager != null)
+                {
+                    _coinManager.AddCoins(levelCoinReward);
+                    Debug.Log($"{levelCoinReward} COIN KAZANILDI VE KAYDEDİLDİ! Toplam: {_coinManager.CurrentCoins}");
+                }
+
                 // Bu kod, 0.5 saniye sonra çalışacak.
                 SoundManager.Instance.PlaySFX("LevelWin");
                 Debug.Log("TEBRİKLER! SEVİYE TAMAMLANDI!");
@@ -880,8 +991,6 @@ public class GameManager : MonoBehaviour
             if (seat != null) seat.ResetHighlight();
         }
         currentlyHighlightedSeats.Clear();
-
-        
     }
 
     private void PlaceStartingAnimals()
@@ -947,18 +1056,18 @@ public class GameManager : MonoBehaviour
     /// </summary>
     public void ActivateRecallMode()
     {
-        // Eğer seçili bir hayvan varsa veya power-up yoksa modu aktif etme.
-        if (selectedAnimal != null || PowerUpController.Instance.GetPowerUpCount() <= 0)
+        // Eğer zaten seçili bir hayvan varsa veya hakkınız kalmadıysa başarısız
+        if (selectedAnimal != null || _recallPowerUpSO.RemainingUse <= 0)
         {
-            SoundManager.Instance.PlaySFX("RecallFail"); // Hata sesi çal
+            SoundManager.Instance.PlaySFX("RecallFail");
             return;
         }
 
         isRecallModeActive = true;
-        PowerUpController.Instance.SetRecallModeActiveVisuals(true); // UI'ı güncelle
-        StartShakingSeatedAnimals(); 
-        SoundManager.Instance.PlaySFX("PowerUpActivate"); // Mod aktif sesi çal
-        Debug.Log("Geri Alma Modu Aktif. Geri alınacak hayvanı seçin.");
+        PowerUpController.Instance.SetPowerUpVisuals(_recallPowerUpSO, true);
+        StartShakingSeatedAnimals(AnimalController.Instances.Where(animal => animal.isSeated && animal.isRecallable));
+        SoundManager.Instance.PlaySFX("PowerUpActivate");
+        Debug.Log($"{_recallPowerUpSO.powerupName} modu aktif. Geri alınacak hayvanı seçin.");
     }
 
     /// <summary>
@@ -967,7 +1076,7 @@ public class GameManager : MonoBehaviour
     private void DeactivateRecallMode()
     {
         isRecallModeActive = false;
-        PowerUpController.Instance.SetRecallModeActiveVisuals(false);
+        PowerUpController.Instance.SetPowerUpVisuals(_recallPowerUpSO, false);
         StopShakingSeatedAnimals();
     }
 
@@ -979,87 +1088,156 @@ public class GameManager : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
         {
-            // Tıklanan objenin bir hayvan olup olmadığını ve oturup oturmadığını kontrol et.
-            if (hit.collider.TryGetComponent<AnimalController>(out var animal) && animal.isSeated)
+            // Tıklanan hayvan ise ve recallable durumdaysa çağır
+            if (hit.collider.TryGetComponent<AnimalController>(out var animal)
+                && animal.isSeated
+                && animal.isRecallable)
             {
-                if (animal.isRecallable)
-                {
-                    // Başarılı! Hayvanı geri çağır.
-                    RecallAnimal(animal);
-                }
+
+                RecallAnimal(animal);
             }
             else
             {
-                // Oturmayan bir hayvana veya boş bir yere tıklandıysa modu iptal et.
                 DeactivateRecallMode();
             }
         }
         else
         {
-            // Herhangi bir şeye tıklanmadıysa modu iptal et.
             DeactivateRecallMode();
         }
     }
-
     /// <summary>
     /// Belirtilen hayvanı oturduğu yerden kaldırıp kuyruğun başına ekler.
     /// </summary>
-    private void RecallAnimal(AnimalController animalToRecall)
+    private void RecallAnimal(AnimalController animal)
     {
-        animalToRecall.transform.DOKill();
-        animalToRecall.transform.rotation = Quaternion.identity;
+        // Animasyon ve rotasyon temizliği
+        animal.transform.DOKill();
+        animal.transform.rotation = Quaternion.identity;
 
-        // 1. Power-up'ı kullan ve sayıyı düşür.
-        PowerUpController.Instance.UsePowerUp();
+        // Koltukları boşalt
+        foreach (var seat in animal.occupiedSeats)
+            seat?.Vacate();
+        animal.occupiedSeats.Clear();
 
-        // 2. Hayvanın oturduğu tüm koltukları boşalt.
-        foreach (var seat in animalToRecall.occupiedSeats)
-        {
-            if (seat != null) seat.Vacate();
-        }
-        animalToRecall.occupiedSeats.Clear();
+        // Durumu güncelle
+        animal.isSeated = false;
+        animal.animalSO.gridOriginPos = new Vector2Int(-1, -1);
 
-        // 3. Hayvanın durumunu güncelle.
-        animalToRecall.isSeated = false;
-        animalToRecall.animalSO.gridOriginPos = new Vector2Int(-1, -1);
+        // Kuyruğun başına ekle
+        animalQueue.Insert(0, animal);
 
-        // 4. Hayvanı kuyruğun en başına ekle.
-        animalQueue.Insert(0, animalToRecall);
+        // Kuralları göster
+        animal.DisplayMyRules();
 
-        // 5. Kurallarını tekrar göster.
-        animalToRecall.DisplayMyRules();
-
-        // 6. Geri alma modunu kapat.
+        // Modu kapat
         DeactivateRecallMode();
 
-        // 7. Başarı sesi çal.
+        PowerUpController.Instance.DecreaseRemainingUse(_recallPowerUpSO);
+
+        // Başarı sesi ve log
         SoundManager.Instance.PlaySFX("RecallSuccess");
-        Debug.Log($"{animalToRecall.animalSO._animalName} geri çağrıldı!");
+        Debug.Log($"{animal.animalSO._animalName} geri çağrıldı!");
     }
 
-    private void StartShakingSeatedAnimals()
+    public void ActivateEyepatchMode()
+    {
+        // Eğer zaten seçili bir hayvan varsa veya hakkınız kalmadıysa başarısız
+        if (selectedAnimal != null || _eyepatchPowerUpSO.RemainingUse <= 0)
+        {
+            SoundManager.Instance.PlaySFX("EyepatchFail");
+            return;
+        }
+
+
+        isEyepatchModeActive = true;
+        PowerUpController.Instance.SetPowerUpVisuals(_eyepatchPowerUpSO, true);
+        SoundManager.Instance.PlaySFX("PowerUpActivate");
+        StartShakingSeatedAnimals(AnimalController.Instances.Where(animal => animal.animalSO._animalName == "Aslan" && !animal.animalSO.effectedBySkill));
+        Debug.Log($"{_eyepatchPowerUpSO.powerupName} modu aktif. Geri alınacak hayvanı seçin.");
+    }
+
+    private void DeactivateEyepatchMode()
+    {
+        isEyepatchModeActive = false;
+        PowerUpController.Instance.SetPowerUpVisuals(_eyepatchPowerUpSO, false);
+        StopShakingSeatedAnimals();
+    }
+
+    public void HandleEyepatchClick()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
+        {
+            // Tıklanan hayvan ise ve recallable durumdaysa çağır
+            if (hit.collider.TryGetComponent<AnimalController>(out var animal) 
+                && animal.animalSO._animalName == "Aslan"
+                && !animal.animalSO.effectedBySkill)
+            {
+                EyepatchAnimal(animal);
+            }
+            else
+            {
+                DeactivateEyepatchMode();
+            }
+        }
+        else
+        {
+            DeactivateEyepatchMode();
+        }
+    }
+
+    private void EyepatchAnimal(AnimalController animal)
+    {
+        // Animasyon ve rotasyon temizliği
+        animal.transform.DOKill();
+        animal.transform.rotation = Quaternion.identity;
+
+        var rends = animal.GetComponentsInChildren<SkinnedMeshRenderer>();
+
+        foreach (var rend in rends)
+        {
+            // Orijinal mesh’e bağlı kalmak için sharedMaterials kullanıyoruz
+            var count = rend.sharedMaterials.Length;
+            var newMats = new Material[count];
+            for (int i = 0; i < count; i++)
+            {
+                newMats[i] = whiteEffectAreaMaterial;  // buraya atamak istediğiniz Material referansını koyun
+            }
+            rend.materials = newMats;
+        }
+
+        // Durumu güncelle
+        animal.animalSO.traits.Clear();
+        animal.animalSO.effectedBySkill = true;
+
+        // Modu kapat
+        DeactivateEyepatchMode();
+
+        PowerUpController.Instance.DecreaseRemainingUse(_eyepatchPowerUpSO);
+
+        // Başarı sesi ve log
+        SoundManager.Instance.PlaySFX("EyepatchSuccess");
+        Debug.Log($"{animal.animalSO._animalName} gozu baglandi!");
+
+    }
+    private void StartShakingSeatedAnimals(IEnumerable<AnimalController> animals)
     {
         // Sahnede AnimalController component'ine sahip tüm objeleri bul.
-        AnimalController[] allAnimalsOnScene = FindObjectsOfType<AnimalController>();
-
-        foreach (var animal in allAnimalsOnScene)
+        foreach (var animal in animals)
         {
-            // Sadece oturan hayvanları hedef al.
-            if (animal.isSeated && animal.isRecallable)
-            {
-                // DOTween'in DOShakeRotation'ı ile daha yumuşak ve sürekli bir sallanma efekti.
-                // Bu animasyona özel bir kimlik ("shake") atıyoruz ki daha sonra kolayca durdurabilelim.
-                animal.transform.DOShakeRotation(
-                    duration: 2f,      // Bir tam sallanma döngüsü ne kadar sürsün (saniye).
-                    strength: 5f,      // Ne kadar güçlü sallanacağı (derece cinsinden).
-                    vibrato: 5,        // Ne kadar titreşimli/sık sallanacağı.
-                    randomness: 45f,   // Sallanmanın ne kadar rastgele olacağı (0-180).
-                    fadeOut: false     // Animasyon sonunda yavaşça durmasın.
-                )
-                .SetEase(Ease.InOutSine) // Yumuşak başla, yumuşak bitir.
-                .SetLoops(-1, LoopType.Yoyo) // Sonsuz döngü ve Yoyo ile ileri-geri salınım.
-                .SetId("shake");
-            }
+            // DOTween'in DOShakeRotation'ı ile daha yumuşak ve sürekli bir sallanma efekti.
+            // Bu animasyona özel bir kimlik ("shake") atıyoruz ki daha sonra kolayca durdurabilelim.
+            animal.transform.DOShakeRotation(
+                duration: 2f,      // Bir tam sallanma döngüsü ne kadar sürsün (saniye).
+                strength: 5f,      // Ne kadar güçlü sallanacağı (derece cinsinden).
+                vibrato: 5,        // Ne kadar titreşimli/sık sallanacağı.
+                randomness: 45f,   // Sallanmanın ne kadar rastgele olacağı (0-180).
+                fadeOut: false     // Animasyon sonunda yavaşça durmasın.
+            )
+            .SetEase(Ease.InOutSine) // Yumuşak başla, yumuşak bitir.
+            .SetLoops(-1, LoopType.Yoyo) // Sonsuz döngü ve Yoyo ile ileri-geri salınım.
+            .SetId("shake");
         }
     }
 
@@ -1072,8 +1250,7 @@ public class GameManager : MonoBehaviour
         DOTween.Kill("shake");
 
         // Her ihtimale karşı hayvanların rotasyonunu sıfırla.
-        AnimalController[] allAnimalsOnScene = FindObjectsOfType<AnimalController>();
-        foreach (var animal in allAnimalsOnScene)
+        foreach (var animal in AnimalController.Instances)
         {
             if (animal.isSeated)
             {

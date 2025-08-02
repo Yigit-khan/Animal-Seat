@@ -1,4 +1,6 @@
 using UnityEngine;
+using Unity.VisualScripting;
+
 
 // Sadece Unity Editör'de çalışacak özel fonksiyonlar için bu using satırını ekliyoruz.
 #if UNITY_EDITOR
@@ -24,7 +26,12 @@ public class SeatController : MonoBehaviour
     public Vector2Int GridPosition;
 
     [Tooltip("Koltuk şu anda dolu mu?")]
-    public bool isOccupied { get; private set; } = false;
+    public bool isOccupied { get; 
+        private set;
+    
+    } 
+        
+        = false;
 
     [Tooltip("Eğer koltuk doluysa, hangi hayvan tarafından işgal edildiği.")]
     public AnimalController occupiedBy { get; private set; } = null;
@@ -91,6 +98,7 @@ public class SeatController : MonoBehaviour
 
         isOccupied = true;
         occupiedBy = animal;
+        var boxCollider = GetComponent<BoxCollider>().enabled = false;
         
         if (animal != null && animal.animalSO != null)
         {
@@ -105,11 +113,12 @@ public class SeatController : MonoBehaviour
     {
         isOccupied = false;
         occupiedBy = null;
+        var boxCollider = GetComponent<BoxCollider>().enabled = true;
     }
 
 
     // Bu fonksiyon bloğu sadece Unity Editör'de çalışır ve oyunun build'ine dahil edilmez.
-    #if UNITY_EDITOR
+#if UNITY_EDITOR
     /// <summary>
     /// Sadece Editör'de çalışır. Sahne penceresine görsel yardımcılar (Gizmos) çizmek için kullanılır.
     /// Bu fonksiyon, obje seçili olmasa bile her zaman çalışır.
