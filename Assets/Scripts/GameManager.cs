@@ -98,7 +98,7 @@ public class GameManager : MonoBehaviour
     [Header("UI")]
     [SerializeField] private GameObject winUI;
     [SerializeField] private InGameUIManager inGameUIManager;
-    
+
     // --- Özel Deðiþkenler ---
     private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
 
@@ -108,7 +108,7 @@ public class GameManager : MonoBehaviour
     private AnimalController selectedAnimal = null;
     private Plane dragPlane;
     private Vector3 offset;
-    
+
     private int currentLives;
     private List<GameObject> heartIcons = new List<GameObject>();
     private AnimalManager _animalManager;
@@ -151,7 +151,7 @@ public class GameManager : MonoBehaviour
         _animalManager = new AnimalManager();
         animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
         _coinManager = CoinManager.Instance;
-        
+
         //Oyun her başladığında durumu playing olarak ayarlıyoruz.
         CurrentGameState = GameState.Playing;
         Time.timeScale = 1f;
@@ -442,7 +442,7 @@ public class GameManager : MonoBehaviour
                 lastValidHoldingSlotTarget = null; // Diðer hedefi temizle
                 if (lastValidSeatTarget != targetSeat)
                 {
-                    
+
                     ShowEffectArea(selectedAnimal.animalSO, targetSeat);
                     lastValidSeatTarget = targetSeat;
                 }
@@ -501,7 +501,7 @@ public class GameManager : MonoBehaviour
             ReturnAnimalToOrigin();
         }
 
-           
+
         selectedAnimal.gameObject.layer = selectedAnimal.originalLayer;
         selectedAnimal = null;
         lastValidSeatTarget = null;
@@ -510,25 +510,52 @@ public class GameManager : MonoBehaviour
 
     private bool TryPlaceOnSeat(SeatController targetSeat)
     {
-        // Hedefin geçerli olduðundan emin ol (güvenlik kontrolü).
-        if (targetSeat == null) return false;
+        if (targetSeat == null || selectedAnimal == null) return false;
 
-        // Kural kontrolünü doðrudan bu hedefe göre yap.
-        bool isValid = IsPlacementValid(targetSeat);
+        // --- Simülasyon Başlangıcı ---
+        Vector2Int originalPos = selectedAnimal.animalSO.gridOriginPos;
+        selectedAnimal.animalSO.gridOriginPos = targetSeat.GridPosition;
+        // ---
+
+        // 1. AnimalManager'dan "etkilenen" hayvanların listesini al.
+        bool isValid = _animalManager.IsAllInteractionsValid(animalSOs, out List<AnimalSO> affectedAnimals);
+
+        // --- Simülasyonu Geri Al ---
+        selectedAnimal.animalSO.gridOriginPos = originalPos;
+        // ---
+
         if (!isValid)
         {
             SoundManager.Instance.PlaySFX("PlacementWrong");
 
+            Debug.Log("Hatalı yerleştirme! Etkilenen hayvan(lar):");
+
+            // 2. ÖNCE, o an yerleştirmeye çalıştığımız hayvana efekti uygula.
+            // Çünkü bu hamlenin kendisi hatalı.
+            selectedAnimal.PlayErrorFeedback();
+
+            // 3. SONRA, bu hamleden rahatsız olan DİĞER hayvanlara da efekti uygula.
+            var allControllers = AnimalController.Instances;
+            foreach (var controller in allControllers)
+            {
+                // Eğer bu controller, etkilenenler listesindeyse VE
+                // o an seçili olan hayvanın kendisi değilse (çünkü ona zaten uyguladık)...
+                if (controller.animalSO != null && affectedAnimals.Contains(controller.animalSO) && controller != selectedAnimal)
+                {
+                    Debug.Log("- " + controller.animalSO._animalName);
+                    controller.PlayErrorFeedback(); // Hata efektini oynat!
+                }
+            }
+
             LoseLife();
-            return false; // Yerleþtirme baþarýsýz.
+            return false;
         }
 
+        // Hamle geçerliyse...
         SoundManager.Instance.PlaySFX("PlacementCorrect");
-
-        // Kurallar uygunsa, hayvaný bu hedefe yerleþtir.
+        selectedAnimal.animalSO.gridOriginPos = targetSeat.GridPosition;
         PlaceAnimalOnSeat(selectedAnimal, targetSeat);
-
-        return true; // Yerleþtirme baþarýlý.
+        return true;
     }
 
     private void PlaceAnimalOnSeat(AnimalController animal, SeatController mainSeat)
@@ -566,7 +593,7 @@ public class GameManager : MonoBehaviour
         CheckWinCondition();
     }
 
-
+    /*
     private bool IsPlacementValid(SeatController targetSeat)
     {
         if (selectedAnimal == null)
@@ -612,8 +639,7 @@ public class GameManager : MonoBehaviour
         //Debug.Log("isValid: " + isValid);
         return isValid;
     }
-
-    // GameManager.cs
+    */
 
     private void LoseLife()
     {
@@ -1172,7 +1198,7 @@ public class GameManager : MonoBehaviour
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
         {
             // Tıklanan hayvan ise ve recallable durumdaysa çağır
-            if (hit.collider.TryGetComponent<AnimalController>(out var animal) 
+            if (hit.collider.TryGetComponent<AnimalController>(out var animal)
                 && animal.animalSO._animalName == "Aslan"
                 && !animal.animalSO.effectedBySkill)
             {

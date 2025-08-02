@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using DG.Tweening;
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -25,6 +26,9 @@ public class AnimalController : MonoBehaviour
     private List<GameObject> myBubbles = new List<GameObject>();
     private Animator animator; // Animator bileşenini hafızada tutmak için (performans).
     private bool _isSeated = false; // "isSeated" durumunu içeride saklamak için özel değişken.
+
+    private Renderer[] animalRenderers;
+    private List<Color> originalColors = new List<Color>();
 
     private void Awake()
     {
@@ -78,6 +82,14 @@ public class AnimalController : MonoBehaviour
         // Animator bileşenini en başta bir kere bulup hafızaya alalım.
         animator = GetComponent<Animator>();
 
+        animalRenderers = GetComponentsInChildren<Renderer>(true);
+
+        foreach (var rend in animalRenderers)
+        {
+            // Materyalin bir kopyasını oluşturduğumuzdan emin olalım ki diğer hayvanları etkilemesin.
+            originalColors.Add(rend.material.color);
+        }
+
         // --- DEBUG 4: Initialize çağrıldığını ve Animator'ün durumunu logla. ---
         if (animator != null)
         {
@@ -87,6 +99,26 @@ public class AnimalController : MonoBehaviour
         else
         {
             Debug.LogError($"<color=red>[{this.name}]</color> Initialize edildi ama Animator BULUNAMADI.");
+        }
+    }
+
+    public void PlayErrorFeedback()
+    {
+        if (animalRenderers == null || animalRenderers.Length == 0) return;
+
+        // Hayvanın ana gövdesini hafifçe titret.
+        transform.DOShakePosition(duration: 0.5f, strength: 0.1f, vibrato: 20);
+
+        // Hayvanın tüm görsel parçalarını 0.15 saniyede kırmızı yap,
+        // bir süre bekle, sonra 0.3 saniyede eski rengine geri döndür.
+        for (int i = 0; i < animalRenderers.Length; i++)
+        {
+            int index = i; // Döngü içinde lambda kullanırken closure problemi yaşamamak için.
+
+            Sequence feedbackSequence = DOTween.Sequence();
+            feedbackSequence.Append(animalRenderers[index].material.DOColor(Color.red, 0.15f));
+            feedbackSequence.AppendInterval(0.2f); // Bu süre kadar kırmızı kalacak.
+            feedbackSequence.Append(animalRenderers[index].material.DOColor(originalColors[index], 0.3f));
         }
     }
 
