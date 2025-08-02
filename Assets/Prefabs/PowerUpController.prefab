@@ -44,7 +44,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 62c2f5dda0765ab4a9474d5a6de06c26, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  recallButton: {fileID: 0}
-  recallCountText: {fileID: 0}
-  recallActiveIndicator: {fileID: 0}
-  startingRecallCount: 2
+  powerUps:
+  - so: {fileID: 11400000, guid: 678dfe432a65b5448ab683376a7a4e5a, type: 2}
+    uiButtonObjectName: Skill_Recall
+    uiTextObjectName: RecallText
+    uiButton: {fileID: 0}
+    uiText: {fileID: 0}
+  - so: {fileID: 11400000, guid: 950c0eed4e3df6c42926a6201527f718, type: 2}
+    uiButtonObjectName: Skill_Eyepatch
+    uiTextObjectName: EyepatchText
+    uiButton: {fileID: 0}
+    uiText: {fileID: 0}

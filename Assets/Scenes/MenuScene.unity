@@ -570,6 +570,42 @@ MonoBehaviour:
     pitch: 2.3
     loop: 0
     source: {fileID: 0}
+  - name: Recall
+    clip: {fileID: 8300000, guid: ba6682878f0a2d842b4071ebd9a28224, type: 3}
+    volume: 1
+    pitch: 2.3
+    loop: 0
+    source: {fileID: 0}
+  - name: RecallFail
+    clip: {fileID: 8300000, guid: 01ec3f0b1b4792e41b81d19790994534, type: 3}
+    volume: 1
+    pitch: 2.3
+    loop: 0
+    source: {fileID: 0}
+  - name: RecallSuccess
+    clip: {fileID: 8300000, guid: 3e3b3597efcd69148a7c8f20f85e1a4f, type: 3}
+    volume: 0.772
+    pitch: 2.3
+    loop: 0
+    source: {fileID: 0}
+  - name: Eyepatch
+    clip: {fileID: 8300000, guid: ba6682878f0a2d842b4071ebd9a28224, type: 3}
+    volume: 1
+    pitch: 2.3
+    loop: 0
+    source: {fileID: 0}
+  - name: EyepatchFail
+    clip: {fileID: 8300000, guid: 01ec3f0b1b4792e41b81d19790994534, type: 3}
+    volume: 1
+    pitch: 2.3
+    loop: 0
+    source: {fileID: 0}
+  - name: EyepatchSuccess
+    clip: {fileID: 8300000, guid: 4e3b8732164334844aba1f9a8362ff3a, type: 3}
+    volume: 1
+    pitch: 2.3
+    loop: 0
+    source: {fileID: 0}
 --- !u!4 &620770012
 Transform:
   m_ObjectHideFlags: 0

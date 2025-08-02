@@ -1,139 +1,154 @@
+ï»¿using DG.Tweening;
+using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
-using DG.Tweening; // DOTween kütüphanesini kullanmak için bu satýr gereklidir.
+using static UnityEngine.EventSystems.EventTrigger;
 
-/// <summary>
-/// "Geri Alma" power-up'ýnýn UI elemanlarýný, sayýsýný ve animasyonlarýný yönetir.
-/// </summary>
+[System.Serializable]
+public class PowerUpUIReference
+{
+    [Tooltip("ScriptableObject verisi")]
+    public PowerupSO so;
+
+    [Tooltip("Sahnedeki Button bileÅŸeni")]
+    public string uiButtonObjectName;
+
+    [Tooltip("Sahnedeki TextMeshProUGUI bileÅŸeni")]
+    public string uiTextObjectName;
+
+    [HideInInspector] public Button uiButton;
+
+    [HideInInspector] public TextMeshProUGUI uiText;
+}
+
 public class PowerUpController : MonoBehaviour
 {
     public static PowerUpController Instance;
 
-    [Header("UI Referanslarý")]
-    [Tooltip("Geri alma power-up'ýný tetikleyen buton.")]
-    [SerializeField] private Button recallButton;
-    [Tooltip("Kalan power-up sayýsýný gösteren TextMeshPro metni.")]
-    [SerializeField] private TMP_Text recallCountText;
-
-    [Header("UI Referanslarý")]
-    [Tooltip("Geri alma power-up'ýný tetikleyen buton.")]
-    [SerializeField] private Button eyepatchButton;
-    [Tooltip("Kalan power-up sayýsýný gösteren TextMeshPro metni.")]
-    [SerializeField] private TMP_Text eyepatchText;
-
-
-    [Header("Ayarlar")]
-    [Tooltip("Oyuncunun her seviye baþýnda sahip olacaðý geri alma hakký sayýsý.")]
-    [SerializeField] private int startingRecallCount = 2;
-
-    [Header("Animasyon Ayarlarý")]
-    [Tooltip("Mod aktifken butonun ne kadar büyüyeceði (1.2 = %120).")]
-    [SerializeField] private float buttonScaleAmount = 1.2f;
-    [Tooltip("Butonun büyüme/küçülme animasyonunun saniye cinsinden süresi.")]
-    [SerializeField] private float buttonAnimationDuration = 0.3f;
-
-    // --- Özel Deðiþkenler ---
-    private int recallPowerUpCount;
-    private Vector3 initialButtonScale; // Butonun orijinal boyutunu animasyon sonrasý geri dönmek için saklar.
+    [Tooltip("Her power-up iÃ§in SO, Button ve Text referanslarÄ±nÄ± ekleyin")]
+    [SerializeField] private List<PowerUpUIReference> powerUps;
 
     private void Awake()
     {
-        // Singleton Deseni: Sahnede sadece bir tane PowerUpController olmasýný saðlar.
-        if (Instance == null)
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
+        foreach (var entry in powerUps)
         {
-            Instance = this;
+            // Button atamasÄ±
+            GameObject btnGO = GameObject.Find(entry.uiButtonObjectName);
+            if (btnGO != null)
+            {
+                entry.uiButton = btnGO.GetComponent<Button>();
+                if (entry.uiButton == null)
+                    Debug.LogError($"GameObject '{entry.uiButtonObjectName}' Ã¼zerinde Button component'i yok!");
+            }
+            else
+            {
+                Debug.LogError($"Button GameObject '{entry.uiButtonObjectName}' bulunamadÄ±!");
+            }
+
+            // Text atamasÄ±
+            GameObject txtGO = GameObject.Find(entry.uiTextObjectName);
+            if (txtGO != null)
+            {
+                entry.uiText = txtGO.GetComponent<TextMeshProUGUI>();
+                if (entry.uiText == null)
+                    Debug.LogError($"GameObject '{entry.uiTextObjectName}' Ã¼zerinde TextMeshProUGUI component'i yok!");
+            }
+            else
+            {
+                Debug.LogError($"Text GameObject '{entry.uiTextObjectName}' bulunamadÄ±!");
+            }
         }
-        else
+
+        for (int i = 0; i < powerUps.Count; i++)
         {
-            Destroy(gameObject);
+            var original = powerUps[i].so;
+            var clone = ScriptableObject.Instantiate(original);
+            powerUps[i].so = clone;
         }
     }
 
     private void Start()
     {
-        // Baþlangýç deðerlerini ata ve UI'ý güncelle.
-        recallPowerUpCount = startingRecallCount;
-        UpdateUI();
-
-        // Butonun týklama olayýna ilgili fonksiyonu ata.
-        if (recallButton != null)
+        foreach (var entry in powerUps)
         {
-            recallButton.onClick.AddListener(OnRecallButtonClick);
-            // Butonun baþlangýçtaki orijinal boyutunu kaydet.
-            initialButtonScale = recallButton.transform.localScale;
+            // 1) BaÅŸlangÄ±Ã§ Ã¶lÃ§eÄŸini SO iÃ§ine kaydet
+            entry.so.recallButtonInitialScale = entry.uiButton.transform.localScale;
+
+            // 2) Butona tÄ±klama eventâ€™i ekle
+            entry.uiButton.onClick.AddListener(() => OnPowerUpClick(entry));
+
+            // 3) UIâ€™Ä± baÅŸlangÄ±Ã§ deÄŸeriyle gÃ¼ncelle
+            entry.uiText.text = entry.so.remainingUse.ToString();
         }
     }
 
-    /// <summary>
-    /// Geri alma butonu týklandýðýnda GameManager'daki ilgili fonksiyonu tetikler.
-    /// </summary>
-    private void OnRecallButtonClick()
+    private void OnPowerUpClick(PowerUpUIReference entry)
     {
-        GameManager.Instance.ActivateRecallMode();
-    }
+        var so = entry.so;
+        if (so.remainingUse <= 0)
+            return;
 
-    /// <summary>
-    /// Geri alma modunun aktif olup olmadýðýný UI'da görsel olarak ayarlar (buton animasyonu).
-    /// </kýsayol>
-    public void SetRecallModeActiveVisuals(bool isActive)
-    {
-        if (recallButton == null) return;
-
-        // Olasý çakýþmalarý önlemek için önceki animasyonlarý durdur.
-        recallButton.transform.DOKill();
-
-        if (isActive)
+        // b) DoÄŸru power-up modunu baÅŸlat
+        switch (so.powerupName)
         {
-            // Butonu DOTween ile büyüt.
-            recallButton.transform.DOScale(initialButtonScale * buttonScaleAmount, buttonAnimationDuration)
-                .SetEase(Ease.OutBack); // Animasyona canlýlýk katan bir efekt.
+            case "Recall":
+                GameManager.Instance.ActivateRecallMode();
+                break;
+            case "Eyepatch":
+                GameManager.Instance.ActivateEyepatchMode();
+                break;
+                // Yeni power-upâ€™lar eklenecekse case bloklarÄ±na ekleyin
         }
-        else
-        {
-            // Butonu DOTween ile orijinal boyutuna geri döndür.
-            recallButton.transform.DOScale(initialButtonScale, buttonAnimationDuration)
-                .SetEase(Ease.OutBack);
-        }
+
+        // c) Ses efekti Ã§al (powerupName ile eÅŸleÅŸen klip adÄ±na gÃ¶re)
+        SoundManager.Instance.PlaySFX(so.powerupName);
     }
 
     /// <summary>
-    /// Bir power-up kullanýldýðýnda bu fonksiyon çaðrýlýr. Sayýyý düþürür ve UI'ý günceller.
+    /// DÄ±ÅŸarÄ±dan Ã§aÄŸrÄ±larak belirli bir power-upâ€™Ä±n buton gÃ¶rselini aktif/pasif yapar.
     /// </summary>
-    public void UsePowerUp()
+    public void SetPowerUpVisuals(PowerupSO so, bool isActive)
     {
-        if (recallPowerUpCount > 0)
-        {
-            recallPowerUpCount--;
-            UpdateUI();
-        }
+        var entry = powerUps.Find(e => e.so == so);
+        if (entry == null) return;
+
+        // Mevcut animasyonlarÄ± sonlandÄ±r
+        entry.uiButton.transform.DOKill();
+
+        // Hedef Ã¶lÃ§eÄŸi hesapla
+        Vector3 initialScale = so.recallButtonInitialScale;
+        Vector3 targetScale = isActive
+            ? initialScale * so.buttonScaleAmount
+            : initialScale;
+
+        // Animasyonu uygula
+        entry.uiButton.transform
+            .DOScale(targetScale, so.buttonAnimationDuration)
+            .SetEase(Ease.OutBack);
     }
 
     /// <summary>
-    /// Oyuncuya belirtilen miktarda power-up ekler (Dükkan vb. için).
+    /// powerupName ile eÅŸleÅŸen UI referansÄ±nÄ± bulur.
     /// </summary>
-    public void AddPowerUps(int amount)
+    public PowerUpUIReference GetReferenceByName(string powerupName)
     {
-        recallPowerUpCount += amount;
-        UpdateUI();
+        return powerUps.Find(e =>
+            e.so.powerupName.Equals(powerupName, StringComparison.OrdinalIgnoreCase)
+        );
     }
 
-    /// <summary>
-    /// Mevcut power-up sayýsýný döndürür.
-    /// </summary>
-    public int GetPowerUpCount()
+    public void DecreaseRemainingUse(PowerupSO powerup)
     {
-        return recallPowerUpCount;
+        PowerUpUIReference reference = GetReferenceByName(powerup.powerupName);
+
+        // a) Kalan hakkÄ± dÃ¼ÅŸÃ¼r ve UIâ€™Ä± gÃ¼ncelle
+        powerup.remainingUse--;
+        reference.uiText.text = powerup.remainingUse.ToString();
     }
 
-    /// <summary>
-    /// Kalan power-up sayýsýný gösteren metni günceller.
-    /// </summary>
-    private void UpdateUI()
-    {
-        if (recallCountText != null)
-        {
-            recallCountText.text = recallPowerUpCount.ToString();
-        }
-    }
 }

@@ -911,7 +911,7 @@ GameObject:
   - component: {fileID: 7656609456425691639}
   - component: {fileID: 8553064671685368410}
   m_Layer: 5
-  m_Name: Booster
+  m_Name: Skill_Recall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1422,7 +1422,7 @@ GameObject:
   - component: {fileID: 4391487789056032951}
   - component: {fileID: 1287950152955044349}
   m_Layer: 5
-  m_Name: Booster (1)
+  m_Name: Skill_Eyepatch
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7102,7 +7102,7 @@ GameObject:
   - component: {fileID: 3330650983418672609}
   - component: {fileID: 8374286361052544149}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: EyepatchText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -9769,7 +9769,7 @@ GameObject:
   - component: {fileID: 7983041517424122603}
   - component: {fileID: 8949366680941874991}
   m_Layer: 5
-  m_Name: boostertext
+  m_Name: RecallText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

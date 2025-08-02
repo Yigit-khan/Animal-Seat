@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c244071309c499c48bb7546a48afb645, type: 3}
-  m_Name: AnimalObject_Fil
+  m_Script: {fileID: 11500000, guid: c6b85fc4135c516418d3aeef4f046a0c, type: 3}
+  m_Name: PowerupSO_Eyepatch
   m_EditorClassIdentifier: 
-  _animalName: Fil
-  gridOriginPos: {x: 6, y: 6}
-  size: {x: 2, y: 1}
-  traits:
-  - {fileID: 11400000, guid: c1f6cc0d36d4b114dbb3fc2bd2b55628, type: 2}
+  powerupName: Eyepatch
+  remainingUse: 2
+  buttonScaleAmount: 1.2
+  buttonAnimationDuration: 0.3
+  recallButtonInitialScale: {x: 0, y: 0, z: 0}
+  soundFileName: Eyepatch
