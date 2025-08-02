@@ -28,14 +28,13 @@ public class LevelSelectController : MonoBehaviour
         UpdateLevelDisplay();
         UpdateHexNumbers();
     }
-    
+
     //menüdeki play butonuna basýnca çalýþýyor
     public void OnPlayButtonPressed()
     {
         SoundManager.Instance.PlaySFX("ButtonClick");
         //en son geldiðimiz leveli atadýk
-        currentLevelIndex = unlockedLevel;
-        SaveManager.SaveCurrentLevel(currentLevelIndex);  // Sadece seçili level kaydedilir
+        SaveManager.SaveCurrentLevel(currentLevelIndex);
         string sceneName = "Level" + currentLevelIndex;
         Debug.Log("Yükleniyor: " + sceneName);
         SceneManager.LoadScene(sceneName);
@@ -74,6 +73,20 @@ public class LevelSelectController : MonoBehaviour
         }
 
         Debug.Log("Yeni level açýldý: " + unlockedLevel);
+    }
+
+    public void SelectPreviousLevel()
+    {
+        SoundManager.Instance.PlaySFX("ButtonClick");
+
+        // Eðer þu anki seviye 1'den büyükse, bir önceki seviyeye geçebiliriz.
+        if (currentLevelIndex > 1)
+        {
+            currentLevelIndex--;
+            UpdateLevelDisplay();
+            UpdateHexNumbers();
+            Debug.Log("Önceki seviye seçildi: " + currentLevelIndex);
+        }
     }
 
     //butonun üstündeki yazýyý güncelliyor
