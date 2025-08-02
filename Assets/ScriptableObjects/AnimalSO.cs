@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using static UnityEngine.UI.Image;
@@ -19,19 +18,5 @@ public class AnimalSO : ScriptableObject
     public Vector2Int size;
 
     [Tooltip("Hayvanın sahip olduğu karakteristiklerin (trait) listesi")]
-    public List<AnimalTraitSO> traits;
-
-    [HideInInspector] public bool effectedBySkill = false;
-
-    //private void Awake()
-    //{
-    //    List<AnimalTraitSO> originalTraits = new List<AnimalTraitSO>(traits);
-
-    //    traits.Clear();
-
-    //    foreach (var trait in originalTraits)
-    //    {
-    //        traits.Add(ScriptableObject.Instantiate(trait));
-    //    }
-    //}
+    public AnimalTraitSO[] traits;
 }

@@ -74,5 +74,4 @@ public class AnimalTraitSO : ScriptableObject
 
         return points;
     }
-
 }

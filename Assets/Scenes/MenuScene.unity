@@ -448,6 +448,22 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4455103395900647061, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4455103395900647061, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4455103395900647061, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4455103395900647061, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4932677325885377031, guid: a8e0f661607dc744997818c59b380495, type: 3}
       propertyPath: m_LocalPosition.x
       value: -22.376953
@@ -488,6 +504,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5255893623999570932, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5255893623999570932, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5255893623999570932, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5255893623999570932, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5599238098385249423, guid: a8e0f661607dc744997818c59b380495, type: 3}
       propertyPath: m_Name
       value: MenuCanvasFinal
@@ -511,6 +543,22 @@ PrefabInstance:
     - target: {fileID: 6116644477021781713, guid: a8e0f661607dc744997818c59b380495, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -75
+      objectReference: {fileID: 0}
+    - target: {fileID: 7171767265721831723, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7171767265721831723, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7171767265721831723, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7171767265721831723, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7193191047475402976, guid: a8e0f661607dc744997818c59b380495, type: 3}
       propertyPath: m_AnchorMax.y
@@ -553,6 +601,22 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7247972765867053276, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7367000715124000783, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7367000715124000783, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7367000715124000783, guid: a8e0f661607dc744997818c59b380495, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7367000715124000783, guid: a8e0f661607dc744997818c59b380495, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
