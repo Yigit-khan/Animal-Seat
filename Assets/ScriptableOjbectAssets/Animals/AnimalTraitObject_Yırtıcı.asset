@@ -17,6 +17,7 @@ MonoBehaviour:
   antiToEveryTrait: 0
   antiTraits:
   - {fileID: 11400000, guid: c1f6cc0d36d4b114dbb3fc2bd2b55628, type: 2}
+  - {fileID: 11400000, guid: 2f210cec2b0dc7147b3d459a7b48fa41, type: 2}
   effectRanges:
     up: 0
     down: 1
