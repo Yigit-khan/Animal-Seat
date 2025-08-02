@@ -6097,7 +6097,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 869.69836, y: -75}
-  m_SizeDelta: {x: 0, y: 64}
+  m_SizeDelta: {x: 219, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6147932306488242423
 CanvasRenderer:
@@ -26795,7 +26795,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 480.5, y: -75}
-  m_SizeDelta: {x: 0, y: 76.8809}
+  m_SizeDelta: {x: 316.19, y: 76.8809}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &691066553813605830
 CanvasRenderer:
@@ -34184,15 +34184,22 @@ MonoBehaviour:
   settingsPopUp: {fileID: 6676268206650186681}
   lifePopUp: {fileID: 3032541232836654141}
   darkBackground: {fileID: 5974296651204802173}
+  leaderBoardPanel: {fileID: 0}
+  shopPanel: {fileID: 0}
   settingsButton: {fileID: 2035731100460250916}
   lifePlusButton: {fileID: 6831303666765275655}
   coinPlusButton: {fileID: 4349133701127193371}
   exitButtonSettings: {fileID: 6892805711146789048}
   exitButtonLife: {fileID: 7165565320525045275}
+  cupButton: {fileID: 0}
+  homeButton: {fileID: 0}
+  shopButton: {fileID: 0}
   lifeCount: 3
   lifeText: {fileID: 943214361937558008}
   lifeTimerText: {fileID: 2488791310372524357}
   coinText: {fileID: 2105199125641087894}
+  fadePanel: {fileID: 0}
+  fadeDuration: 0.5
 --- !u!1 &7292117397044606944
 GameObject:
   m_ObjectHideFlags: 0
