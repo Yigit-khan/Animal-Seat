@@ -64,10 +64,14 @@ EditorBuildSettings:
     guid: c769182870606f7469ac6353bf4e3416
   - enabled: 1
     path: Assets/Scenes/Level19.unity
+<<<<<<< Updated upstream
     guid: 48feb327ff969e145a9fe89cbd35fc21
   - enabled: 1
     path: Assets/Scenes/Level20.unity
     guid: e28b21242169a5741aafb315da0abec6
+=======
+    guid: 7cd89d4a694844043bd7cc4035594194
+>>>>>>> Stashed changes
   m_configObjects:
     com.unity.adaptiveperformance.google.android.provider_settings: {fileID: 11400000, guid: 29ad7bf5bae13f94c898963739398877, type: 2}
     com.unity.adaptiveperformance.loader_settings: {fileID: 11400000, guid: 0252bffdd4fe5fe4b93085db967140f8, type: 2}
