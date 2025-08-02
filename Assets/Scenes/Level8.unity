@@ -1224,7 +1224,7 @@ PrefabInstance:
     - target: {fileID: 5743515054873346784, guid: ba968a3e4fd11bc4b9681f23477fdec9, type: 3}
       propertyPath: powerUps.Array.data[0].so
       value: 
-      objectReference: {fileID: 11400000, guid: 678dfe432a65b5448ab683376a7a4e5a, type: 2}
+      objectReference: {fileID: 11400000, guid: 3779d663515a14144a018ef3a27bf4c9, type: 2}
     - target: {fileID: 5743515054873346784, guid: ba968a3e4fd11bc4b9681f23477fdec9, type: 3}
       propertyPath: powerUps.Array.data[1].so
       value: 
@@ -1576,17 +1576,6 @@ MonoBehaviour:
   dragZOffset: -2
   downwardRayOffset: {x: 0, y: 0, z: 0.5}
   thoughtBubblePrefab: {fileID: 7132762222629922322, guid: e1e4b45fd61781a4fada237aef74d1ca, type: 3}
-  allRuleIcons:
-  - trait: {fileID: 11400000, guid: d0d78c06f24616e42ae7264fe1bd64fc, type: 2}
-    icon: {fileID: 21300000, guid: 8399562725e8ec046b09fc0fca0eb00d, type: 3}
-  - trait: {fileID: 11400000, guid: c1f6cc0d36d4b114dbb3fc2bd2b55628, type: 2}
-    icon: {fileID: 21300000, guid: e59edbeaf71886549afbaa4d0f0102f9, type: 3}
-  - trait: {fileID: 11400000, guid: 2f210cec2b0dc7147b3d459a7b48fa41, type: 2}
-    icon: {fileID: 21300000, guid: 8399562725e8ec046b09fc0fca0eb00d, type: 3}
-  - trait: {fileID: 11400000, guid: 55b132e95d0b33a43b4d6334ed1c8a8f, type: 2}
-    icon: {fileID: 21300000, guid: 466b8f03ed77e03498a59150ec4ede57, type: 3}
-  - trait: {fileID: 11400000, guid: 99fcffd4ab7203945ae546c96636d9aa, type: 2}
-    icon: {fileID: 21300000, guid: c4c52439d4dbf584d87a420fd6acee9c, type: 3}
   bubbleOffset: {x: 0, y: 1.351, z: 0.404}
   heartsContainer: {fileID: 1804082975}
   heartIconPrefab: {fileID: 6376916222732492553, guid: ed2ae119050d6c84489a5eb380e827b5, type: 3}

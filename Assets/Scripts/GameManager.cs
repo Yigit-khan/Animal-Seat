@@ -403,63 +403,95 @@ public class GameManager : MonoBehaviour
 
     private void HandleMouseDrag()
     {
-        // 1. Hayvanýn Pozisyonunu Sürükleyerek Güncelle
+        // 1) Sürükleme mantığınız olduğu gibi kalıyor…
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (dragPlane.Raycast(mouseRay, out float enter))
         {
-            Vector3 targetPosition = mouseRay.GetPoint(enter) + offset;
-            targetPosition.y = dragLiftHeight;
-            selectedAnimal.transform.position = targetPosition;
+            var p = mouseRay.GetPoint(enter) + offset;
+            p.y = dragLiftHeight;
+            selectedAnimal.transform.position = p;
         }
 
-        // 2. Hedef Tespiti ve Görsel Geri Bildirim
-        Ray downwardRay = new Ray(selectedAnimal.transform.position + downwardRayOffset, Vector3.down);
+        // 2) OverlapBox ile alt hedef tespiti
         bool foundTarget = false;
-        Debug.DrawRay(downwardRay.origin, downwardRay.direction * 50, Color.green);
 
-        // Önce, hayvanýn altýnda bir ANA KOLTUK var mý?
-        if (Physics.Raycast(downwardRay, out RaycastHit hit, 20f, seatLayer))
+        // Ayak hizasını hedef alalım:
+        Vector3 boxOffset = new Vector3(0, -0.2f, 0.5f);
+        Vector3 halfExtents = new Vector3(0.4f, 4f, 0.5f);
+        Vector3 boxCenter = selectedAnimal.transform.position
+                              + boxOffset
+                              - Vector3.up * halfExtents.y;
+        Quaternion boxRot = Quaternion.identity;
+
+        // 2a) Ana koltuklar
+        var seatHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, seatLayer);
+        if (seatHits.Length > 0 &&
+            seatHits[0].TryGetComponent<SeatController>(out var targetSeat))
         {
+            foundTarget = true;
+            lastValidHoldingSlotTarget = null;
 
-            if (hit.collider.TryGetComponent<SeatController>(out SeatController targetSeat))
+            if (lastValidSeatTarget != targetSeat)
             {
-                foundTarget = true;
-                lastValidHoldingSlotTarget = null; // Diðer hedefi temizle
-                if (lastValidSeatTarget != targetSeat)
-                {
-
-                    ShowEffectArea(selectedAnimal.animalSO, targetSeat);
-                    lastValidSeatTarget = targetSeat;
-                }
+                ShowEffectArea(selectedAnimal.animalSO, targetSeat);
+                lastValidSeatTarget = targetSeat;
             }
         }
-
-        // Eðer ana koltuk bulunamadýysa, BEKLEME KOLTUÐU var mý?
-        if (!foundTarget && Physics.Raycast(downwardRay, out hit, 20f, holdingSlotLayer))
+        else
         {
-            if (hit.collider.TryGetComponent<HoldingSlotController>(out HoldingSlotController targetHoldingSlot))
+            // 2b) Bekleme slotları
+            var holdHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, holdingSlotLayer);
+            foreach (var col in holdHits)
             {
-                if (targetHoldingSlot.CurrentState == SlotState.Unlocked)
+                if (col.TryGetComponent<HoldingSlotController>(out var slot) &&
+                    slot.CurrentState == SlotState.Unlocked)
                 {
                     foundTarget = true;
-                    ResetAllHighlights(); // Etki alaný yok
-                    lastValidSeatTarget = null; // Diðer hedefi temizle
-                    lastValidHoldingSlotTarget = targetHoldingSlot;
-
-                    // Ýsteðe baðlý: Bekleme koltuðu için de bir highlight efekti eklenebilir.
-                    // targetHoldingSlot.Highlight();
+                    ResetAllHighlights();
+                    lastValidSeatTarget = null;
+                    lastValidHoldingSlotTarget = slot;
+                    break;
                 }
             }
         }
 
-        // Eðer hiçbir hedefin üzerinde deðilse...
+        // 3) Hiçbir şey yoksa temizle
         if (!foundTarget)
         {
             ResetAllHighlights();
             lastValidSeatTarget = null;
             lastValidHoldingSlotTarget = null;
         }
+
+        // 4) (Opsiyonel) OverlapBox'ı görselleştirmek için
+        DebugDrawBox(boxCenter, halfExtents, boxRot, foundTarget ? Color.green : Color.red);
     }
+
+    private void DebugDrawBox(Vector3 center, Vector3 halfExtents, Quaternion rot, Color c)
+    {
+        // 8 köşeyi hesaplayıp çiziyoruz
+        Vector3[] points = new Vector3[8];
+        int idx = 0;
+        for (int x = -1; x <= 1; x += 2)
+            for (int y = -1; y <= 1; y += 2)
+                for (int z = -1; z <= 1; z += 2)
+                    points[idx++] = center + rot * Vector3.Scale(halfExtents, new Vector3(x, y, z));
+
+        Debug.DrawLine(points[0], points[1], c);
+        Debug.DrawLine(points[2], points[3], c);
+        Debug.DrawLine(points[4], points[5], c);
+        Debug.DrawLine(points[6], points[7], c);
+        Debug.DrawLine(points[0], points[2], c);
+        Debug.DrawLine(points[1], points[3], c);
+        Debug.DrawLine(points[4], points[6], c);
+        Debug.DrawLine(points[5], points[7], c);
+        Debug.DrawLine(points[0], points[4], c);
+        Debug.DrawLine(points[1], points[5], c);
+        Debug.DrawLine(points[2], points[6], c);
+        Debug.DrawLine(points[3], points[7], c);
+    }
+
+
 
     private void HandleMouseUp()
     {

@@ -1,5 +1,7 @@
 using UnityEngine;
 using Unity.VisualScripting;
+using System.Linq;
+
 
 
 // Sadece Unity Editör'de çalışacak özel fonksiyonlar için bu using satırını ekliyoruz.
@@ -96,6 +98,12 @@ public class SeatController : MonoBehaviour
             return;
         }
 
+        var tailRenderers = animal.GetComponentsInChildren<SkinnedMeshRenderer>().Where(renderer => renderer.name == "tail");
+        foreach(var tailRenderer in tailRenderers)
+        {
+            tailRenderer.enabled = false;
+        }
+
         isOccupied = true;
         occupiedBy = animal;
         var boxCollider = GetComponent<BoxCollider>().enabled = false;
@@ -111,6 +119,12 @@ public class SeatController : MonoBehaviour
     /// </summary>
     public void Vacate()
     {
+        var tailRenderers = occupiedBy.GetComponentsInChildren<SkinnedMeshRenderer>().Where(renderer => renderer.name == "tail");
+        foreach (var tailRenderer in tailRenderers)
+        {
+            tailRenderer.enabled = true;
+        }
+
         isOccupied = false;
         occupiedBy = null;
         var boxCollider = GetComponent<BoxCollider>().enabled = true;

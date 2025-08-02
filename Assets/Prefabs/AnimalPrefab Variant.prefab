@@ -8,6 +8,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1673835947833657309, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: m_Name
+      value: tail
+      objectReference: {fileID: 0}
+    - target: {fileID: 3834263793691551477, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 5793116159061711575, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -48,9 +56,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6488509145776063696, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.019
+      objectReference: {fileID: 0}
+    - target: {fileID: 6488509145776063696, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.034
+      objectReference: {fileID: 0}
     - target: {fileID: 8885787366193381668, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: m_Name
-      value: AnimalPrefab
+      value: AnimalPrefab Variant
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

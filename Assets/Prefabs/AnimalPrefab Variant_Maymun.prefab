@@ -68,6 +68,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: monkey
       objectReference: {fileID: 0}
+    - target: {fileID: 3459346092698570700, guid: 28824cd2789c3ec4ba8b45c35f1b8885, type: 3}
+      propertyPath: m_Name
+      value: tail
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
