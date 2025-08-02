@@ -3,19 +3,25 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using TMPro;
-public class UIManager: MonoBehaviour
+using UnityEditor.VisionOS;
+public class UIManager : MonoBehaviour
 {
     [Header("Panels")]
     public GameObject settingsPopUp;
     public GameObject lifePopUp;
     public GameObject darkBackground;
+    public GameObject leaderBoardPanel;
+    public GameObject shopPanel;
 
     [Header("Buttons")]
     public Button settingsButton;
     public Button lifePlusButton;
-    public Button coinPlusButton; //þimdilik boþ
+    public Button coinPlusButton;
     public Button exitButtonSettings;
     public Button exitButtonLife;
+    public Button cupButton;
+    public Button homeButton;
+    public Button shopButton;
 
     [SerializeField]
     private int lifeCount = 3; //denemek için böyle verdim
@@ -29,18 +35,26 @@ public class UIManager: MonoBehaviour
     private Coroutine lifeCoroutine;
     private CoinManager _coinManager;
 
-    
+
+    public CanvasGroup fadePanel; // Fade için CanvasGroup
+    public float fadeDuration = 0.5f; // Kararma süresi
+
     private void Start()
     {
         //butonlara fonksiyon atamasý
         settingsButton.onClick.AddListener(OpensettingsPopUp);
         lifePlusButton.onClick.AddListener(OpenLifePopUp);
+        coinPlusButton.onClick.AddListener(OpenShopPanel);
 
         exitButtonSettings.onClick.AddListener(CloseSettingsPopUp);
         exitButtonLife.onClick.AddListener(CloseLifePopUp);
 
+        homeButton.onClick.AddListener(OpenHome);
+        cupButton.onClick.AddListener(OpenLeaderBoard);
+        shopButton.onClick.AddListener(OpenShopPanel);
+
         _coinManager = CoinManager.Instance;
-        
+
         UpdateLifeUI();
         UpdateCoins();
 
@@ -84,6 +98,91 @@ public class UIManager: MonoBehaviour
         darkBackground.SetActive(false);
     }
 
+    public void OpenHome()
+    {
+        StartCoroutine(FadeOutAndHideLeaderboardandShop());
+    }
+
+    public void OpenLeaderBoard()
+    {
+        StartCoroutine(FadeInAndShowLeaderboard());
+    }
+    public void OpenShopPanel()
+    {
+        StartCoroutine(FadeInAndShowShopPanel());
+    }
+    IEnumerator FadeInAndShowLeaderboard()
+    {
+        // Kararma
+        float t = 0;
+        fadePanel.gameObject.SetActive(true);
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            fadePanel.alpha = Mathf.Lerp(0, 1, t / fadeDuration);
+            yield return null;
+        }
+
+        leaderBoardPanel.SetActive(true);
+        shopPanel.SetActive(false);
+        t = 0;
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            fadePanel.alpha = Mathf.Lerp(1, 0, t / fadeDuration);
+            yield return null;
+        }
+        fadePanel.gameObject.SetActive(false);
+    }
+
+    IEnumerator FadeInAndShowShopPanel()
+    {
+        // Kararma
+        float t = 0;
+        fadePanel.gameObject.SetActive(true);
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            fadePanel.alpha = Mathf.Lerp(0, 1, t / fadeDuration);
+            yield return null;
+        }
+
+        shopPanel.SetActive(true);
+        leaderBoardPanel.SetActive(false);
+        t = 0;
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            fadePanel.alpha = Mathf.Lerp(1, 0, t / fadeDuration);
+            yield return null;
+        }
+        fadePanel.gameObject.SetActive(false);
+    }
+    IEnumerator FadeOutAndHideLeaderboardandShop()
+    {
+        // Kararma (fade in)
+        float t = 0;
+        fadePanel.gameObject.SetActive(true);
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            fadePanel.alpha = Mathf.Lerp(0, 1, t / fadeDuration);
+            yield return null;
+        }
+
+
+        leaderBoardPanel.SetActive(false);
+        shopPanel.SetActive(false);
+
+        t = 0;
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            fadePanel.alpha = Mathf.Lerp(1, 0, t / fadeDuration);
+            yield return null;
+        }
+        fadePanel.gameObject.SetActive(false);
+    }
     void AddLife()
     {
         if (lifeCount < 5)
@@ -111,7 +210,7 @@ public class UIManager: MonoBehaviour
             lifeText.text = lifeCount.ToString() + "/5";
         }
     }
-    
+
     void UpdateCoins()
     {
         coinText.text = _coinManager.CurrentCoins.ToString();
@@ -138,5 +237,7 @@ public class UIManager: MonoBehaviour
         lifeCoroutine = null;
     }
 
-    
+
+
+
 }
