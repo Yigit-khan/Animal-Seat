@@ -141,7 +141,7 @@ public class AnimalController : MonoBehaviour
         // Balon oluşturma mantığı
         foreach (var trait in animalSO.traits)
         {
-            Sprite icon = GameManager.Instance.GetIconForTrait(trait);
+            var icon = trait.traitIcon;
             if (icon != null)
             {
                 GameObject bubbleObj = GameManager.Instance.CreateThoughtBubble(icon, trait.traitDescription);

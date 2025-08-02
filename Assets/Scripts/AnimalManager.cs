@@ -64,6 +64,7 @@ public class AnimalManager
     {
         if (emptySeats == null || emptySeats.Count == 0 && waitingAnimals.Count > 0) return true;
 
+        int validCount = 0;
         foreach (var animalToTest in waitingAnimals)
         {
             foreach (var seatToTest in emptySeats)
@@ -75,12 +76,14 @@ public class AnimalManager
                 if (IsAllInteractionsValid(hypotheticalBoardState))
                 {
                     animalToTest.gridOriginPos = originalPos;
-                    return false;
+                    validCount++;
+                    break;
                 }
 
                 animalToTest.gridOriginPos = originalPos;
             }
         }
-        return waitingAnimals.Count > 0;
+        Debug.Log(waitingAnimals.Count + " --- " + validCount);
+        return !(waitingAnimals.Count == validCount);
     }
 }

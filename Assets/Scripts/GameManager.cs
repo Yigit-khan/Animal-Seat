@@ -57,7 +57,6 @@ public class GameManager : MonoBehaviour
     [Header("Düşünce Balonu Ayarları")]
     [SerializeField] private GameObject thoughtBubblePrefab;
     // LİSTENİN TÜRÜNÜ DEĞİŞTİRİN:
-    [SerializeField] private List<RuleIconData> allRuleIcons;
     // BU DEĞİŞKENİ PUBLİC YAPIN:
     public Vector3 bubbleOffset = new Vector3(0, 1.5f, 0);
 
@@ -178,20 +177,6 @@ public class GameManager : MonoBehaviour
     }
 
     #region Public Fonksiyonlar
-
-    public Sprite GetIconForTrait(AnimalTraitSO traitToFind)
-    {
-        foreach (var rule in allRuleIcons)
-        {
-            if (rule.trait == traitToFind)
-            {
-                return rule.icon;
-            }
-        }
-        // Eğer eşleşen bir ikon bulunamazsa, uyarı ver ve null döndür.
-        Debug.LogWarning($"'{traitToFind.name}' için bir ikon bulunamadı. GameManager'daki 'All Rule Icons' listesini kontrol edin.");
-        return null;
-    }
 
     public GameObject CreateThoughtBubble(Sprite icon, string description)
     {

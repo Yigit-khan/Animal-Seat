@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   traitName: Otobur
   traitDescription: "Y\u0131rt\u0131c\u0131dan korkar"
+  traitIcon: {fileID: 21300000, guid: 9ce61ba238989534d9f08e08a753a3cd, type: 3}
   antiToEveryTrait: 0
   antiTraits: []
   effectRanges:

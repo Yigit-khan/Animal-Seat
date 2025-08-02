@@ -28,6 +28,9 @@ public class AnimalTraitSO : ScriptableObject
     [Tooltip("Trait iconunun yanında yer alacak açıklama")]
     public string traitDescription;
 
+    [Tooltip("Trait iconu")]
+    public Sprite traitIcon;
+
     [Tooltip("Yalnız oturmak ister (bütün trait'lere karşı anti)")]
     public bool antiToEveryTrait;
 
