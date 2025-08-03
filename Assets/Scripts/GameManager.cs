@@ -6,6 +6,8 @@ using Unity.VisualScripting;
 using DG.Tweening;
 using JetBrains.Annotations;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem.Interactions;
+
 
 
 
@@ -846,7 +848,7 @@ public class GameManager : MonoBehaviour
             // --- DEÐÝÞÝKLÝK BURADA ---
             // Pozisyonu X eksenine göre hesapla (yan yana dizilecekler)
             Vector3 position = holdingSlotsParent.position + new Vector3(i * holdingSlotSpacing, 0, 0);
-
+            
             // Geri kalan mantýk ayný.
 
             // Eðer bu slot kilitli olacaksa...
@@ -855,10 +857,12 @@ public class GameManager : MonoBehaviour
                 // Kilitli prefab'ý oluþtur.
                 GameObject slotObj = Instantiate(lockedSlotPrefab, position, Quaternion.identity, holdingSlotsParent);
                 HoldingSlotController controller = slotObj.GetComponent<HoldingSlotController>();
+  
                 if (controller != null)
                 {
                     controller.Initialize(SlotState.Locked);
                     holdingSlots.Add(controller);
+
                 }
             }
             // Eðer bu slot açýk olacaksa...
@@ -866,11 +870,14 @@ public class GameManager : MonoBehaviour
             {
                 // Normal prefab'ý oluþtur.
                 GameObject slotObj = Instantiate(holdingSlotPrefab, position, Quaternion.identity, holdingSlotsParent);
+                slotObj.transform.rotation = holdingSlotsParent.rotation;
                 HoldingSlotController controller = slotObj.GetComponent<HoldingSlotController>();
                 if (controller != null)
                 {
                     controller.Initialize(SlotState.Unlocked);
                     holdingSlots.Add(controller);
+                    if (holdingSlotsParent.tag == "Tutorial")
+                        controller.Highlight();
                 }
             }
         }
@@ -1238,19 +1245,19 @@ public class GameManager : MonoBehaviour
         animal.transform.DOKill();
         animal.transform.rotation = Quaternion.identity;
 
-        var rends = animal.GetComponentsInChildren<SkinnedMeshRenderer>();
+        //var rends = animal.GetComponentsInChildren<SkinnedMeshRenderer>();
 
-        foreach (var rend in rends)
-        {
-            // Orijinal mesh’e bağlı kalmak için sharedMaterials kullanıyoruz
-            var count = rend.sharedMaterials.Length;
-            var newMats = new Material[count];
-            for (int i = 0; i < count; i++)
-            {
-                newMats[i] = whiteEffectAreaMaterial;  // buraya atamak istediğiniz Material referansını koyun
-            }
-            rend.materials = newMats;
-        }
+        //foreach (var rend in rends)
+        //{
+        //    // Orijinal mesh’e bağlı kalmak için sharedMaterials kullanıyoruz
+        //    var count = rend.sharedMaterials.Length;
+        //    var newMats = new Material[count];
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        newMats[i] = whiteEffectAreaMaterial;  // buraya atamak istediğiniz Material referansını koyun
+        //    }
+        //    rend.materials = newMats;
+        //}
 
         // Durumu güncelle
         animal.animalSO.traits.Clear();
@@ -1263,6 +1270,12 @@ public class GameManager : MonoBehaviour
 
         // Başarı sesi ve log
         SoundManager.Instance.PlaySFX("EyepatchSuccess");
+        
+        foreach (var rend in animal.GetComponentsInChildren<Renderer>().Where(rend => rend.name == "eyepatch"))
+        {
+            rend.enabled = true;
+        }
+
         Debug.Log($"{animal.animalSO._animalName} gozu baglandi!");
 
     }

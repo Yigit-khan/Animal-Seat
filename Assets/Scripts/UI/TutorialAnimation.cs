@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using UnityEngine;
 using System.Collections;
 public class TutorialAnimation : MonoBehaviour
@@ -7,8 +7,12 @@ public class TutorialAnimation : MonoBehaviour
     public RectTransform startTarget;
     public RectTransform endTarget;
     public float moveDuration = 1f;
-    public int loopCount = -1; // Sonsuz tekrar için -1
+    public int loopCount = -1; // Sonsuz tekrar iÃ§in -1
 
+    private void Awake()
+    {
+        handImage.transform.position = startTarget.transform.position;
+    }
     private void OnEnable()
     {
         StartCoroutine(PlayAnimation());
@@ -16,14 +20,15 @@ public class TutorialAnimation : MonoBehaviour
 
     IEnumerator PlayAnimation()
     {
+        handImage.transform.position = startTarget.transform.position;
         int loops = 0;
 
         while (loopCount < 0 || loops < loopCount)
         {
-            // Baþlangýç pozisyonuna git
+            // BaÃ¾langÃ½Ã§ pozisyonuna git
             handImage.anchoredPosition = startTarget.anchoredPosition;
 
-            // Bitiþ pozisyonuna animasyon
+            // BitiÃ¾ pozisyonuna animasyon
             float t = 0;
             while (t < moveDuration)
             {

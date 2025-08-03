@@ -6,9 +6,11 @@ public class tutorialAnimScript : MonoBehaviour
 {
     public float slideDuration = 0.5f;
     public float slideOffsetY = 500f;
+    public GameObject handImage;
 
     private Vector2 targetPosition;
     private bool isClosing = false;
+
 
     void Start()
     {
@@ -49,6 +51,8 @@ public class tutorialAnimScript : MonoBehaviour
 
         RectTransform rectTransform = GetComponent<RectTransform>();
         Vector2 hidePosition = targetPosition - new Vector2(0, slideOffsetY);
+
+        Destroy(handImage);
 
         rectTransform.DOAnchorPos(hidePosition, slideDuration)
             .SetEase(Ease.InBack)

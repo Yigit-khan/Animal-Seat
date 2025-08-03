@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: PowerupSO_Eyepatch
   m_EditorClassIdentifier: 
   powerupName: Eyepatch
-  defaultUses: 2
+  defaultUses: 99
   buttonScaleAmount: 1.2
   buttonAnimationDuration: 0.3
   recallButtonInitialScale: {x: 0, y: 0, z: 0}
