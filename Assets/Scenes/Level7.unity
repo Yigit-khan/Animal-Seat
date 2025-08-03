@@ -2753,7 +2753,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4252101548820283293, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
       propertyPath: m_Name
-      value: eyepatchtext
+      value: EyepatchText
       objectReference: {fileID: 0}
     - target: {fileID: 4720305591924511643, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
       propertyPath: m_AnchorMax.y
