@@ -12,6 +12,7 @@ public class TutorialAnimation : MonoBehaviour
     private void Awake()
     {
         handImage.transform.position = startTarget.transform.position;
+        
     }
     private void OnEnable()
     {

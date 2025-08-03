@@ -34,6 +34,17 @@ public class tutorialAnimScript : MonoBehaviour
 
         // Yukarı animasyon
         rectTransform.DOAnchorPos(targetPosition, slideDuration).SetEase(Ease.OutBack);
+
+         Image img = handImage.GetComponent<Image>();
+    if (img != null)
+    {
+        Color c = img.color;
+        c.a = 0f;
+        img.color = c;
+
+       
+        img.DOFade(1f, 1f).SetDelay(0.5f);
+    }
     }
 
     void Update()
