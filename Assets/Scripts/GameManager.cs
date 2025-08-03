@@ -92,7 +92,7 @@ public class GameManager : MonoBehaviour
 
     [Header("Etki Alaný Gösterme Ayarlarý")]
     [Tooltip("Etki alanýndaki koltuklarý renklendirmek için kullanýlacak materyal.")]
-    [SerializeField] private Material greenEffectAreaMaterial;
+    [SerializeField] public Material greenEffectAreaMaterial;
     [SerializeField] private Material redEffectAreaMaterial;
     [SerializeField] private Material yellowEffectAreaMaterial;
     [SerializeField] private Material whiteEffectAreaMaterial;
@@ -103,6 +103,7 @@ public class GameManager : MonoBehaviour
 
     // --- Özel Deðiþkenler ---
     private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
+    private List<HoldingSlotController> currentlyHighlightedHoldingSlots = new List<HoldingSlotController>();
 
     // --- Sistemler ve Özel Deðiþkenler ---
     private GridSystem gridSystem;
@@ -450,9 +451,16 @@ public class GameManager : MonoBehaviour
                     slot.CurrentState == SlotState.Unlocked)
                 {
                     foundTarget = true;
+
+                    // Önce tüm eski highlight’ları temizle
                     ResetAllHighlights();
                     lastValidSeatTarget = null;
                     lastValidHoldingSlotTarget = slot;
+
+                    // ► Holding slot’a highlight uygula ◄
+                    slot.Highlight(greenEffectAreaMaterial);
+                    currentlyHighlightedHoldingSlots.Add(slot);
+
                     break;
                 }
             }
@@ -499,6 +507,15 @@ public class GameManager : MonoBehaviour
     private void HandleMouseUp()
     {
         if (selectedAnimal == null) return;
+        
+        // --- YENİ EKLENEN DURDURMA KISMI ---
+        // "drag_sway" kimliğine sahip sallanma animasyonunu durdur.
+        DOTween.Kill("drag_sway");
+        // Hayvanın rotasyonunu anında sıfırla ki yamuk kalmasın.
+        selectedAnimal.transform.rotation = Quaternion.identity;
+        // --- BİTİŞ ---
+
+
         ResetAllHighlights();
 
         bool placedSuccessfully = false;
@@ -893,11 +910,14 @@ public class GameManager : MonoBehaviour
                     controller.Initialize(SlotState.Unlocked);
                     holdingSlots.Add(controller);
                     if (holdingSlotsParent.tag == "Tutorial")
-                        controller.Highlight();
-                }
+                        controller.TutorialScaleAnim();
+                }   
             }
         }
     }
+
+    [SerializeField] private float dragSwayAmount = 5f;    // Sürüklerken ne kadar yana eğileceği (derece).
+    [SerializeField] private float dragSwayDuration = 1f; // Bir tam sallanma döngüsünün süresi.
 
     private void StartDraggingSelectedAnimal()
     {
@@ -905,6 +925,14 @@ public class GameManager : MonoBehaviour
 
         selectedAnimal.ClearMyBubbles();
         selectedAnimal.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+
+        // --- YENİ EKLENEN SALLANMA ANİMASYONU ---
+        // Hayvanı Z ekseninde (ileri-geri) sürekli salla.
+        // Animasyona özel bir kimlik atıyoruz ki sadece bu animasyonu durdurabilelim.
+        selectedAnimal.transform.DORotate(new Vector3(0, 0, dragSwayAmount), dragSwayDuration)
+            .SetEase(Ease.InOutSine)
+            .SetLoops(-1, LoopType.Yoyo) // Sonsuz ve ileri-geri salınım
+            .SetId("drag_sway");
 
         // Sürükleme düzlemini Y ekseninde, kaldýrma yüksekliðinde oluþtur.
         dragPlane = new Plane(Vector3.up, new Vector3(0, dragLiftHeight, 0));
@@ -1020,6 +1048,7 @@ public class GameManager : MonoBehaviour
 
         if (!activateSeatHighlight)
         {
+
             if (!potentialSeat.isOccupied)
             {
                 potentialSeat.Highlight(yellowEffectAreaMaterial);
@@ -1054,11 +1083,15 @@ public class GameManager : MonoBehaviour
     // Tüm renklendirilmiþ koltuklarý orijinal rengine döndürür.
     private void ResetAllHighlights()
     {
+        // SeatController highlight’larını temizle
         foreach (var seat in currentlyHighlightedSeats)
-        {
-            if (seat != null) seat.ResetHighlight();
-        }
+            seat?.ResetHighlight();
         currentlyHighlightedSeats.Clear();
+
+        // HoldingSlotController highlight’larını temizle
+        foreach (var slot in currentlyHighlightedHoldingSlots)
+            slot?.ResetHighlight();
+        currentlyHighlightedHoldingSlots.Clear();
     }
 
     private void PlaceStartingAnimals()

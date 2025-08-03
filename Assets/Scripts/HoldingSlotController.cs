@@ -24,12 +24,22 @@ public class HoldingSlotController : MonoBehaviour
     [SerializeField] private Ease pulseEase = Ease.InOutSine;
     private Vector3 _initialScale;
     private Tween _pulseTween;
-    private bool isHighlighting = false;
+    private bool isAnimating = false;
+
+    private MeshRenderer meshRenderer;
+    private Material originalMaterial;
+    private Material highlightMaterial;
 
 
     private void Awake()
     {
         _initialScale = transform.localScale;
+        meshRenderer = GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            originalMaterial = meshRenderer.material;
+        }
+        highlightMaterial = GameManager.Instance.greenEffectAreaMaterial;
     }
 
     public void Initialize(SlotState initialState)
@@ -46,8 +56,8 @@ public class HoldingSlotController : MonoBehaviour
     {
         if (CurrentState == SlotState.Unlocked)
         {
-            if (isHighlighting)
-                ClearHighlight();
+            if (isAnimating)
+                ClearAnim();
             OccupyingAnimal = animal;
             SetState(SlotState.Occupied);
         }
@@ -65,16 +75,31 @@ public class HoldingSlotController : MonoBehaviour
         return new PickUpResult(null, false);
     }
 
+    public void Highlight(Material highlightMaterial)
+    {
+        if (meshRenderer != null)
+        {
+            meshRenderer.material = highlightMaterial;
+        }
+    }
+    public void ResetHighlight()
+    {
+        if (meshRenderer != null && originalMaterial != null)
+        {
+            meshRenderer.material = originalMaterial;
+        }
+    }
+
     /// <summary>
     /// Slot'u sürekli vurgu (pulsate) animasyonuyla gösterir.
     /// Reset edilmediği sürece döngü devam eder.
     /// </summary>
-    public void Highlight()
+    public void TutorialScaleAnim()
     {
         // Eğer zaten bir pulsatör tween varsa üzerine yeni kurma
         if (_pulseTween != null && _pulseTween.IsActive()) return;
 
-        isHighlighting = true;
+        isAnimating = true;
         // İlk önce varsa önceki tüm animasyonları durdur
         transform.DOKill();
 
@@ -89,9 +114,9 @@ public class HoldingSlotController : MonoBehaviour
     /// <summary>
     /// Highlight'ı durdurur ve ölçeği orijinal haline çeker.
     /// </summary>
-    public void ClearHighlight()
+    public void ClearAnim()
     {
-        isHighlighting = false;
+        isAnimating = false;
 
         // Döngüsel tween'i durdur
         if (_pulseTween != null)
