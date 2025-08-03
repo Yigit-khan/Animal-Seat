@@ -15,6 +15,7 @@ public class AnimalController : MonoBehaviour
     [Header("Veri Referansı")]
     [Tooltip("Bu hayvanın tüm verilerini ve karakteristiklerini tutan ScriptableObject.")]
     public AnimalSO animalSO;
+    public Renderer eyepatchRenderer;
 
     [Header("Durum Değişkenleri")]
     [Tooltip("Bu hayvanın 'Geri Alma' power-up'ı ile geri çağrılıp çağrılamayacağını belirtir.")]
@@ -40,6 +41,9 @@ public class AnimalController : MonoBehaviour
         {
             Debug.LogError($"[{name}] animalSO asset’i atanmamış!");
         }
+
+
+       
     }
 
     /// <summary>
@@ -88,6 +92,8 @@ public class AnimalController : MonoBehaviour
         {
             // Materyalin bir kopyasını oluşturduğumuzdan emin olalım ki diğer hayvanları etkilemesin.
             originalColors.Add(rend.material.color);
+            if (rend.name == "eyepatch")
+                eyepatchRenderer = rend;
         }
 
         // --- DEBUG 4: Initialize çağrıldığını ve Animator'ün durumunu logla. ---

@@ -54,7 +54,8 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float queueMoveSpeed = 8f;
     [SerializeField] private float seatHeightOffset = 0.1f;
     [SerializeField] private float dragZOffset = -2f;
-    [SerializeField] private Vector3 downwardRayOffset = new Vector3(0, 0, 0.5f);
+    [SerializeField] private Vector3 eyepatchOffset = new Vector3(0f, -0.5f, -0.25f);
+
 
     [Header("Düşünce Balonu Ayarları")]
     [SerializeField] private GameObject thoughtBubblePrefab;
@@ -588,7 +589,6 @@ public class GameManager : MonoBehaviour
             animator.SetBool("isSeated", true);
         }
 
-
         // Hayvanın hangi koltukları işgal ettiğini listesine kaydet.
         animal.occupiedSeats.Clear();
         Vector2Int size = animal.animalSO.size;
@@ -606,6 +606,22 @@ public class GameManager : MonoBehaviour
             }
         }
         // --- BİTİŞ ---
+
+
+        if (animal.animalSO.effectedBySkill && animal.eyepatchRenderer != null)
+        {
+            var tr = animal.eyepatchRenderer.transform;
+
+            // Önce varsa devam eden tween’i iptal et
+            tr.DOKill();
+
+            // Hedef pozisyonu hesapla
+            Vector3 targetPos = tr.position + eyepatchOffset;
+
+            // Yarım saniyede yumuşakça geçiş
+            tr.DOMove(targetPos, 0.4f)
+              .SetEase(Ease.OutQuad);
+        }
 
         animalQueue.Remove(animal);
         animal.gameObject.layer = animal.originalLayer;
@@ -1066,6 +1082,7 @@ public class GameManager : MonoBehaviour
 
                     animalController.isSeated = true;
                     animalController.isRecallable = false;
+                    animalController.occupiedSeats.Add(seat);
 
                     // 3. Kural sisteminin kullanması için AnimalSO'dan bir RUNTIME KOPYASI oluştur
                     AnimalSO runtimeSO = ScriptableObject.Instantiate(animalController.animalSO);
@@ -1166,6 +1183,8 @@ public class GameManager : MonoBehaviour
         // Animasyon ve rotasyon temizliği
         animal.transform.DOKill();
         animal.transform.rotation = Quaternion.identity;
+        if (animal.eyepatchRenderer != null)
+            animal.eyepatchRenderer.transform.position -= eyepatchOffset;
 
         // Koltukları boşalt
         foreach (var seat in animal.occupiedSeats)
@@ -1270,11 +1289,10 @@ public class GameManager : MonoBehaviour
 
         // Başarı sesi ve log
         SoundManager.Instance.PlaySFX("EyepatchSuccess");
-        
-        foreach (var rend in animal.GetComponentsInChildren<Renderer>().Where(rend => rend.name == "eyepatch"))
-        {
-            rend.enabled = true;
-        }
+
+        animal.eyepatchRenderer.enabled = true;
+        if (animal.occupiedSeats.Count > 0)
+            animal.eyepatchRenderer.transform.position += eyepatchOffset;
 
         Debug.Log($"{animal.animalSO._animalName} gozu baglandi!");
 
@@ -1299,9 +1317,9 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Hayvanlardaki tüm titreme animasyonlarını durdurur.
-    /// </summary>
+    // <summary>
+    // Hayvanlardaki tüm titreme animasyonlarını durdurur.
+    // </summary>
     private void StopShakingSeatedAnimals()
     {
         // "shake" ID'sine sahip tüm DOTween animasyonlarını durdur.
@@ -1313,6 +1331,47 @@ public class GameManager : MonoBehaviour
             if (animal.isSeated)
             {
                 animal.transform.DORotate(Vector3.zero, 0.1f);
+            }
+        }
+    }
+
+    private void StartPulsingSeatedAnimals(IEnumerable<AnimalController> animals)
+    {
+        // Kaç katına çıkacak, ne kadar süreyle (yarım döngü)
+        float pulseScale = 1.15f;
+        float pulseDuration = 0.5f;
+
+        foreach (var animal in animals)
+        {
+            var t = animal.transform;
+            // Eğer daha önce atanmış pulse tween varsa temizle
+            t.DOKill();
+
+            // Orijinal ölçeği al
+            Vector3 originalScale = t.localScale;
+
+            // Sonsuz döngüyle büyüyüp küçülme
+            t.DOScale(originalScale * pulseScale, pulseDuration)
+             .SetEase(Ease.InOutSine)
+             .SetLoops(-1, LoopType.Yoyo)
+             .SetId("pulse");
+        }
+    }
+
+    private void StopPulsingSeatedAnimals()
+    {
+        // 1) "pulse" ID'sine sahip tüm DOTween animasyonlarını durdur
+        DOTween.Kill("pulse");
+
+        // 2) Her aktifleştirilmiş hayvanı orijinal ölçeğe döndür
+        foreach (var animal in AnimalController.Instances)
+        {
+            if (animal.isSeated)
+            {
+                // Tween varsa tamamen temizle
+                animal.transform.DOKill();
+                // Orijinal ölçek olarak 1,1,1 varsayıyoruz
+                animal.transform.localScale = Vector3.one;
             }
         }
     }
