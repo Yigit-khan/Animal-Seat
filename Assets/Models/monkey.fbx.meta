@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: rig.001|rig.001Action (1)
-      takeName: rig.001|rig.001Action
+      name: monkey_rig|monkey_rigSit
+      takeName: monkey_rig|monkey_rigSit
       internalID: 4863499572309031108
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 0.10000001
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -60,11 +60,11 @@ ModelImporter:
       maskSource: {instanceID: 0}
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
-      name: rig.001|rig.001Action
-      takeName: rig.001|rig.001Action
+      name: monkey_rig|monkey_rigIdle
+      takeName: monkey_rig|monkey_rigIdle
       internalID: -6851493242495694946
       firstFrame: 0
-      lastFrame: 1
+      lastFrame: 0.10000001
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -155,7 +155,7 @@ ModelImporter:
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
-  avatarSetup: 0
+  avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
   importBlendShapeDeformPercent: 1
   remapMaterialsIfMaterialImportModeIsNone: 0
