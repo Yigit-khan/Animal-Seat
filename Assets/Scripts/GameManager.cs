@@ -523,10 +523,8 @@ public class GameManager : MonoBehaviour
         }
 
         // 4) (Opsiyonel) OverlapBox'ı görselleştirmek için
-        DebugDrawBox(boxCenter, halfExtents, boxRot, foundTarget ? Color.green : Color.red);
+        //DebugDrawBox(boxCenter, halfExtents, boxRot, foundTarget ? Color.green : Color.red);
     }
-
-
 
     private void DebugDrawBox(Vector3 center, Vector3 halfExtents, Quaternion rot, Color c)
     {
