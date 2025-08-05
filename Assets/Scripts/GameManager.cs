@@ -314,7 +314,7 @@ public class GameManager : MonoBehaviour
 
             if (animalQueue.Count > visableAnimalCount)
             {
-                foreach (var renderer in animalController.GetComponentsInChildren<Renderer>(false))
+                foreach (var renderer in animalController.animalRenderers)
                 {
                     if (renderer.name.ToLower() != "eyepatch")
                         renderer.enabled = false;
@@ -339,7 +339,7 @@ public class GameManager : MonoBehaviour
 
             if (i < visableAnimalCount)
             {
-                foreach (var renderer in animalQueue[i].GetComponentsInChildren<Renderer>())
+                foreach (var renderer in animalQueue[i].animalRenderers)
                 {
                     if (renderer.name.ToLower() != "eyepatch")
                         renderer.enabled = true;
@@ -387,6 +387,7 @@ public class GameManager : MonoBehaviour
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
+
         // 1. Bekleme koltuðundaki bir hayvana mý týklandý?
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
         {
@@ -429,7 +430,7 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-    
+
     private void HandleMouseDrag()
     {
         // Sürükleme mantığınız olduğu gibi kalıyor…
@@ -649,9 +650,9 @@ public class GameManager : MonoBehaviour
         animal.ClearMyBubbles();
         animal.transform.position = mainSeat.transform.position + new Vector3(0, seatHeightOffset, 0);
 
-        if (animal.TryGetComponent<Animator>(out var animator))
+        if (animal.animator != null)
         {
-            animator.SetBool("isSeated", true);
+            animal.animator.SetBool("isSeated", true);
         }
 
         // Hayvanın hangi koltukları işgal ettiğini listesine kaydet.
@@ -1051,7 +1052,6 @@ public class GameManager : MonoBehaviour
 
         if (!activateSeatHighlight)
         {
-
             if (!potentialSeat.isOccupied)
             {
                 potentialSeat.Highlight(yellowEffectAreaMaterial);
