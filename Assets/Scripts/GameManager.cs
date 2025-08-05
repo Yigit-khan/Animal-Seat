@@ -1242,6 +1242,8 @@ public class GameManager : MonoBehaviour
 
         PowerUpController.Instance.DecreaseRemainingUse(_recallPowerUpSO);
 
+        UpdateAnimalQueuePositions();
+
         // Başarı sesi ve log
         SoundManager.Instance.PlaySFX("RecallSuccess");
         Debug.Log($"{animal.animalSO._animalName} geri çağrıldı!");
@@ -1315,6 +1317,8 @@ public class GameManager : MonoBehaviour
         animal.eyepatchRenderer.enabled = true;
         if (animal.occupiedSeats.Count > 0)
             animal.eyepatchRenderer.transform.position += eyepatchOffset;
+
+        UpdateAnimalQueuePositions();
 
         Debug.Log($"{animal.animalSO._animalName} gozu baglandi!");
 
