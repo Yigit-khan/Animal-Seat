@@ -11,7 +11,7 @@ public class LevelSelectController : MonoBehaviour
     private int currentLevelIndex = 1; //þu anki leveli tutuyor
     [SerializeField]
     private int unlockedLevel = 1; //henü açýlmamýþ leveli tutuyor
-    private const int maxLevel = 20; //þimdilik böyle
+    private const int maxLevel = 21; //þimdilik böyle
 
     private void Awake()
     {
