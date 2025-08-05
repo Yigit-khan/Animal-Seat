@@ -1,4 +1,4 @@
-using DG.Tweening;
+ï»¿using DG.Tweening;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.Audio;
@@ -6,7 +6,7 @@ using UnityEngine.Audio;
 [RequireComponent(typeof(RectTransform), typeof(CanvasGroup))]
 public class PanelWinUIAnimator : MonoBehaviour
 {
-    [SerializeField] private CanvasGroup[] elementsToFadeIn; // sırayla görünmesini istediğin şeyler
+    [SerializeField] private CanvasGroup[] elementsToFadeIn; // sÃ½rayla gÃ¶rÃ¼nmesini istediÃ°in Ã¾eyler
     [SerializeField] private float elementDelay = 0.2f;
 
     private RectTransform panel;
@@ -47,14 +47,14 @@ public class PanelWinUIAnimator : MonoBehaviour
     {
         foreach (CanvasGroup cg in elementsToFadeIn)
         {
-            // Önce alpha'yı sıfırla ve objenin aktif olduğundan emin ol
+            // Ã–nce alpha'yÃ½ sÃ½fÃ½rla ve objenin aktif olduÃ°undan emin ol
             cg.alpha = 0;
             cg.gameObject.SetActive(true);
 
-            // 1. DEĞİŞİKLİK: Bu animasyonu da zamandan bağımsız yap
+            // 1. DEÃÃÃÃKLÃK: Bu animasyonu da zamandan baÃ°Ã½msÃ½z yap
             cg.DOFade(1f, 0.3f).SetUpdate(true);
 
-            // 2. DEĞİŞİKLİK: Zamana bağlı bekleme yerine, gerçek zamana bağlı bekle
+            // 2. DEÃÃÃÃKLÃK: Zamana baÃ°lÃ½ bekleme yerine, gerÃ§ek zamana baÃ°lÃ½ bekle
             yield return new WaitForSecondsRealtime(elementDelay);
         }
     }

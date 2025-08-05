@@ -26,10 +26,10 @@ public class AnimalController : MonoBehaviour
     [HideInInspector] public Renderer eyepatchRenderer;
     public List<SeatController> occupiedSeats = new List<SeatController>();
     private List<GameObject> myBubbles = new List<GameObject>();
+    private Animator animator; // Animator bileşenini hafızada tutmak için (performans).
     private bool _isSeated = false; // "isSeated" durumunu içeride saklamak için özel değişken.
 
-    public Animator animator; // Animator bileşenini hafızada tutmak için (performans).
-    public Renderer[] animalRenderers;
+    private Renderer[] animalRenderers;
     private List<Color> originalColors = new List<Color>();
 
     private void Awake()
