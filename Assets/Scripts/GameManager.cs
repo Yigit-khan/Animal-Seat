@@ -429,13 +429,10 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    // =================================================================================
-    // !!! --- ANA OPTİMİZASYON BURADA --- !!!
-    // =================================================================================
+    
     private void HandleMouseDrag()
     {
-        // 1. Hayvanı farenin pozisyonuna taşı (Bu kısım değişmedi).
+        // Sürükleme mantığınız olduğu gibi kalıyor…
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (dragPlane.Raycast(mouseRay, out float enter))
         {
@@ -444,77 +441,91 @@ public class GameManager : MonoBehaviour
             selectedAnimal.transform.position = p;
         }
 
-        // 2. [OPTİMİZASYON] Gereksiz kontrolü engellemek için eşik değeri kontrolü.
-        // Hayvan yeterince hareket etmediyse, bu frame için hedef tespitini atla.
-        if (Vector3.SqrMagnitude(selectedAnimal.transform.position - lastCheckedDragPosition) < dragCheckDistanceThreshold * dragCheckDistanceThreshold)
-        {
-            return; // Yeterince hareket yok, fonksiyondan çık.
-        }
-        lastCheckedDragPosition = selectedAnimal.transform.position; // Pozisyonu güncelle.
-
-
-        // 3. [OPTİMİZASYON] Hedef Tespiti: Fizik yerine Grid-bazlı yaklaşım.
+        // OverlapBox ile alt hedef tespiti
         bool foundTarget = false;
-        SeatController potentialSeat = null;
 
-        // 3a. Önce en hızlı yöntem: Grid sisteminden koltuk bul.
-        Vector2Int gridPos = gridSystem.WorldToGridPosition(selectedAnimal.transform.position + new Vector3(0, 0, 0.5f));
-        potentialSeat = gridSystem.GetSeatAt(gridPos);
+        // Ayak hizasını hedef alalım:
+        Vector3 boxOffset = new Vector3(0, -0.2f, 0.5f);
+        Vector3 halfExtents = new Vector3(0.4f, 4f, 0.5f);
+        Vector3 boxCenter = selectedAnimal.transform.position
+                              + boxOffset
+                              - Vector3.up * halfExtents.y;
+        Quaternion boxRot = Quaternion.identity;
 
-        if (potentialSeat != null && !potentialSeat.isOccupied)
+        // 1) İki layer'ı tek bir LayerMask'te birleştirelim.
+        // Bitwise OR operatörü (|) iki maskeyi birleştirir.
+        LayerMask combinedMask = seatLayer | holdingSlotLayer;
+
+        // 2) OverlapBox'ı SADECE BİR KEZ çağırarak her iki layer'daki objeleri alalım.
+        var allHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, combinedMask);
+
+        // Bulunan hedefi işlemek için başlangıçta null olan değişkenler tanımlayalım.
+        SeatController foundSeat = null;
+        HoldingSlotController foundSlot = null;
+
+        // 3) Sonuçları işleyelim. Orijinal koddaki gibi koltuklara öncelik verelim.
+        // Önce bir koltuk var mı diye kontrol edelim.
+        foreach (var col in allHits)
+        {
+            if (col.TryGetComponent<SeatController>(out var seat))
+            {
+                foundSeat = seat;
+                break; // Koltuk bulduğumuz an döngüden çıkabiliriz çünkü öncelik koltukta.
+            }
+        }
+
+        // 4a) Eğer bir koltuk bulunduysa...
+        if (foundSeat != null)
         {
             foundTarget = true;
-            // Eğer yeni bir koltuğun üzerindeysek...
-            if (lastValidSeatTarget != potentialSeat)
+            lastValidHoldingSlotTarget = null; // Diğer hedefi temizle
+
+            if (lastValidSeatTarget != foundSeat)
             {
-                ResetAllHighlights(); // Önce eskileri temizle
-                ShowEffectArea(selectedAnimal.animalSO, potentialSeat);
-                lastValidSeatTarget = potentialSeat;
-                lastValidHoldingSlotTarget = null; // Bekleme slotu hedefini sıfırla
+                ShowEffectArea(selectedAnimal.animalSO, foundSeat);
+                lastValidSeatTarget = foundSeat;
             }
         }
+        // 4b) Eğer koltuk bulunamadıysa, o zaman bekleme slotu var mı diye bakalım.
         else
         {
-            // 3b. Grid'de uygun koltuk yoksa, bekleme slotlarını kontrol et (daha yavaş olan OverlapBox ile).
-            // Bu, OverlapBox'ın sadece gerektiğinde çalışmasını sağlar.
-            Vector3 boxCenter = selectedAnimal.transform.position + new Vector3(0, -0.2f, 0.5f);
-            Vector3 halfExtents = new Vector3(0.4f, 4f, 0.5f);
-            var holdHits = Physics.OverlapBox(boxCenter, halfExtents, Quaternion.identity, holdingSlotLayer);
-
-            DebugDrawBox(boxCenter, halfExtents, Quaternion.identity, Color.magenta);
-
-            HoldingSlotController potentialSlot = null;
-            foreach (var col in holdHits)
+            foreach (var col in allHits)
             {
-                if (col.TryGetComponent<HoldingSlotController>(out var slot) && slot.CurrentState == SlotState.Unlocked)
+                if (col.TryGetComponent<HoldingSlotController>(out var slot) &&
+                    slot.CurrentState == SlotState.Unlocked)
                 {
-                    potentialSlot = slot;
-                    break; // İlk bulduğumuz yeterli.
+                    foundSlot = slot;
+                    break; // Geçerli ilk slotu bulduk, döngüden çıkalım.
                 }
             }
 
-            if (potentialSlot != null)
+            if (foundSlot != null)
             {
                 foundTarget = true;
-                if (lastValidHoldingSlotTarget != potentialSlot)
-                {
-                    ResetAllHighlights();
-                    potentialSlot.Highlight(greenEffectAreaMaterial);
-                    currentlyHighlightedHoldingSlots.Add(potentialSlot);
-                    lastValidHoldingSlotTarget = potentialSlot;
-                    lastValidSeatTarget = null; // Ana koltuk hedefini sıfırla
-                }
+
+                // Önce tüm eski highlight'ları temizle
+                ResetAllHighlights();
+                lastValidSeatTarget = null; // Diğer hedefi temizle
+                lastValidHoldingSlotTarget = foundSlot;
+
+                // ► Holding slot'a highlight uygula ◄
+                foundSlot.Highlight(greenEffectAreaMaterial);
+                currentlyHighlightedHoldingSlots.Add(foundSlot);
             }
         }
 
-        // 4. Hiçbir hedef bulunamadıysa her şeyi temizle.
-        if (!foundTarget && (lastValidSeatTarget != null || lastValidHoldingSlotTarget != null))
+        // 3) Hiçbir şey yoksa temizle
+        if (!foundTarget)
         {
             ResetAllHighlights();
             lastValidSeatTarget = null;
             lastValidHoldingSlotTarget = null;
         }
+
+        // 4) (Opsiyonel) OverlapBox'ı görselleştirmek için
+        DebugDrawBox(boxCenter, halfExtents, boxRot, foundTarget ? Color.green : Color.red);
     }
+
 
 
     private void DebugDrawBox(Vector3 center, Vector3 halfExtents, Quaternion rot, Color c)
