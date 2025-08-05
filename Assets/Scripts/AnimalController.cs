@@ -15,7 +15,7 @@ public class AnimalController : MonoBehaviour
     [Header("Veri Referansı")]
     [Tooltip("Bu hayvanın tüm verilerini ve karakteristiklerini tutan ScriptableObject.")]
     public AnimalSO animalSO;
-
+    public Renderer eyepatchRenderer;
 
     [Header("Durum Değişkenleri")]
     [Tooltip("Bu hayvanın 'Geri Alma' power-up'ı ile geri çağrılıp çağrılamayacağını belirtir.")]
@@ -23,7 +23,6 @@ public class AnimalController : MonoBehaviour
 
     // --- ÖZEL DEĞİŞKENLER ---
     public int originalLayer { get; private set; }
-    [HideInInspector] public Renderer eyepatchRenderer;
     public List<SeatController> occupiedSeats = new List<SeatController>();
     private List<GameObject> myBubbles = new List<GameObject>();
     private Animator animator; // Animator bileşenini hafızada tutmak için (performans).
@@ -44,7 +43,7 @@ public class AnimalController : MonoBehaviour
         }
 
 
-       
+
     }
 
     /// <summary>

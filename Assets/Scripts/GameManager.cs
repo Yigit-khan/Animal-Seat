@@ -8,7 +8,6 @@ using JetBrains.Annotations;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem.Interactions;
 
-
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
@@ -48,10 +47,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float queueMoveSpeed = 8f;
     [SerializeField] private float seatHeightOffset = 0.1f;
     [SerializeField] private float dragZOffset = -2f;
-    [SerializeField] private float queueMoveDuration = 0.5f; // Hareketin ne kadar süreceği (saniye)
-    [SerializeField] private int visableAnimalCount = 3; // Hareketin ne kadar süreceği (saniye)
     [SerializeField] private Vector3 eyepatchOffset = new Vector3(0f, -0.5f, -0.25f);
-
 
 
     [Header("Düşünce Balonu Ayarları")]
@@ -133,9 +129,6 @@ public class GameManager : MonoBehaviour
     // Mevcut oyun durumunu tutacak değişken
     public static GameState CurrentGameState { get; private set; }
 
-    // --- OPTİMİZASYON İÇİN EKLENEN DEĞİŞKENLER ---
-    private Vector3 lastCheckedDragPosition; // Sürükleme sırasında son kontrol edilen pozisyon
-    private const float dragCheckDistanceThreshold = 0.05f; // Sadece bu mesafeden fazla hareket ederse hedef tespiti yap
 
     private void Awake()
     {
@@ -176,6 +169,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        UpdateAnimalQueuePositions();
         HandlePlayerInput();
     }
 
@@ -311,46 +305,21 @@ public class GameManager : MonoBehaviour
 
                 animalQueue.Add(animalController);
             }
-
-            if (animalQueue.Count > visableAnimalCount)
-            {
-                foreach (var renderer in animalController.GetComponentsInChildren<Renderer>(false))
-                {
-                    if (renderer.name.ToLower() != "eyepatch")
-                        renderer.enabled = false;
-                    renderer.gameObject.isStatic = true;
-                }
-            }
         }
     }
-
     private void UpdateAnimalQueuePositions()
     {
-        // DOTween kullanacağı için bu fonksiyon artık Update içinde çağrılmayacak.
-        // Sadece gerektiğinde (bir hayvan yerleştirildiğinde) çağrılacak.
-
         int maxIndex = Mathf.Min(animalQueue.Count, queuePositions.Length);
 
         for (int i = 0; i < maxIndex; i++)
         {
-            if (animalQueue[i] == null) continue;
+            if (animalQueue[i] == selectedAnimal) continue;
 
-            Debug.Log($"Animal {animalQueue[i].animalSO._animalName} is currently {i}. on the line");
-
-            if (i < visableAnimalCount)
-            {
-                foreach (var renderer in animalQueue[i].GetComponentsInChildren<Renderer>())
-                {
-                    if (renderer.name.ToLower() != "eyepatch")
-                        renderer.enabled = true;
-                    renderer.gameObject.isStatic = false;
-                }
-            }
-
-            // Vector3.Lerp yerine DOTween'in DOMove metodunu kullanıyoruz.
-            // Bu, animasyonu başlatır ve kendi kendine bitirmesini sağlar.
-            animalQueue[i].transform.DOMove(queuePositions[i].position, queueMoveDuration)
-                .SetEase(Ease.OutQuad); // Animasyona biraz yumuşaklık katmak için.
+            animalQueue[i].transform.position = Vector3.Lerp(
+                animalQueue[i].transform.position,
+                queuePositions[i].position,
+                Time.deltaTime * queueMoveSpeed
+            );
         }
     }
 
@@ -363,9 +332,8 @@ public class GameManager : MonoBehaviour
         }
 
         if (Input.GetMouseButtonDown(0)) HandleMouseDown();
-        if (selectedAnimal == null) return;
-        if (Input.GetMouseButton(0)) HandleMouseDrag();
-        if (Input.GetMouseButtonUp(0)) HandleMouseUp();
+        if (Input.GetMouseButton(0) && selectedAnimal != null) HandleMouseDrag();
+        if (Input.GetMouseButtonUp(0) && selectedAnimal != null) HandleMouseUp();
     }
 
     private void HandleMouseDown()
@@ -429,10 +397,10 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-    
+
     private void HandleMouseDrag()
     {
-        // Sürükleme mantığınız olduğu gibi kalıyor…
+        // 1) Sürükleme mantığınız olduğu gibi kalıyor…
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (dragPlane.Raycast(mouseRay, out float enter))
         {
@@ -441,7 +409,7 @@ public class GameManager : MonoBehaviour
             selectedAnimal.transform.position = p;
         }
 
-        // OverlapBox ile alt hedef tespiti
+        // 2) OverlapBox ile alt hedef tespiti
         bool foundTarget = false;
 
         // Ayak hizasını hedef alalım:
@@ -452,65 +420,42 @@ public class GameManager : MonoBehaviour
                               - Vector3.up * halfExtents.y;
         Quaternion boxRot = Quaternion.identity;
 
-        // 1) İki layer'ı tek bir LayerMask'te birleştirelim.
-        // Bitwise OR operatörü (|) iki maskeyi birleştirir.
-        LayerMask combinedMask = seatLayer | holdingSlotLayer;
-
-        // 2) OverlapBox'ı SADECE BİR KEZ çağırarak her iki layer'daki objeleri alalım.
-        var allHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, combinedMask);
-
-        // Bulunan hedefi işlemek için başlangıçta null olan değişkenler tanımlayalım.
-        SeatController foundSeat = null;
-        HoldingSlotController foundSlot = null;
-
-        // 3) Sonuçları işleyelim. Orijinal koddaki gibi koltuklara öncelik verelim.
-        // Önce bir koltuk var mı diye kontrol edelim.
-        foreach (var col in allHits)
-        {
-            if (col.TryGetComponent<SeatController>(out var seat))
-            {
-                foundSeat = seat;
-                break; // Koltuk bulduğumuz an döngüden çıkabiliriz çünkü öncelik koltukta.
-            }
-        }
-
-        // 4a) Eğer bir koltuk bulunduysa...
-        if (foundSeat != null)
+        // 2a) Ana koltuklar
+        var seatHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, seatLayer);
+        if (seatHits.Length > 0 &&
+            seatHits[0].TryGetComponent<SeatController>(out var targetSeat))
         {
             foundTarget = true;
-            lastValidHoldingSlotTarget = null; // Diğer hedefi temizle
+            lastValidHoldingSlotTarget = null;
 
-            if (lastValidSeatTarget != foundSeat)
+            if (lastValidSeatTarget != targetSeat)
             {
-                ShowEffectArea(selectedAnimal.animalSO, foundSeat);
-                lastValidSeatTarget = foundSeat;
+                ShowEffectArea(selectedAnimal.animalSO, targetSeat);
+                lastValidSeatTarget = targetSeat;
             }
         }
-        // 4b) Eğer koltuk bulunamadıysa, o zaman bekleme slotu var mı diye bakalım.
         else
         {
-            foreach (var col in allHits)
+            // 2b) Bekleme slotları
+            var holdHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, holdingSlotLayer);
+            foreach (var col in holdHits)
             {
                 if (col.TryGetComponent<HoldingSlotController>(out var slot) &&
                     slot.CurrentState == SlotState.Unlocked)
                 {
-                    foundSlot = slot;
-                    break; // Geçerli ilk slotu bulduk, döngüden çıkalım.
+                    foundTarget = true;
+
+                    // Önce tüm eski highlight’ları temizle
+                    ResetAllHighlights();
+                    lastValidSeatTarget = null;
+                    lastValidHoldingSlotTarget = slot;
+
+                    // ► Holding slot’a highlight uygula ◄
+                    slot.Highlight(greenEffectAreaMaterial);
+                    currentlyHighlightedHoldingSlots.Add(slot);
+
+                    break;
                 }
-            }
-
-            if (foundSlot != null)
-            {
-                foundTarget = true;
-
-                // Önce tüm eski highlight'ları temizle
-                ResetAllHighlights();
-                lastValidSeatTarget = null; // Diğer hedefi temizle
-                lastValidHoldingSlotTarget = foundSlot;
-
-                // ► Holding slot'a highlight uygula ◄
-                foundSlot.Highlight(greenEffectAreaMaterial);
-                currentlyHighlightedHoldingSlots.Add(foundSlot);
             }
         }
 
@@ -523,7 +468,7 @@ public class GameManager : MonoBehaviour
         }
 
         // 4) (Opsiyonel) OverlapBox'ı görselleştirmek için
-        //DebugDrawBox(boxCenter, halfExtents, boxRot, foundTarget ? Color.green : Color.red);
+        DebugDrawBox(boxCenter, halfExtents, boxRot, foundTarget ? Color.green : Color.red);
     }
 
     private void DebugDrawBox(Vector3 center, Vector3 halfExtents, Quaternion rot, Color c)
@@ -549,6 +494,8 @@ public class GameManager : MonoBehaviour
         Debug.DrawLine(points[2], points[6], c);
         Debug.DrawLine(points[3], points[7], c);
     }
+
+
 
     private void HandleMouseUp()
     {
@@ -577,7 +524,6 @@ public class GameManager : MonoBehaviour
             placedSuccessfully = TryPlaceOnHoldingSlot(lastValidHoldingSlotTarget);
         }
 
-
         // 3. Eðer hiçbir yere yerleþemediyse, orijinal pozisyonuna geri dön.
         if (!placedSuccessfully)
         {
@@ -585,7 +531,6 @@ public class GameManager : MonoBehaviour
             ReturnAnimalToOrigin();
         }
 
-        UpdateAnimalQueuePositions();
 
         selectedAnimal.gameObject.layer = selectedAnimal.originalLayer;
         selectedAnimal = null;
@@ -692,6 +637,54 @@ public class GameManager : MonoBehaviour
         animal.gameObject.layer = animal.originalLayer;
         CheckWinCondition();
     }
+
+    /*
+    private bool IsPlacementValid(SeatController targetSeat)
+    {
+        if (selectedAnimal == null)
+        {
+            Debug.LogError("IsPlacementValid çağrıldı ancak selectedAnimal null!");
+            return false;
+        }
+
+        // 1) CurrentLevelAnimals içindeki prefab'lar değil,
+        //    runtime'daki AnimalController'lar üzerinden veri toplayın.
+        //    Aksi taktirde prefab.GetComponent<AnimalController>() null döner.
+
+
+        // 2) Önce koltuğu alıp null kontrolü yapın!
+        Vector2Int checkPos = targetSeat.GridPosition;
+        SeatController adjacentSeat = gridSystem.GetSeatAt(checkPos);
+        if (adjacentSeat == null)
+        {
+            Debug.LogWarning($"Soldaki komşu koltuk bulunamadı: [{checkPos.x},{checkPos.y}]");
+            return false;
+        }
+
+        // 3) Burada SeatController.GridPosition’ı doğrudan değiştirmek yerine
+        //    yeni bir Vector2Int ile gridOriginPos’u hesaplayın:
+        Vector2Int newOrigin = new Vector2Int(
+            adjacentSeat.GridPosition.x,
+            adjacentSeat.GridPosition.y
+        );
+
+        // 4) animalSO’nun null olmadığından emin olun
+        var animalController = selectedAnimal;
+        if (animalController.animalSO == null)
+        {
+            Debug.LogError($"{animalController.name} üzerinde AnimalSO yok!");
+            return false;
+        }
+
+        animalController.animalSO.gridOriginPos = newOrigin;
+        //Debug.Log($"{animalController.animalSO._animalName} yeni gridOriginPos: {newOrigin}");
+
+        // 5) Interaction testi için doğru listeyi kullanın
+        bool isValid = _animalManager.IsAllInteractionsValid(animalSOs);
+        //Debug.Log("isValid: " + isValid);
+        return isValid;
+    }
+    */
 
     private void LoseLife()
     {
@@ -922,9 +915,6 @@ public class GameManager : MonoBehaviour
     private void StartDraggingSelectedAnimal()
     {
         if (selectedAnimal == null) return;
-
-        // OPTİMİZASYON: Başlangıç pozisyonunu ayarla
-        lastCheckedDragPosition = selectedAnimal.transform.position;
 
         selectedAnimal.ClearMyBubbles();
         selectedAnimal.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
@@ -1242,8 +1232,6 @@ public class GameManager : MonoBehaviour
 
         PowerUpController.Instance.DecreaseRemainingUse(_recallPowerUpSO);
 
-        UpdateAnimalQueuePositions();
-
         // Başarı sesi ve log
         SoundManager.Instance.PlaySFX("RecallSuccess");
         Debug.Log($"{animal.animalSO._animalName} geri çağrıldı!");
@@ -1302,6 +1290,20 @@ public class GameManager : MonoBehaviour
         animal.transform.DOKill();
         animal.transform.rotation = Quaternion.identity;
 
+        //var rends = animal.GetComponentsInChildren<SkinnedMeshRenderer>();
+
+        //foreach (var rend in rends)
+        //{
+        //    // Orijinal mesh’e bağlı kalmak için sharedMaterials kullanıyoruz
+        //    var count = rend.sharedMaterials.Length;
+        //    var newMats = new Material[count];
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        newMats[i] = whiteEffectAreaMaterial;  // buraya atamak istediğiniz Material referansını koyun
+        //    }
+        //    rend.materials = newMats;
+        //}
+
         // Durumu güncelle
         animal.animalSO.traits.Clear();
         animal.animalSO.effectedBySkill = true;
@@ -1317,8 +1319,6 @@ public class GameManager : MonoBehaviour
         animal.eyepatchRenderer.enabled = true;
         if (animal.occupiedSeats.Count > 0)
             animal.eyepatchRenderer.transform.position += eyepatchOffset;
-
-        UpdateAnimalQueuePositions();
 
         Debug.Log($"{animal.animalSO._animalName} gozu baglandi!");
 
