@@ -48,12 +48,11 @@ public class GameManager : MonoBehaviour
     [SerializeField] private float seatHeightOffset = 0.1f;
     [SerializeField] private float dragZOffset = -2f;
     [SerializeField] private Vector3 eyepatchOffset = new Vector3(0f, -0.5f, -0.25f);
-
+    [SerializeField] private float dragSwayAmount = 5f;    // Sürüklerken ne kadar yana eğileceği (derece).
+    [SerializeField] private float dragSwayDuration = 1f; // Bir tam sallanma döngüsünün süresi.
 
     [Header("Düşünce Balonu Ayarları")]
     [SerializeField] private GameObject thoughtBubblePrefab;
-    // LİSTENİN TÜRÜNÜ DEĞİŞTİRİN:
-    // BU DEĞİŞKENİ PUBLİC YAPIN:
     public Vector3 bubbleOffset = new Vector3(0, 1.5f, 0);
 
 
@@ -66,8 +65,6 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject heartIconPrefab;
 
     [Header("Bekleme Koltuðu Ayarlarý")]
-    // Bu diziye artýk gerek yok, çünkü slotlarý kodla oluþturacaðýz.
-    // [SerializeField] private HoldingSlotController[] holdingSlots; 
     [Tooltip("Bekleme slotlarýnýn oluþturulacaðý parent obje.")]
     [SerializeField] private Transform holdingSlotsParent;
     [Tooltip("Normal, kilitsiz bekleme koltuðu prefab'ý.")]
@@ -94,6 +91,7 @@ public class GameManager : MonoBehaviour
     [SerializeField] private GameObject winUI;
     [SerializeField] private InGameUIManager inGameUIManager;
 
+
     // --- Özel Deðiþkenler ---
     private List<SeatController> currentlyHighlightedSeats = new List<SeatController>();
     private List<HoldingSlotController> currentlyHighlightedHoldingSlots = new List<HoldingSlotController>();
@@ -104,6 +102,7 @@ public class GameManager : MonoBehaviour
     private AnimalController selectedAnimal = null;
     private Plane dragPlane;
     private Vector3 offset;
+
 
     private int currentLives;
     private List<GameObject> heartIcons = new List<GameObject>();
@@ -126,7 +125,6 @@ public class GameManager : MonoBehaviour
     private bool isRecallModeActive = false;
     private bool isEyepatchModeActive = false;
 
-    // Mevcut oyun durumunu tutacak değişken
     public static GameState CurrentGameState { get; private set; }
 
 
@@ -142,23 +140,19 @@ public class GameManager : MonoBehaviour
 
         Time.timeScale = 1f;
 
-        // 1. Sistemleri kur
         gridSystem = new GridSystem(seatParent, gridOriginReference, gridCellSize);
         _animalManager = new AnimalManager();
         animalSOs = new List<AnimalSO>(); // Kural sisteminin kullanacağı listeyi başlat
         _coinManager = CoinManager.Instance;
 
-        //Oyun her başladığında durumu playing olarak ayarlıyoruz.
         CurrentGameState = GameState.Playing;
         Time.timeScale = 1f;
 
         isWinSequenceStarted = false;
         isGameOverSequenceStarted = false;
 
-        // 2. Editörde atanan başlangıç hayvanlarını sahneye yerleştir
         PlaceStartingAnimals();
 
-        // 3. Diğer sistemleri kurmaya devam et
         SetupHoldingSlots();
         SetupLives();
         InitializeAnimalQueue();
@@ -188,12 +182,10 @@ public class GameManager : MonoBehaviour
 
     public void AddOneLife()
     {
-        // Eğer canlar zaten maksimumda değilse...
         if (currentLives < maxLives)
         {
             currentLives++;
 
-            // UI'da yeni bir kalp ikonu oluştur.
             if (heartIconPrefab != null && heartsContainer != null)
             {
                 GameObject heart = Instantiate(heartIconPrefab, heartsContainer);
@@ -207,13 +199,13 @@ public class GameManager : MonoBehaviour
     public void ResetLevelForContinue()
     {
         // ... kazanma kaybetme durumu kontrolü.
-        isWinSequenceStarted = false; // Seviye sıfırlandığında da sıfırla
+        isWinSequenceStarted = false; 
         isGameOverSequenceStarted = false;
     }
 
     public void RestartCurrentLevel()
     {
-        CurrentGameState = GameState.Playing; // Tekrar oynanabilir yap
+        CurrentGameState = GameState.Playing;
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
@@ -223,7 +215,7 @@ public class GameManager : MonoBehaviour
         if (CurrentGameState == GameState.Playing)
         {
             CurrentGameState = GameState.Paused;
-            Time.timeScale = 0f; // Zamanı durdur (animasyonlar vb. için)
+            Time.timeScale = 0f;
             Debug.Log("Oyun Duraklatıldı.");
         }
     }
@@ -233,7 +225,7 @@ public class GameManager : MonoBehaviour
         if (CurrentGameState == GameState.Paused)
         {
             CurrentGameState = GameState.Playing;
-            Time.timeScale = 1f; // Zamanı normale döndür
+            Time.timeScale = 1f;
             Debug.Log("Oyun Devam Ediyor.");
         }
     }
@@ -256,7 +248,6 @@ public class GameManager : MonoBehaviour
 
     private void SetupAnimalSOs()
     {
-
         // BU FONKSİYON ARTIK SADECE KUYRUKTAKİ HAYVANLAR İÇİN ÇALIŞIR.
         // Başlangıç hayvanlarının SO'ları PlaceStartingAnimals içinde zaten ayarlandı.
         foreach (var ac in animalQueue)
@@ -265,7 +256,7 @@ public class GameManager : MonoBehaviour
                 continue;
 
             AnimalSO runtimeSO = ScriptableObject.Instantiate(ac.animalSO);
-            runtimeSO.gridOriginPos = new Vector2Int(-1, -1); // Kuyruktaki hayvanların pozisyonu yoktur
+            runtimeSO.gridOriginPos = new Vector2Int(-1, -1); // grid dışında
             ac.animalSO = runtimeSO;
             animalSOs.Add(runtimeSO);
         }
@@ -280,9 +271,6 @@ public class GameManager : MonoBehaviour
     private void InitializeAnimalQueue()
     {
         animalQueue.Clear();
-        // currentLevelAnimals listesinden kuyruğa hayvan ekle.
-        // Not: Seviye başında yerleştirdiğiniz hayvanları bu listeden çıkarabilirsiniz,
-        // böylece aynı hayvanlar hem oturup hem de kuyrukta olmaz.
         int count = Mathf.Min(currentLevelAnimals.Count, queuePositions.Length);
         for (int i = 0; i < count; i++)
         {
@@ -299,8 +287,6 @@ public class GameManager : MonoBehaviour
             {
                 animalController.Initialize();
 
-                // --- İŞTE YENİ EKLENEN SATIR ---
-                // Sadece kuyruğa eklenen hayvanların kurallarını/balonlarını göster.
                 animalController.DisplayMyRules();
 
                 animalQueue.Add(animalController);
@@ -325,7 +311,6 @@ public class GameManager : MonoBehaviour
 
     private void HandlePlayerInput()
     {
-        // Eğer oyun oynanış durumunda değilse, hiçbir oyuncu girdisini işleme alma.
         if (CurrentGameState != GameState.Playing)
         {
             return;
@@ -350,12 +335,10 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        // Eðer zaten bir hayvan seçiliyse, yeni bir týklama iþlemi yapma.
         if (selectedAnimal != null) return;
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        // 1. Bekleme koltuðundaki bir hayvana mý týklandý?
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
         {
             foreach (var slot in holdingSlots)
@@ -373,7 +356,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // 2. Kuyruktaki hayvana mý týklandý?
         if (Physics.Raycast(ray, out hit, 100f, animalLayer))
         {
             if (animalQueue.Count > 0 && hit.collider.gameObject == animalQueue[0].gameObject)
@@ -388,7 +370,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // 3. Kilitli bir slota mý týklandý?
         if (Physics.Raycast(ray, out hit, 100f, holdingSlotLayer))
         {
             if (hit.collider.TryGetComponent<HoldingSlotController>(out var slotController) && slotController.CurrentState == SlotState.Locked)
@@ -400,7 +381,6 @@ public class GameManager : MonoBehaviour
 
     private void HandleMouseDrag()
     {
-        // 1) Sürükleme mantığınız olduğu gibi kalıyor…
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (dragPlane.Raycast(mouseRay, out float enter))
         {
@@ -409,10 +389,8 @@ public class GameManager : MonoBehaviour
             selectedAnimal.transform.position = p;
         }
 
-        // 2) OverlapBox ile alt hedef tespiti
         bool foundTarget = false;
 
-        // Ayak hizasını hedef alalım:
         Vector3 boxOffset = new Vector3(0, -0.2f, 0.5f);
         Vector3 halfExtents = new Vector3(0.4f, 4f, 0.5f);
         Vector3 boxCenter = selectedAnimal.transform.position
@@ -420,10 +398,15 @@ public class GameManager : MonoBehaviour
                               - Vector3.up * halfExtents.y;
         Quaternion boxRot = Quaternion.identity;
 
-        // 2a) Ana koltuklar
-        var seatHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, seatLayer);
-        if (seatHits.Length > 0 &&
-            seatHits[0].TryGetComponent<SeatController>(out var targetSeat))
+        // iki kere overlapbox yapmak yerine layerları birleştiriyoruz
+        LayerMask allSeats = seatLayer | holdingSlotLayer;
+
+        // ana koltuklar
+        var hits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, allSeats);
+
+
+        if (hits.Length > 0 &&
+            hits[0].TryGetComponent<SeatController>(out var targetSeat))
         {
             foundTarget = true;
             lastValidHoldingSlotTarget = null;
@@ -436,9 +419,8 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // 2b) Bekleme slotları
-            var holdHits = Physics.OverlapBox(boxCenter, halfExtents, boxRot, holdingSlotLayer);
-            foreach (var col in holdHits)
+            // bekleme slotları
+            foreach (var col in hits)
             {
                 if (col.TryGetComponent<HoldingSlotController>(out var slot) &&
                     slot.CurrentState == SlotState.Unlocked)
@@ -459,7 +441,6 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // 3) Hiçbir şey yoksa temizle
         if (!foundTarget)
         {
             ResetAllHighlights();
@@ -467,7 +448,6 @@ public class GameManager : MonoBehaviour
             lastValidHoldingSlotTarget = null;
         }
 
-        // 4) (Opsiyonel) OverlapBox'ı görselleştirmek için
         DebugDrawBox(boxCenter, halfExtents, boxRot, foundTarget ? Color.green : Color.red);
     }
 
@@ -501,36 +481,29 @@ public class GameManager : MonoBehaviour
     {
         if (selectedAnimal == null) return;
 
-        // --- YENİ EKLENEN DURDURMA KISMI ---
-        // "drag_sway" kimliğine sahip sallanma animasyonunu durdur.
+        // animasyon sifirla
         DOTween.Kill("drag_sway");
-        // Hayvanın rotasyonunu anında sıfırla ki yamuk kalmasın.
         selectedAnimal.transform.rotation = Quaternion.identity;
-        // --- BİTİŞ ---
 
 
         ResetAllHighlights();
 
         bool placedSuccessfully = false;
 
-        // 1. ÖNCELÝK: Hafýzada geçerli bir ana koltuk hedefi var mý?
         if (lastValidSeatTarget != null)
         {
             placedSuccessfully = TryPlaceOnSeat(lastValidSeatTarget);
         }
-        // 2. ÖNCELÝK: Hafýzada geçerli bir bekleme koltuðu hedefi var mý?
         else if (lastValidHoldingSlotTarget != null)
         {
             placedSuccessfully = TryPlaceOnHoldingSlot(lastValidHoldingSlotTarget);
         }
 
-        // 3. Eðer hiçbir yere yerleþemediyse, orijinal pozisyonuna geri dön.
         if (!placedSuccessfully)
         {
             selectedAnimal.animalSO.gridOriginPos = new Vector2Int(-1, -1);
             ReturnAnimalToOrigin();
         }
-
 
         selectedAnimal.gameObject.layer = selectedAnimal.originalLayer;
         selectedAnimal = null;
@@ -542,17 +515,14 @@ public class GameManager : MonoBehaviour
     {
         if (targetSeat == null || selectedAnimal == null) return false;
 
-        // --- Simülasyon Başlangıcı ---
+        // --- simülasyon başlangıcı ---
         Vector2Int originalPos = selectedAnimal.animalSO.gridOriginPos;
         selectedAnimal.animalSO.gridOriginPos = targetSeat.GridPosition;
-        // ---
 
-        // 1. AnimalManager'dan "etkilenen" hayvanların listesini al.
         bool isValid = _animalManager.IsAllInteractionsValid(animalSOs, out List<AnimalSO> affectedAnimals);
 
-        // --- Simülasyonu Geri Al ---
+        // --- simülasyonu geri Al ---
         selectedAnimal.animalSO.gridOriginPos = originalPos;
-        // ---
 
         if (!isValid)
         {
@@ -581,7 +551,7 @@ public class GameManager : MonoBehaviour
             return false;
         }
 
-        // Hamle geçerliyse...
+        // hamle geçerliyse...
         SoundManager.Instance.PlaySFX("PlacementCorrect");
         selectedAnimal.animalSO.gridOriginPos = targetSeat.GridPosition;
         PlaceAnimalOnSeat(selectedAnimal, targetSeat);
@@ -599,7 +569,6 @@ public class GameManager : MonoBehaviour
             animator.SetBool("isSeated", true);
         }
 
-        // Hayvanın hangi koltukları işgal ettiğini listesine kaydet.
         animal.occupiedSeats.Clear();
         Vector2Int size = animal.animalSO.size;
         for (int x = 0; x < size.x; x++)
@@ -615,20 +584,16 @@ public class GameManager : MonoBehaviour
                 }
             }
         }
-        // --- BİTİŞ ---
 
 
         if (animal.animalSO.effectedBySkill && animal.eyepatchRenderer != null)
         {
             var tr = animal.eyepatchRenderer.transform;
 
-            // Önce varsa devam eden tween’i iptal et
             tr.DOKill();
 
-            // Hedef pozisyonu hesapla
             Vector3 targetPos = tr.position + eyepatchOffset;
 
-            // Yarım saniyede yumuşakça geçiş
             tr.DOMove(targetPos, 0.4f)
               .SetEase(Ease.OutQuad);
         }
@@ -698,20 +663,15 @@ public class GameManager : MonoBehaviour
             heartIcons.RemoveAt(heartIcons.Count - 1);
         }
 
-        // Eğer canlar bittiyse, oyunu bitir.
         if (currentLives <= 0)
         {
-            GameOver(false); // Can kaybı nedeniyle oyun bitti.
-            return; // Fonksiyondan çık, alttaki kontrolü yapma.
+            GameOver(false); 
+            return;
         }
 
-        // --- YENİ EKLENEN KISIM ---
-        // Canlar bitmedi, ama acaba bu son hamle oyunu kilitledi mi?
-        // CheckWinCondition'daki soft-lock mantığının bir kopyasını buraya alıyoruz.
         List<AnimalSO> waitingAnimals = animalQueue.Select(a => a.animalSO).ToList();
         List<AnimalSO> seatedSOs = animalSOs.Where(so => so.gridOriginPos.x >= 0).ToList();
 
-        // Bekleme slotlarındaki hayvanları da bekleyenler listesine ekle.
         foreach (var slot in holdingSlots)
         {
             if (slot.CurrentState == SlotState.Occupied && slot.OccupyingAnimal != null)
@@ -720,26 +680,21 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Soft-lock kontrolünü yap.
         bool isSoftLocked = _animalManager.IsSoftLocked(waitingAnimals, gridSystem.GetAllEmptySeats(), seatedSOs);
         if (isSoftLocked)
         {
             Debug.LogWarning("CAN KAYBINDAN SONRA Soft lock TESPİT EDİLDİ! Oyun bitiriliyor...");
             GameOver(true); // Soft-lock nedeniyle oyun bitti.
         }
-        // --- YENİ KISMIN SONU ---
     }
 
-    // GameManager.cs
-
-    private void GameOver(bool isSoftLock) // DEĞİŞTİ: Parametre eklendi.
+    private void GameOver(bool isSoftLock)
     {
         if (isGameOverSequenceStarted) return;
         isGameOverSequenceStarted = true;
 
-        CurrentGameState = GameState.Lost; //oyun kaybedildi oalrak gamestati güncelle
+        CurrentGameState = GameState.Lost;
 
-        // Neye göre kaybedildiğine bağlı olarak metni belirle.
         string loseReasonText = isSoftLock ? "NO MOVES LEFT" : "FAILED"; // YENİ
 
         float loseDelay = 0.5f;
@@ -749,8 +704,7 @@ public class GameManager : MonoBehaviour
 
             if (inGameUIManager != null)
             {
-                // Belirlediğimiz metni UI yöneticisine gönder.
-                inGameUIManager.ShowLoseUI(loseReasonText); // DEĞİŞTİ
+                inGameUIManager.ShowLoseUI(loseReasonText);
             }
             else
             {
@@ -761,7 +715,6 @@ public class GameManager : MonoBehaviour
 
     private void CheckWinCondition()
     {
-        // Eğer kazanma süreci zaten başlamışsa, tekrar kontrol etme.
         if (isWinSequenceStarted) return;
 
         bool isHoldingSlotsOccipied = false;
@@ -774,16 +727,13 @@ public class GameManager : MonoBehaviour
             }
         }
 
-        // Kazanma koşulu sağlandı mı?
         if (animalQueue.Count == 0 && !isHoldingSlotsOccipied)
         {
-            // Kazanma sürecini başlat ve tekrar başlatılmasını engelle.
             isWinSequenceStarted = true;
 
-            CurrentGameState = GameState.Won; //Gamestate kazandı
+            CurrentGameState = GameState.Won;
 
-            // --- DOTWEEN GECİKMESİ BURADA ---
-            float winDelay = 0.5f; // 0.5 saniye gecikme
+            float winDelay = 0.2f;
             DOVirtual.DelayedCall(winDelay, () =>
             {
 
@@ -792,7 +742,6 @@ public class GameManager : MonoBehaviour
                 if (currentLevel >= unlockedLevel)
                 {
                     SaveManager.SaveLevel(currentLevel + 1);
-                    // Konsolda seviye kilidinin açıldığını net bir şekilde görelim.
                     Debug.Log($"SEVİYE {currentLevel + 1} KİLİDİ AÇILDI!");
                 }
 
@@ -803,7 +752,6 @@ public class GameManager : MonoBehaviour
                     Debug.Log($"{levelCoinReward} COIN KAZANILDI VE KAYDEDİLDİ! Toplam: {_coinManager.CurrentCoins}");
                 }
 
-                // Bu kod, 0.5 saniye sonra çalışacak.
                 SoundManager.Instance.PlaySFX("LevelWin");
                 Debug.Log("TEBRİKLER! SEVİYE TAMAMLANDI!");
 
@@ -819,7 +767,6 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // Soft-lock kontrolü olduğu gibi kalabilir.
             List<AnimalSO> waitingAnimals = animalQueue.Select(a => a.animalSO).ToList();
             List<AnimalSO> seatedSOs = animalSOs.Where(so => so.gridOriginPos.x >= 0).ToList();
             foreach (var animal in holdingSlots)
@@ -861,26 +808,18 @@ public class GameManager : MonoBehaviour
 
     private void SetupHoldingSlots()
     {
-        // Önce eski slotlarý temizle (seviye yeniden baþlarsa)
         foreach (Transform child in holdingSlotsParent)
         {
             Destroy(child.gameObject);
         }
         holdingSlots.Clear();
 
-        // Toplam slot sayýsý kadar döngüye gir.
         for (int i = 0; i < totalHoldingSlots; i++)
         {
-            // --- DEÐÝÞÝKLÝK BURADA ---
-            // Pozisyonu X eksenine göre hesapla (yan yana dizilecekler)
             Vector3 position = holdingSlotsParent.position + new Vector3(i * holdingSlotSpacing, 0, 0);
 
-            // Geri kalan mantýk ayný.
-
-            // Eðer bu slot kilitli olacaksa...
             if (i >= unlockedSlotsAtStart)
             {
-                // Kilitli prefab'ý oluþtur.
                 GameObject slotObj = Instantiate(lockedSlotPrefab, position, Quaternion.identity, holdingSlotsParent);
                 HoldingSlotController controller = slotObj.GetComponent<HoldingSlotController>();
 
@@ -891,10 +830,8 @@ public class GameManager : MonoBehaviour
 
                 }
             }
-            // Eðer bu slot açýk olacaksa...
             else
             {
-                // Normal prefab'ý oluþtur.
                 GameObject slotObj = Instantiate(holdingSlotPrefab, position, Quaternion.identity, holdingSlotsParent);
                 slotObj.transform.rotation = holdingSlotsParent.rotation;
                 HoldingSlotController controller = slotObj.GetComponent<HoldingSlotController>();
@@ -909,9 +846,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    [SerializeField] private float dragSwayAmount = 5f;    // Sürüklerken ne kadar yana eğileceği (derece).
-    [SerializeField] private float dragSwayDuration = 1f; // Bir tam sallanma döngüsünün süresi.
-
     private void StartDraggingSelectedAnimal()
     {
         if (selectedAnimal == null) return;
@@ -919,39 +853,27 @@ public class GameManager : MonoBehaviour
         selectedAnimal.ClearMyBubbles();
         selectedAnimal.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 
-        // --- YENİ EKLENEN SALLANMA ANİMASYONU ---
-        // Hayvanı Z ekseninde (ileri-geri) sürekli salla.
-        // Animasyona özel bir kimlik atıyoruz ki sadece bu animasyonu durdurabilelim.
+        // hayvanı Z ekseninde sürekli sallama
         selectedAnimal.transform.DORotate(new Vector3(0, 0, dragSwayAmount), dragSwayDuration)
             .SetEase(Ease.InOutSine)
-            .SetLoops(-1, LoopType.Yoyo) // Sonsuz ve ileri-geri salınım
+            .SetLoops(-1, LoopType.Yoyo)
             .SetId("drag_sway");
 
-        // Sürükleme düzlemini Y ekseninde, kaldýrma yüksekliðinde oluþtur.
         dragPlane = new Plane(Vector3.up, new Vector3(0, dragLiftHeight, 0));
 
         Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (dragPlane.Raycast(mouseRay, out float enter))
         {
-            // Hayvanýn baþlangýç pozisyonunu al.
             Vector3 animalStartPosition = selectedAnimal.transform.position;
 
-            // Mouse'un düzlemdeki baþlangýç noktasýný al.
             Vector3 planeHitPoint = mouseRay.GetPoint(enter);
 
-            // Hem Y hem de Z ofsetini tek seferde hesapla.
-            // Hayvanýn son pozisyonu = (Düzlemdeki Nokta + Z Ofseti) + (Baþlangýçtaki Fark)
-            // Offset = Baþlangýç Pozisyonu - (Düzlemdeki Nokta + Z Ofseti)
             offset = animalStartPosition - (planeHitPoint + new Vector3(0, 0, dragZOffset));
         }
     }
     private void TryUnlockSlot(HoldingSlotController lockedSlot)
     {
         Debug.Log("Kilitli slota týklandý! Kilit açýlýyor...");
-
-        // TODO: Para kontrolü mantýðý buraya eklenebilir.
-        // if (playerCoins < unlockCost) return;
-        // playerCoins -= unlockCost;
 
         // 1. Mevcut kilitli slotun pozisyonunu ve parent'ýný kaydet.
         Vector3 position = lockedSlot.transform.position;
@@ -979,7 +901,6 @@ public class GameManager : MonoBehaviour
     }
     private bool TryPlaceOnHoldingSlot(HoldingSlotController targetSlot)
     {
-        // Hedefin geçerli olduðundan emin ol.
         if (targetSlot == null || targetSlot.CurrentState != SlotState.Unlocked)
         {
             return false;
@@ -987,7 +908,6 @@ public class GameManager : MonoBehaviour
 
         SoundManager.Instance.PlaySFX("PlaceToHoldingSlot");
 
-        // Hayvaný bu hedefe yerleþtir.
         targetSlot.PlaceAnimal(selectedAnimal);
         selectedAnimal.transform.position = targetSlot.transform.position + new Vector3(0, seatHeightOffset, 0);
         animalQueue.Remove(selectedAnimal);
@@ -996,31 +916,25 @@ public class GameManager : MonoBehaviour
 
     private void ReturnAnimalToOrigin()
     {
-        selectedAnimal.isSeated = false; // Artık oturmuyor.
-        // Eðer hayvan bir bekleme slotundan alýndýysa...
+        selectedAnimal.isSeated = false;
         if (startParentOfSelectedAnimal != null && startParentOfSelectedAnimal.TryGetComponent<HoldingSlotController>(out var slot))
         {
-            // Onu tekrar ayný slota geri koy.
             slot.PlaceAnimal(selectedAnimal);
             selectedAnimal.transform.position = slot.transform.position + new Vector3(0, seatHeightOffset, 0);
         }
-        // Eðer hayvan kuyruktan alýndýysa...
         else
         {
-            // Kuyrukta zaten yoksa, sýranýn en baþýna tekrar ekle.
             if (!animalQueue.Contains(selectedAnimal))
             {
                 animalQueue.Insert(0, selectedAnimal);
             }
         }
 
-        // Hatalý yerleþtirmeden sonra hayvanýn kurallarýný tekrar göster.
         selectedAnimal.DisplayMyRules();
     }
 
     private void ShowEffectArea(AnimalSO animalSO, SeatController potentialSeat)
     {
-        // Önce varsa eski highlight'larý temizle.
         ResetAllHighlights();
 
         List<SeatController> neighbors = new List<SeatController>();
@@ -1073,15 +987,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Tüm renklendirilmiþ koltuklarý orijinal rengine döndürür.
     private void ResetAllHighlights()
     {
-        // SeatController highlight’larını temizle
         foreach (var seat in currentlyHighlightedSeats)
             seat?.ResetHighlight();
         currentlyHighlightedSeats.Clear();
 
-        // HoldingSlotController highlight’larını temizle
         foreach (var slot in currentlyHighlightedHoldingSlots)
             slot?.ResetHighlight();
         currentlyHighlightedHoldingSlots.Clear();
@@ -1103,28 +1014,22 @@ public class GameManager : MonoBehaviour
                 );
                 if (animalObj.TryGetComponent<AnimalController>(out var animalController))
                 {
-                    // Bu fonksiyon artık balon OLUŞTURMUYOR, bu yüzden burada çağırmak güvenli.
                     animalController.Initialize();
 
                     animalController.isSeated = true;
                     animalController.isRecallable = false;
                     animalController.occupiedSeats.Add(seat);
 
-                    // 3. Kural sisteminin kullanması için AnimalSO'dan bir RUNTIME KOPYASI oluştur
                     AnimalSO runtimeSO = ScriptableObject.Instantiate(animalController.animalSO);
-                    runtimeSO.gridOriginPos = seat.GridPosition; // Grid pozisyonunu bu kopyaya ata
-                    animalController.animalSO = runtimeSO; // Controller'ın artık bu kopyayı kullanmasını sağla
-                    animalSOs.Add(runtimeSO); // Hayvanı, kural yöneticisinin listesine ekle
+                    runtimeSO.gridOriginPos = seat.GridPosition;
+                    animalController.animalSO = runtimeSO;
+                    animalSOs.Add(runtimeSO);
 
-                    // 4. Hayvanın boyutuna göre kapladığı TÜM koltukları "dolu" olarak işaretle
                     Vector2Int size = runtimeSO.size;
                     for (int x = 0; x < size.x; x++)
                     {
                         for (int y = 0; y < size.y; y++)
                         {
-                            // Not: Grid'inizin Y ekseninin nasıl çalıştığına göre (aşağı mı yukarı mı artıyor)
-                            // buradaki 'seat.GridPosition.y + y' ifadesini '- y' olarak değiştirmeniz gerekebilir.
-                            // Genellikle +y doğrudur.
                             Vector2Int currentPos = new Vector2Int(seat.GridPosition.x + x, seat.GridPosition.y + y);
                             SeatController occupiedSeat = gridSystem.GetSeatAt(currentPos);
                             if (occupiedSeat != null)
@@ -1183,7 +1088,6 @@ public class GameManager : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
         {
-            // Tıklanan hayvan ise ve recallable durumdaysa çağır
             if (hit.collider.TryGetComponent<AnimalController>(out var animal)
                 && animal.isSeated
                 && animal.isRecallable)
@@ -1206,40 +1110,32 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void RecallAnimal(AnimalController animal)
     {
-        // Animasyon ve rotasyon temizliği
         animal.transform.DOKill();
         animal.transform.rotation = Quaternion.identity;
         if (animal.eyepatchRenderer != null)
             animal.eyepatchRenderer.transform.position -= eyepatchOffset;
 
-        // Koltukları boşalt
         foreach (var seat in animal.occupiedSeats)
             seat?.Vacate();
         animal.occupiedSeats.Clear();
 
-        // Durumu güncelle
         animal.isSeated = false;
         animal.animalSO.gridOriginPos = new Vector2Int(-1, -1);
 
-        // Kuyruğun başına ekle
         animalQueue.Insert(0, animal);
 
-        // Kuralları göster
         animal.DisplayMyRules();
 
-        // Modu kapat
         DeactivateRecallMode();
 
         PowerUpController.Instance.DecreaseRemainingUse(_recallPowerUpSO);
 
-        // Başarı sesi ve log
         SoundManager.Instance.PlaySFX("RecallSuccess");
         Debug.Log($"{animal.animalSO._animalName} geri çağrıldı!");
     }
 
     public void ActivateEyepatchMode()
     {
-        // Eğer zaten seçili bir hayvan varsa veya hakkınız kalmadıysa başarısız
         if (selectedAnimal != null || _eyepatchPowerUpSO.RemainingUse <= 0)
         {
             SoundManager.Instance.PlaySFX("EyepatchFail");
@@ -1266,7 +1162,6 @@ public class GameManager : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, 100f, animalLayer))
         {
-            // Tıklanan hayvan ise ve recallable durumdaysa çağır
             if (hit.collider.TryGetComponent<AnimalController>(out var animal)
                 && animal.animalSO._animalName == "Aslan"
                 && !animal.animalSO.effectedBySkill)
@@ -1286,34 +1181,16 @@ public class GameManager : MonoBehaviour
 
     private void EyepatchAnimal(AnimalController animal)
     {
-        // Animasyon ve rotasyon temizliği
         animal.transform.DOKill();
         animal.transform.rotation = Quaternion.identity;
 
-        //var rends = animal.GetComponentsInChildren<SkinnedMeshRenderer>();
-
-        //foreach (var rend in rends)
-        //{
-        //    // Orijinal mesh’e bağlı kalmak için sharedMaterials kullanıyoruz
-        //    var count = rend.sharedMaterials.Length;
-        //    var newMats = new Material[count];
-        //    for (int i = 0; i < count; i++)
-        //    {
-        //        newMats[i] = whiteEffectAreaMaterial;  // buraya atamak istediğiniz Material referansını koyun
-        //    }
-        //    rend.materials = newMats;
-        //}
-
-        // Durumu güncelle
         animal.animalSO.traits.Clear();
         animal.animalSO.effectedBySkill = true;
 
-        // Modu kapat
         DeactivateEyepatchMode();
 
         PowerUpController.Instance.DecreaseRemainingUse(_eyepatchPowerUpSO);
 
-        // Başarı sesi ve log
         SoundManager.Instance.PlaySFX("EyepatchSuccess");
 
         animal.eyepatchRenderer.enabled = true;
@@ -1325,11 +1202,8 @@ public class GameManager : MonoBehaviour
     }
     private void StartShakingSeatedAnimals(IEnumerable<AnimalController> animals)
     {
-        // Sahnede AnimalController component'ine sahip tüm objeleri bul.
         foreach (var animal in animals)
         {
-            // DOTween'in DOShakeRotation'ı ile daha yumuşak ve sürekli bir sallanma efekti.
-            // Bu animasyona özel bir kimlik ("shake") atıyoruz ki daha sonra kolayca durdurabilelim.
             animal.transform.DOShakeRotation(
                 duration: 2f,      // Bir tam sallanma döngüsü ne kadar sürsün (saniye).
                 strength: 5f,      // Ne kadar güçlü sallanacağı (derece cinsinden).
@@ -1348,10 +1222,8 @@ public class GameManager : MonoBehaviour
     // </summary>
     private void StopShakingSeatedAnimals()
     {
-        // "shake" ID'sine sahip tüm DOTween animasyonlarını durdur.
         DOTween.Kill("shake");
 
-        // Her ihtimale karşı hayvanların rotasyonunu sıfırla.
         foreach (var animal in AnimalController.Instances)
         {
             if (animal.isSeated)
@@ -1363,20 +1235,16 @@ public class GameManager : MonoBehaviour
 
     private void StartPulsingSeatedAnimals(IEnumerable<AnimalController> animals)
     {
-        // Kaç katına çıkacak, ne kadar süreyle (yarım döngü)
         float pulseScale = 1.15f;
         float pulseDuration = 0.5f;
 
         foreach (var animal in animals)
         {
             var t = animal.transform;
-            // Eğer daha önce atanmış pulse tween varsa temizle
             t.DOKill();
 
-            // Orijinal ölçeği al
             Vector3 originalScale = t.localScale;
 
-            // Sonsuz döngüyle büyüyüp küçülme
             t.DOScale(originalScale * pulseScale, pulseDuration)
              .SetEase(Ease.InOutSine)
              .SetLoops(-1, LoopType.Yoyo)
@@ -1386,17 +1254,13 @@ public class GameManager : MonoBehaviour
 
     private void StopPulsingSeatedAnimals()
     {
-        // 1) "pulse" ID'sine sahip tüm DOTween animasyonlarını durdur
         DOTween.Kill("pulse");
 
-        // 2) Her aktifleştirilmiş hayvanı orijinal ölçeğe döndür
         foreach (var animal in AnimalController.Instances)
         {
             if (animal.isSeated)
             {
-                // Tween varsa tamamen temizle
                 animal.transform.DOKill();
-                // Orijinal ölçek olarak 1,1,1 varsayıyoruz
                 animal.transform.localScale = Vector3.one;
             }
         }
