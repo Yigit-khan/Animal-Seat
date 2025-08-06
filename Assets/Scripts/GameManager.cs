@@ -586,7 +586,7 @@ public class GameManager : MonoBehaviour
         }
 
 
-        if (animal.animalSO.effectedBySkill && animal.eyepatchRenderer != null)
+        if (animal.animalSO.eyepatched && animal.eyepatchRenderer != null)
         {
             var tr = animal.eyepatchRenderer.transform;
 
@@ -1112,7 +1112,7 @@ public class GameManager : MonoBehaviour
     {
         animal.transform.DOKill();
         animal.transform.rotation = Quaternion.identity;
-        if (animal.eyepatchRenderer != null)
+        if (animal.animalSO.eyepatched)
             animal.eyepatchRenderer.transform.position -= eyepatchOffset;
 
         foreach (var seat in animal.occupiedSeats)
@@ -1146,7 +1146,7 @@ public class GameManager : MonoBehaviour
         isEyepatchModeActive = true;
         PowerUpController.Instance.SetPowerUpVisuals(_eyepatchPowerUpSO, true);
         SoundManager.Instance.PlaySFX("PowerUpActivate");
-        StartShakingSeatedAnimals(AnimalController.Instances.Where(animal => animal.animalSO._animalName == "Aslan" && !animal.animalSO.effectedBySkill));
+        StartShakingSeatedAnimals(AnimalController.Instances.Where(animal => animal.animalSO._animalName == "Aslan" && !animal.animalSO.eyepatched));
         Debug.Log($"{_eyepatchPowerUpSO.powerupName} modu aktif. Geri alınacak hayvanı seçin.");
     }
 
@@ -1164,7 +1164,7 @@ public class GameManager : MonoBehaviour
         {
             if (hit.collider.TryGetComponent<AnimalController>(out var animal)
                 && animal.animalSO._animalName == "Aslan"
-                && !animal.animalSO.effectedBySkill)
+                && !animal.animalSO.eyepatched)
             {
                 EyepatchAnimal(animal);
             }
@@ -1185,7 +1185,7 @@ public class GameManager : MonoBehaviour
         animal.transform.rotation = Quaternion.identity;
 
         animal.animalSO.traits.Clear();
-        animal.animalSO.effectedBySkill = true;
+        animal.animalSO.eyepatched = true;
 
         DeactivateEyepatchMode();
 
@@ -1194,7 +1194,7 @@ public class GameManager : MonoBehaviour
         SoundManager.Instance.PlaySFX("EyepatchSuccess");
 
         animal.eyepatchRenderer.enabled = true;
-        if (animal.occupiedSeats.Count > 0)
+        if (animal.isSeated)
             animal.eyepatchRenderer.transform.position += eyepatchOffset;
 
         Debug.Log($"{animal.animalSO._animalName} gozu baglandi!");

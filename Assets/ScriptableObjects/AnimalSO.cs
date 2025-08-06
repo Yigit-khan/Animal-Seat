@@ -21,7 +21,7 @@ public class AnimalSO : ScriptableObject
     [Tooltip("Hayvanın sahip olduğu karakteristiklerin (trait) listesi")]
     public List<AnimalTraitSO> traits;
 
-    [HideInInspector] public bool effectedBySkill = false;
+    [HideInInspector] public bool eyepatched = false;
 
     //private void Awake()
     //{
