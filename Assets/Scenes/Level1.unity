@@ -2036,9 +2036,9 @@ MonoBehaviour:
   queueMoveSpeed: 8
   seatHeightOffset: 0.1
   dragZOffset: -2
-  queueMoveDuration: 0.5
-  visableAnimalCount: 3
   eyepatchOffset: {x: 0, y: -0.5, z: -0.25}
+  dragSwayAmount: 5
+  dragSwayDuration: 1
   thoughtBubblePrefab: {fileID: 7132762222629922322, guid: e1e4b45fd61781a4fada237aef74d1ca, type: 3}
   bubbleOffset: {x: 0, y: 1.351, z: 0.404}
   heartsContainer: {fileID: 879444495}
@@ -2058,8 +2058,6 @@ MonoBehaviour:
   whiteEffectAreaMaterial: {fileID: 2100000, guid: e9e17af4333fb3f4d9c2728817ab2c7d, type: 2}
   winUI: {fileID: 627182255}
   inGameUIManager: {fileID: 717618883}
-  dragSwayAmount: 5
-  dragSwayDuration: 1
 --- !u!4 &1142940857
 Transform:
   m_ObjectHideFlags: 0
