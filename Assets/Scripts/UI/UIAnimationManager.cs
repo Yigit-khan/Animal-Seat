@@ -7,7 +7,6 @@ using UnityEngine.UI;
 
 public class UIAnimationManager : MonoBehaviour
 {
-
     [Header("Coin Settings")]
     [SerializeField] private GameObject coinPrefab;
     [SerializeField] private RectTransform coinSpawnOrigin;
@@ -63,6 +62,7 @@ public class UIAnimationManager : MonoBehaviour
             // 1. GameManager'ý bul ve 1 can eklemesini söyle.
             if (GameManager.Instance != null)
             {
+                GameManager.Instance.ResumeGame();
                 GameManager.Instance.AddOneLife();
             }
 
@@ -187,6 +187,8 @@ public class UIAnimationManager : MonoBehaviour
     private void ShowRewardedAd(System.Action onComplete)
     {
         Debug.Log("Reklam gösteriliyor...");
+        if (GameManager.Instance != null)
+            GameManager.Instance.PauseGame();
         StartCoroutine(SimulateAd(onComplete));
     }
 
