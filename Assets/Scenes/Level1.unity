@@ -2330,7 +2330,6 @@ MonoBehaviour:
   slideOffsetY: 1000
   handImage: {fileID: 223704505}
   tutorialText: {fileID: 17774094}
-  fullTutorialText: Drag and drop the monkey to the empty seat
   textAnimationDuration: 1
 --- !u!114 &1287078061
 MonoBehaviour:
