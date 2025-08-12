@@ -693,7 +693,13 @@ public class GameManager : MonoBehaviour
         if (isGameOverSequenceStarted) return;
         isGameOverSequenceStarted = true;
 
+
         CurrentGameState = GameState.Lost;
+
+        if (tutorialAnimScript.Instance != null)
+        {
+            tutorialAnimScript.Instance.ForceClose();
+        }
 
         string loseReasonText = isSoftLock ? "NO MOVES LEFT" : "FAILED"; // YENİ
 
@@ -762,6 +768,10 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     Debug.LogError("InGameUIManager referansı atanmamış!");
+                }
+                if (tutorialAnimScript.Instance != null)
+                {
+                    tutorialAnimScript.Instance.ForceClose();
                 }
             });
         }

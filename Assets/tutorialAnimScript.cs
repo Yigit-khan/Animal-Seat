@@ -8,18 +8,21 @@ public enum TutorialState
 {
     AnimatingIn,
     WritingText,
-    WaitingForClose
+    WaitingForClose,
+    Closing // Yeni durum: Zorla kapatılıyor
 }
 
 public class tutorialAnimScript : MonoBehaviour
 {
+    // --- YENİ: STATİK REFERANS (SINGLETON BASİTLEŞTİRİLMİŞ HALİ) ---
+    public static tutorialAnimScript Instance { get; private set; }
+
     [Header("Panel Animasyonu")]
     public float slideDuration = 0.5f;
     public float slideOffsetY = 1000f;
 
     [Header("İçerik")]
     public GameObject handImage;
-    [Tooltip("Animasyon uygulanacak olan, sahnede hazır bulunan TextMeshPro objesi.")]
     public TextMeshProUGUI tutorialText;
 
     [Header("Animasyon Süreleri")]
@@ -33,6 +36,16 @@ public class tutorialAnimScript : MonoBehaviour
 
     void Awake()
     {
+        // Statik referansı ayarla. Sahnede sadece bir tane olmalı.
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+        }
+        else
+        {
+            Instance = this;
+        }
+
         currentState = TutorialState.AnimatingIn;
         if (tutorialText != null)
         {
@@ -49,8 +62,8 @@ public class tutorialAnimScript : MonoBehaviour
         initialPosition = rectTransform.anchoredPosition;
         rectTransform.anchoredPosition = initialPosition - new Vector2(0, slideOffsetY);
 
-        Image handImg = null;
-        if (handImage != null && handImage.TryGetComponent<Image>(out handImg))
+        Image handImg = handImage?.GetComponent<Image>();
+        if (handImg != null)
         {
             handImg.color = new Color(handImg.color.r, handImg.color.g, handImg.color.b, 0f);
         }
@@ -65,17 +78,13 @@ public class tutorialAnimScript : MonoBehaviour
             });
     }
 
-    // --- DEĞİŞİKLİK BURADA ---
-    // Update metodunu, genel tıklama kontrolü için geri getiriyoruz.
     void Update()
     {
-        // Panel açılırken veya kapanırken (AnimatingIn durumunda) tıklamaları yoksay.
-        if (currentState == TutorialState.AnimatingIn) return;
+        // Panel açılırken veya kapanırken tıklamaları yoksay.
+        if (currentState == TutorialState.AnimatingIn || currentState == TutorialState.Closing) return;
 
-        // Ekrana tıklandığını veya dokunulduğunu tespit et.
         if (Input.GetMouseButtonDown(0) || (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began))
         {
-            // Tıklandığında, panelin kendisine tıklanmış gibi davranmasını sağla.
             OnPanelClicked();
         }
     }
@@ -89,8 +98,7 @@ public class tutorialAnimScript : MonoBehaviour
         }
 
         int totalChars = fullText.Length;
-
-        textAnimationTween = DOVirtual.Float(0, totalChars, textAnimationDuration, (value) =>
+        textAnimationTween = DOVirtual.Float(0, totalChars, textAnimationDuration, value =>
         {
             int charCount = Mathf.FloorToInt(value);
             tutorialText.text = fullText.Substring(0, charCount);
@@ -102,7 +110,6 @@ public class tutorialAnimScript : MonoBehaviour
         });
     }
 
-    // Bu fonksiyon artık doğrudan panelin Button'u tarafından değil, Update içinden çağrılıyor.
     public void OnPanelClicked()
     {
         switch (currentState)
@@ -119,30 +126,68 @@ public class tutorialAnimScript : MonoBehaviour
 
     void ClosePanel()
     {
-        if (currentState == TutorialState.AnimatingIn) return;
-        SoundManager.Instance.PlaySFX("UiCloseSound");
-        currentState = TutorialState.AnimatingIn;
+        // Eğer zaten kapanıyorsa tekrar çağırma.
+        if (currentState == TutorialState.AnimatingIn || currentState == TutorialState.Closing) return;
 
-        if (textAnimationTween != null && textAnimationTween.IsActive())
-        {
-            textAnimationTween.Kill();
-        }
+      SoundManager.Instance.PlaySFX("UiCloseSound"); 
+        currentState = TutorialState.Closing;
 
-        if (handImage != null) Destroy(handImage);
+        KillAllTweens();
 
         RectTransform rectTransform = GetComponent<RectTransform>();
         Vector2 hidePosition = initialPosition - new Vector2(0, slideOffsetY);
 
         rectTransform.DOAnchorPos(hidePosition, slideDuration)
             .SetEase(Ease.InBack)
-            .OnComplete(() => Destroy(gameObject));
+            .OnComplete(DestroyContainer);
+    }
+
+    // --- YENİ: DIŞARIDAN ÇAĞIRILACAK ACİL KAPATMA FONKSİYONU ---
+    public void ForceClose()
+    {
+        // Eğer zaten kapanıyorsa veya hiç var olmamışsa, bir şey yapma.
+        if (this == null || currentState == TutorialState.Closing) return;
+
+        Debug.Log("Tutorial paneli dışarıdan bir komutla kapatılıyor!");
+        currentState = TutorialState.Closing;
+
+        KillAllTweens();
+
+        // Animasyonla uğraşmadan anında yok et.
+        // Çünkü Win/Lose ekranı daha önemli ve hemen görünmeli.
+        DestroyContainer();
+    }
+
+    private void KillAllTweens()
+    {
+        if (textAnimationTween != null && textAnimationTween.IsActive())
+        {
+            textAnimationTween.Kill();
+        }
+        // Panelin kendi animasyonunu da öldür (güvenlik önlemi)
+        transform.DOKill();
+    }
+
+    private void DestroyContainer()
+    {
+        // Kendini değil, tüm container'ı (blocker dahil) yok et.
+        if (transform.parent != null)
+        {
+            Destroy(transform.parent.gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void OnDestroy()
     {
-        if (textAnimationTween != null)
+        // Statik referansı temizle ki sahnede hayalet bir referans kalmasın.
+        if (Instance == this)
         {
-            textAnimationTween.Kill();
+            Instance = null;
         }
+        KillAllTweens();
     }
 }

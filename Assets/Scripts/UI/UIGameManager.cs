@@ -81,6 +81,7 @@ public class UIGameManager : MonoBehaviour
 
     public void CloseReplayPopUp()
     {
+
         GameManager.Instance.ResumeGame();
 
         replayPopUp.SetActive(false);
