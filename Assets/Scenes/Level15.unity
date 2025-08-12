@@ -792,7 +792,7 @@ PrefabInstance:
     - target: {fileID: 3365599150997958367, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
       propertyPath: startingAnimalPrefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 3656696935091745275, guid: 32aff4441dcb3224da35b1a70cacf269, type: 3}
     - target: {fileID: 5091745107961107721, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
       propertyPath: m_Name
       value: SeatPrefab (4)
@@ -858,6 +858,92 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
   m_PrefabInstance: {fileID: 468424858}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &499729201
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 590469774}
+    m_Modifications:
+    - target: {fileID: 3365599150997958367, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: GridPosition.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3365599150997958367, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: GridPosition.y
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 3365599150997958367, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: startingAnimalPrefab
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5091745107961107721, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_Name
+      value: SeatPrefab (10)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.05
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1.4705883
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.0952381
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.605
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.141
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0.7071068
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+--- !u!4 &499729202 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8202984256245401178, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+  m_PrefabInstance: {fileID: 499729201}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &503636854
 GameObject:
@@ -1036,6 +1122,7 @@ Transform:
   - {fileID: 468424859}
   - {fileID: 636787267}
   - {fileID: 1397804092}
+  - {fileID: 499729202}
   - {fileID: 1373471103}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1726,6 +1813,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentLevelAnimals:
+  - {fileID: 7868355341752166456, guid: 844cf5877edc69040a1be7ad57612b8c, type: 3}
   - {fileID: 3656696935091745275, guid: fe2c0e8a96d3164418f2b9fa47c15cba, type: 3}
   seatLayer:
     serializedVersion: 2
@@ -2093,12 +2181,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3365599150997958367, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
       propertyPath: GridPosition.y
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3365599150997958367, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
       propertyPath: startingAnimalPrefab
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 3656696935091745275, guid: fe2c0e8a96d3164418f2b9fa47c15cba, type: 3}
     - target: {fileID: 5091745107961107721, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
       propertyPath: m_Name
       value: SeatPrefab (8)
@@ -2184,7 +2272,7 @@ PrefabInstance:
     - target: {fileID: 3365599150997958367, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
       propertyPath: startingAnimalPrefab
       value: 
-      objectReference: {fileID: 7868355341752166456, guid: 844cf5877edc69040a1be7ad57612b8c, type: 3}
+      objectReference: {fileID: 0}
     - target: {fileID: 5091745107961107721, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
       propertyPath: m_Name
       value: SeatPrefab (13)
@@ -2256,7 +2344,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 64dd29fa596ffb6479ffd80be17c20d1, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.84
+      value: 1.41
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 64dd29fa596ffb6479ffd80be17c20d1, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3160,7 +3248,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -341.2, y: 80.56848}
+  m_AnchoredPosition: {x: -341.2, y: 111}
   m_SizeDelta: {x: 657.6, y: 271.3}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2101388372
@@ -3183,8 +3271,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Wet Hippo on the bus! Cats want to stay away from the front, back and side
-    seats. Lion prefers to stay friends with Hippo
+  m_text: Wet Hippo at the bus stop! Cats avoid the front, back, and side seats near
+    Hippo. Lion prefers to stay friends with Hippo, but cats look tasty.
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 9a2157e1f9c4c4d38841fbb92558f587, type: 2}
   m_sharedMaterial: {fileID: -6360588970910393389, guid: 9a2157e1f9c4c4d38841fbb92558f587, type: 2}
