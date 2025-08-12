@@ -5,6 +5,9 @@ using UnityEngine;
 // Bu script, oyundaki tüm ses ve müzik yönetiminden sorumludur.
 public class SoundManager : MonoBehaviour
 {
+
+    public bool sfxEnabled = true; // settings panel için, baþlangýçta sesler açýk olacak.
+
     // Singleton (Tekil Nesne) yapýsý için statik referans.
     public static SoundManager Instance;
 
@@ -52,6 +55,8 @@ public class SoundManager : MonoBehaviour
             s.source.pitch = s.pitch;
             s.source.loop = s.loop;
         }
+
+        ApplySFXState();
     }
 
     /// <summary>
@@ -86,6 +91,13 @@ public class SoundManager : MonoBehaviour
     /// <param name="name">Çalýnacak ses efektinin Inspector'da verilen ismi.</param>
     public void PlaySFX(string name)
     {
+        Debug.Log("SFX Enabled? " + sfxEnabled);
+        if (!sfxEnabled)
+        {
+            Debug.Log("SFX kapalý, ses çalmýyor.");
+            return; //ayarlardan sound kapatýlmýþ ise çalmasýn.
+        }
+           
         // Ýsimle eþleþen sesi listede bul.
         Sound s = Array.Find(sfxSounds, sound => sound.name == name);
         if (s == null)
@@ -95,6 +107,21 @@ public class SoundManager : MonoBehaviour
         }
         s.source.Play();
     }
+
+    public void ApplySFXState()
+    {
+        // sfxEnabled false ise hepsini sustur ve gerekirse durdur.
+        foreach (var s in sfxSounds)
+        {
+            if (s?.source == null) continue;
+
+            s.source.mute = !sfxEnabled;
+
+            if (!sfxEnabled && s.source.isPlaying)
+                s.source.Stop();
+        }
+    }
+
 }
 
 
