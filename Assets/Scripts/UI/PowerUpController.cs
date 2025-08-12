@@ -43,11 +43,11 @@ public class PowerUpController : MonoBehaviour
             {
                 entry.uiButton = btnGO.GetComponent<Button>();
                 if (entry.uiButton == null)
-                    Debug.LogError($"GameObject '{entry.uiButtonObjectName}' üzerinde Button component'i yok!");
+                    Debug.Log($"GameObject '{entry.uiButtonObjectName}' üzerinde Button component'i yok!");
             }
             else
             {
-                Debug.LogError($"Button GameObject '{entry.uiButtonObjectName}' bulunamadı!");
+                Debug.Log($"Button GameObject '{entry.uiButtonObjectName}' bulunamadı!");
             }
 
             // Text ataması
@@ -56,11 +56,11 @@ public class PowerUpController : MonoBehaviour
             {
                 entry.uiText = txtGO.GetComponent<TextMeshProUGUI>();
                 if (entry.uiText == null)
-                    Debug.LogError($"GameObject '{entry.uiTextObjectName}' üzerinde TextMeshProUGUI component'i yok!");
+                    Debug.Log($"GameObject '{entry.uiTextObjectName}' üzerinde TextMeshProUGUI component'i yok!");
             }
             else
             {
-                Debug.LogError($"Text GameObject '{entry.uiTextObjectName}' bulunamadı!");
+                Debug.Log($"Text GameObject '{entry.uiTextObjectName}' bulunamadı!");
             }
         }
 
