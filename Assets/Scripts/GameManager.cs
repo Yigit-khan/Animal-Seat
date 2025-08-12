@@ -121,6 +121,8 @@ public class GameManager : MonoBehaviour
     //Kazanma ve kaybetme durumu kontrolü
     private bool isWinSequenceStarted = false;
     private bool isGameOverSequenceStarted = false;
+    private bool isTutorialLevel = false;
+    private bool isTutorialCompleted = false;
 
     private bool isRecallModeActive = false;
     private bool isEyepatchModeActive = false;
@@ -149,6 +151,8 @@ public class GameManager : MonoBehaviour
 
         isWinSequenceStarted = false;
         isGameOverSequenceStarted = false;
+        if (tutorialAnimScript.Instance != null)
+            isTutorialLevel = true;
 
         PlaceStartingAnimals();
 
@@ -484,7 +488,6 @@ public class GameManager : MonoBehaviour
         DOTween.Kill("drag_sway");
         selectedAnimal.transform.rotation = Quaternion.identity;
 
-
         ResetAllHighlights();
 
         bool placedSuccessfully = false;
@@ -510,9 +513,35 @@ public class GameManager : MonoBehaviour
         lastValidHoldingSlotTarget = null;
     }
 
+    private bool IsTutorialAction(GameObject targetObject)
+    {
+        if (isTutorialCompleted) return true;
+
+        if (tutorialAnimScript.Instance.interactableObject == null) return true;
+
+        if (targetObject == tutorialAnimScript.Instance.interactableObject)
+        {
+            Debug.Log("Tutorial aksiyonu alindi! Tutorial tamamlandi");
+            isTutorialCompleted = true;
+            return true;
+        }
+        else
+        {
+            Debug.Log("Hatalı yerleştirme! Tutorial aksiyonu degil:");
+            return false;
+        }
+    }
+
     private bool TryPlaceOnSeat(SeatController targetSeat)
     {
         if (targetSeat == null || selectedAnimal == null) return false;
+
+
+        if (isTutorialLevel && !IsTutorialAction(targetSeat.gameObject))
+        {
+            SoundManager.Instance.PlaySFX("PlacementWrong");
+            return false;
+        }
 
         // --- simülasyon başlangıcı ---
         Vector2Int originalPos = selectedAnimal.animalSO.gridOriginPos;
@@ -903,8 +932,11 @@ public class GameManager : MonoBehaviour
     }
     private bool TryPlaceOnHoldingSlot(HoldingSlotController targetSlot)
     {
-        if (targetSlot == null || targetSlot.CurrentState != SlotState.Unlocked)
+        if (targetSlot == null || targetSlot.CurrentState != SlotState.Unlocked) return false;
+
+        if (isTutorialLevel && !IsTutorialAction(targetSlot.transform.parent.gameObject))
         {
+            SoundManager.Instance.PlaySFX("PlacementWrong");
             return false;
         }
 

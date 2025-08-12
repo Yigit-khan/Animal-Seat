@@ -34244,6 +34244,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3a27830f6a2c8b54b8e8350d21b41939, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  sfxEnabled: 1
   musicTracks: []
   sfxSounds:
   - name: ButtonClick

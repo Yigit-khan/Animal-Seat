@@ -6456,7 +6456,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 50, y: -112}
-  m_SizeDelta: {x: 0, y: 64}
+  m_SizeDelta: {x: 219, y: 64}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1411314183438233107
 CanvasRenderer:
@@ -8645,6 +8645,7 @@ MonoBehaviour:
   ReplayButton: {fileID: 8114877437990339750}
   coinPlusButton: {fileID: 30518672033214136}
   exitButtonSettings: {fileID: 906923307895608700}
+  mainMenuExitButton: {fileID: 0}
   buttonStay: {fileID: 0}
   buttonRestart: {fileID: 0}
   levelInfo: {fileID: 3594287909499696883}

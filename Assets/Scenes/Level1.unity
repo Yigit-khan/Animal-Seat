@@ -1186,6 +1186,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+--- !u!1 &588591679 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5091745107961107721, guid: 1391baeaf14869a4dabdd0d0d6e7fae5, type: 3}
+  m_PrefabInstance: {fileID: 588591678}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &605677716
 GameObject:
   m_ObjectHideFlags: 0
@@ -2331,6 +2336,7 @@ MonoBehaviour:
   handImage: {fileID: 223704505}
   tutorialText: {fileID: 17774094}
   textAnimationDuration: 1
+  interactableObject: {fileID: 588591679}
 --- !u!114 &1287078061
 MonoBehaviour:
   m_ObjectHideFlags: 0

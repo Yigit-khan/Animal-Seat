@@ -5380,7 +5380,7 @@ GameObject:
   - component: {fileID: 1161638734057447705}
   - component: {fileID: 764814304395255304}
   m_Layer: 5
-  m_Name: Canvas
+  m_Name: "W\u0131nLoseUICanvas"
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -15896,7 +15896,7 @@ MonoBehaviour:
   - {fileID: 3773663504219917871}
   - {fileID: 4414870359344297362}
   - {fileID: 1911856428671221067}
-  elementDelay: 0.4
+  elementDelay: 0.15
 --- !u!82 &7776224226469207247
 AudioSource:
   m_ObjectHideFlags: 0
@@ -26261,7 +26261,7 @@ MonoBehaviour:
   - {fileID: 2527840575559764187}
   - {fileID: 4145716054541907900}
   - {fileID: 5276590515095497473}
-  elementDelay: 0.2
+  elementDelay: 0.15
 --- !u!1 &4046265496824356098
 GameObject:
   m_ObjectHideFlags: 0

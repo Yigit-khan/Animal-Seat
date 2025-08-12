@@ -539,7 +539,7 @@ PrefabInstance:
       objectReference: {fileID: 627182256}
     - target: {fileID: 5922693449023154723, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
       propertyPath: elementDelay
-      value: 0.4
+      value: 0.15
       objectReference: {fileID: 0}
     - target: {fileID: 6435002120157335062, guid: 51b531b224f55e04a838840ff1a90c06, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -1220,6 +1220,7 @@ MonoBehaviour:
   handImage: {fileID: 1996934080}
   tutorialText: {fileID: 1666820105}
   textAnimationDuration: 1
+  interactableObject: {fileID: 503636854}
 --- !u!114 &525314360
 MonoBehaviour:
   m_ObjectHideFlags: 0
