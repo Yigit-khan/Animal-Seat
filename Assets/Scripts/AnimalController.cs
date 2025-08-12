@@ -1,4 +1,5 @@
 ﻿using DG.Tweening;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,6 +32,15 @@ public class AnimalController : MonoBehaviour
     private Renderer[] animalRenderers;
     private List<Color> originalColors = new List<Color>();
 
+    [Header("Oturma Animasyon Ayarları")]
+    [Tooltip("Otururken oynatılacak rastgele animasyonun Animator'deki trigger adı.")]
+    [SerializeField] private string idleAnimationTriggerName = "IdleAction";
+    [Tooltip("Rastgele animasyonlar arasındaki minimum bekleme süresi (saniye).")]
+    [SerializeField] private float minIdleInterval = 5.0f;
+    [Tooltip("Rastgele animasyonlar arasındaki maksimum bekleme süresi (saniye).")]
+    [SerializeField] private float maxIdleInterval = 15.0f;
+    private Coroutine idleAnimationCoroutine; // Rastgele animasyon döngüsünü tutmak için Coroutine referansı.
+
     private void Awake()
     {
         if (animalSO != null)
@@ -54,24 +64,24 @@ public class AnimalController : MonoBehaviour
         get { return _isSeated; }
         set
         {
-            // Eğer yeni değer mevcut değerle aynıysa, gereksiz işlem yapma.
             if (_isSeated == value) return;
-
             _isSeated = value;
-
-            // --- DEBUG 1: 'isSeated' değeri değiştiğinde logla. ---
-            Debug.Log($"<color=cyan>[{this.name}]</color> 'isSeated' durumu <color=yellow>{_isSeated}</color> olarak ayarlandı.");
 
             if (animator != null)
             {
                 animator.SetBool("isSeated", _isSeated);
-                // --- DEBUG 2: Animator'deki parametrenin ayarlandığını logla. ---
-                Debug.Log($"<color=cyan>[{this.name}]</color> Animator'deki 'isSeated' parametresi <color=yellow>{_isSeated}</color> yapıldı.");
             }
+
+            // --- YENİ MANTIK ---
+            // Eğer hayvan OTURUYORSA, rastgele animasyon döngüsünü BAŞLAT.
+            if (_isSeated)
+            {
+                StartIdleAnimationRoutine();
+            }
+            // Eğer hayvan artık oturmuyorsa (kalkıyorsa), rastgele animasyon döngüsünü DURDUR.
             else
             {
-                // --- DEBUG 3: Animator bulunamadıysa hata logla. ---
-                Debug.LogError($"<color=red>[{this.name}]</color> üzerinde Animator bileşeni bulunamadı! Animasyon çalışmayacak.");
+                StopIdleAnimationRoutine();
             }
         }
     }
@@ -182,5 +192,45 @@ public class AnimalController : MonoBehaviour
     void OnDestroy()
     {
         ClearMyBubbles();
+
+        StopIdleAnimationRoutine();
+    }
+
+    private void StartIdleAnimationRoutine()
+    {
+        // Eğer zaten çalışan bir döngü varsa, önce onu durdur (güvenlik önlemi).
+        StopIdleAnimationRoutine();
+        // Yeni bir Coroutine başlat ve referansını sakla.
+        idleAnimationCoroutine = StartCoroutine(IdleAnimationRoutine());
+    }
+
+    private void StopIdleAnimationRoutine()
+    {
+        // Eğer çalışan bir Coroutine varsa, onu durdur.
+        if (idleAnimationCoroutine != null)
+        {
+            StopCoroutine(idleAnimationCoroutine);
+            idleAnimationCoroutine = null; // Referansı temizle.
+        }
+    }
+
+    private IEnumerator IdleAnimationRoutine()
+    {
+        // Bu döngü, hayvan oturduğu sürece sonsuza dek devam eder.
+        while (true)
+        {
+            // Minimum ve maksimum aralık arasında rastgele bir bekleme süresi hesapla.
+            float waitTime = Random.Range(minIdleInterval, maxIdleInterval);
+
+            // Hesaplanan süre kadar bekle.
+            yield return new WaitForSeconds(waitTime);
+
+            // Bekleme bittikten sonra, eğer hala oturuyorsak ve animator geçerliyse...
+            if (isSeated && animator != null)
+            {
+                // Animator'deki trigger'ı ateşle.
+                animator.SetTrigger(idleAnimationTriggerName);
+            }
+        }
     }
 }
