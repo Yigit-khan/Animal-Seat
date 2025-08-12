@@ -14,12 +14,7 @@ public enum TutorialState
 
 public class tutorialAnimScript : MonoBehaviour
 {
-<<<<<<< Updated upstream
-    // --- YENİ: STATİK REFERANS (SINGLETON BASİTLEŞTİRİLMİŞ HALİ) ---
     public static tutorialAnimScript Instance { get; private set; }
-=======
-    public static tutorialAnimScript Instance;
->>>>>>> Stashed changes
 
     [Header("Panel Animasyonu")]
     public float slideDuration = 0.5f;
@@ -44,20 +39,12 @@ public class tutorialAnimScript : MonoBehaviour
 
     void Awake()
     {
-<<<<<<< Updated upstream
-        // Statik referansı ayarla. Sahnede sadece bir tane olmalı.
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-=======
+
         if (Instance != null && Instance != this)
         {
             Destroy(this.gameObject);
         }
         if (Instance != this)
->>>>>>> Stashed changes
         {
             Instance = this;
         }
@@ -158,7 +145,6 @@ public class tutorialAnimScript : MonoBehaviour
 
         rectTransform.DOAnchorPos(hidePosition, slideDuration)
             .SetEase(Ease.InBack)
-<<<<<<< Updated upstream
             .OnComplete(DestroyContainer);
     }
 
@@ -199,10 +185,6 @@ public class tutorialAnimScript : MonoBehaviour
         {
             Destroy(gameObject);
         }
-=======
-            .OnComplete(() => Destroy(gameObject));
-
->>>>>>> Stashed changes
     }
 
     void OnDestroy()
