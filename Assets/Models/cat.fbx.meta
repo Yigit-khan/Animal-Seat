@@ -31,11 +31,11 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: cat_rig|cat_rigIdle
-      takeName: cat_rig|cat_rigIdle
+      name: cat_rigSit
+      takeName: cat_rigSit
       internalID: 4586202542615115829
       firstFrame: 0
-      lastFrame: 0.10000001
+      lastFrame: 1
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
