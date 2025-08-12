@@ -76,6 +76,9 @@ public class PowerUpController : MonoBehaviour
     {
         foreach (var entry in powerUps)
         {
+            if (entry.uiButton == null || entry.so == null)
+                continue;
+
             // 1) Başlangıç ölçeğini SO içine kaydet
             entry.so.recallButtonInitialScale = entry.uiButton.transform.localScale;
 

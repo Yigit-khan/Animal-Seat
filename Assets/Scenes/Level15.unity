@@ -2867,9 +2867,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slideDuration: 1
   slideOffsetY: 1000
-  handImage: {fileID: 0}
+  handImage: {fileID: 330718269}
   tutorialText: {fileID: 2101388372}
   textAnimationDuration: 1
+  interactableObject: {fileID: 0}
 --- !u!114 &1755251035
 MonoBehaviour:
   m_ObjectHideFlags: 0

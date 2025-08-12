@@ -118,11 +118,14 @@ public class GameManager : MonoBehaviour
     private PowerupSO _eyepatchPowerUpSO;
 
 
-    //Kazanma ve kaybetme durumu kontrolü
+    // Kazanma ve kaybetme durumu kontrolü
     private bool isWinSequenceStarted = false;
     private bool isGameOverSequenceStarted = false;
+
+    // Tutorial level variables
     private bool isTutorialLevel = false;
     private bool isTutorialCompleted = false;
+    private GameObject tutorialInteractableObject;
 
     private bool isRecallModeActive = false;
     private bool isEyepatchModeActive = false;
@@ -152,7 +155,11 @@ public class GameManager : MonoBehaviour
         isWinSequenceStarted = false;
         isGameOverSequenceStarted = false;
         if (tutorialAnimScript.Instance != null)
+        {
             isTutorialLevel = true;
+            tutorialInteractableObject = tutorialAnimScript.Instance.interactableObject;
+        }
+        
 
         PlaceStartingAnimals();
 
@@ -515,11 +522,13 @@ public class GameManager : MonoBehaviour
 
     private bool IsTutorialAction(GameObject targetObject)
     {
+        if (targetObject == null) return true;
+
         if (isTutorialCompleted) return true;
 
-        if (tutorialAnimScript.Instance.interactableObject == null) return true;
+        if (tutorialInteractableObject == null) return true;
 
-        if (targetObject == tutorialAnimScript.Instance.interactableObject)
+        if (targetObject == tutorialInteractableObject)
         {
             Debug.Log("Tutorial aksiyonu alindi! Tutorial tamamlandi");
             isTutorialCompleted = true;
@@ -537,10 +546,13 @@ public class GameManager : MonoBehaviour
         if (targetSeat == null || selectedAnimal == null) return false;
 
 
-        if (isTutorialLevel && !IsTutorialAction(targetSeat.gameObject))
+        if (isTutorialLevel)
         {
-            SoundManager.Instance.PlaySFX("PlacementWrong");
-            return false;
+            if (!IsTutorialAction(targetSeat.gameObject))
+            {
+                SoundManager.Instance.PlaySFX("PlacementWrong");
+                return false;
+            }
         }
 
         // --- simülasyon başlangıcı ---
