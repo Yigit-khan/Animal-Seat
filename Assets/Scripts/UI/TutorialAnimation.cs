@@ -1,6 +1,6 @@
-﻿using DG.Tweening;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
+
 public class TutorialAnimation : MonoBehaviour
 {
     public RectTransform handImage;
@@ -11,30 +11,46 @@ public class TutorialAnimation : MonoBehaviour
 
     private void Awake()
     {
-        handImage.transform.position = startTarget.transform.position;
-        
+        if (handImage != null && startTarget != null)
+            handImage.position = startTarget.position;
     }
+
     private void OnEnable()
     {
-        StartCoroutine(PlayAnimation());
+        // Eğer referanslardan biri yoksa animasyonu hiç başlatma
+        if (handImage != null && startTarget != null && endTarget != null)
+            StartCoroutine(PlayAnimation());
     }
 
     IEnumerator PlayAnimation()
     {
-        handImage.transform.position = startTarget.transform.position;
+        if (handImage == null || startTarget == null || endTarget == null)
+            yield break;
+
+        handImage.position = startTarget.position;
         int loops = 0;
 
         while (loopCount < 0 || loops < loopCount)
         {
-            // Baþlangýç pozisyonuna git
+            if (handImage == null || startTarget == null || endTarget == null)
+                yield break;
+
+            // Başlangıç pozisyonuna git
             handImage.anchoredPosition = startTarget.anchoredPosition;
 
-            // Bitiþ pozisyonuna animasyon
+            // Bitiş pozisyonuna animasyon
             float t = 0;
             while (t < moveDuration)
             {
+                if (handImage == null || startTarget == null || endTarget == null)
+                    yield break;
+
                 t += Time.deltaTime;
-                handImage.anchoredPosition = Vector2.Lerp(startTarget.anchoredPosition, endTarget.anchoredPosition, t / moveDuration);
+                handImage.anchoredPosition = Vector2.Lerp(
+                    startTarget.anchoredPosition,
+                    endTarget.anchoredPosition,
+                    t / moveDuration
+                );
                 yield return null;
             }
 
