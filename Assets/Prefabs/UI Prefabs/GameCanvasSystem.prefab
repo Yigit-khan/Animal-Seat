@@ -8929,7 +8929,7 @@ MonoBehaviour:
   settingsButton: {fileID: 4618212038662766349}
   ReplayButton: {fileID: 3286920893227915384}
   coinPlusButton: {fileID: 7248887547080894151}
-  exitButtonSettings: {fileID: 1397418718029396053}
+  exitButtonSettings: {fileID: 4658154512480171297}
   mainMenuExitButton: {fileID: 7518321270611495046}
   buttonStay: {fileID: 6088314935324811969}
   buttonRestart: {fileID: 8027808463590549696}
@@ -10814,6 +10814,17 @@ PrefabInstance:
       addedObject: {fileID: 8802507372181849371}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 74d1b6e0a97e0094c8e631dbb19f2205, type: 3}
+--- !u!114 &4658154512480171297 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7322550703516732205, guid: 74d1b6e0a97e0094c8e631dbb19f2205, type: 3}
+  m_PrefabInstance: {fileID: 2683014839938694668}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &6734362189157120060 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8669070236377253424, guid: 74d1b6e0a97e0094c8e631dbb19f2205, type: 3}
