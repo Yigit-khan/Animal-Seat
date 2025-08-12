@@ -127,7 +127,6 @@ public class GameManager : MonoBehaviour
 
     public static GameState CurrentGameState { get; private set; }
 
-
     private void Awake()
     {
         if (Instance != null && Instance != this) Destroy(gameObject);
@@ -136,7 +135,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        dragZOffset = -.4f;
+        dragZOffset = 0.6f;
 
         Time.timeScale = 1f;
 
@@ -853,7 +852,7 @@ public class GameManager : MonoBehaviour
         selectedAnimal.ClearMyBubbles();
         selectedAnimal.gameObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 
-        // hayvanı Z ekseninde sürekli sallama
+        // sallama animasyonu
         selectedAnimal.transform.DORotate(new Vector3(0, 0, dragSwayAmount), dragSwayDuration)
             .SetEase(Ease.InOutSine)
             .SetLoops(-1, LoopType.Yoyo)
@@ -861,16 +860,9 @@ public class GameManager : MonoBehaviour
 
         dragPlane = new Plane(Vector3.up, new Vector3(0, dragLiftHeight, 0));
 
-        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (dragPlane.Raycast(mouseRay, out float enter))
-        {
-            Vector3 animalStartPosition = selectedAnimal.transform.position;
-
-            Vector3 planeHitPoint = mouseRay.GetPoint(enter);
-
-            offset = animalStartPosition - (planeHitPoint + new Vector3(0, 0, dragZOffset));
-        }
+        offset = new Vector3(0f, 0f, dragZOffset);
     }
+
     private void TryUnlockSlot(HoldingSlotController lockedSlot)
     {
         Debug.Log("Kilitli slota týklandý! Kilit açýlýyor...");
