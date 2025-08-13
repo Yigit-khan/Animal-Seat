@@ -2067,6 +2067,7 @@ MonoBehaviour:
   whiteEffectAreaMaterial: {fileID: 2100000, guid: e9e17af4333fb3f4d9c2728817ab2c7d, type: 2}
   winUI: {fileID: 627182255}
   inGameUIManager: {fileID: 717618883}
+  tutorialInteractableObject: {fileID: 0}
 --- !u!4 &1142940857
 Transform:
   m_ObjectHideFlags: 0
@@ -2341,6 +2342,14 @@ MonoBehaviour:
   tutorialText: {fileID: 17774094}
   textAnimationDuration: 1
   interactableObject: {fileID: 588591679}
+  recallTutorial: 0
+  highlightScale: 1.2
+  highlightDuration: 0.5
+  highlightVibrato: 10
+  highlightElasticity: 1
+  singlePulseDuration: 0.5
+  pulseEase: 4
+  isAnimating: 0
 --- !u!114 &1287078061
 MonoBehaviour:
   m_ObjectHideFlags: 0

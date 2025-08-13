@@ -116,29 +116,7 @@ public class UIAnimationManager : MonoBehaviour
 
     private void CollectCoinsAndProceed(int amount)
     {
-        /* gamemanagera ta��nd�
-        _coinManager.AddCoins(amount);
-        Debug.Log("Current coins: " + _coinManager.CurrentCoins);
-        */
-
-
-        /* Buras� gamemanager i�erisinde ta��nacak
-        // 1. Yeni seviye kilidini a�ma mant���n� BURAYA TA�IYIN
-        int currentLevel = SaveManager.LoadCurrentLevel();
-        int unlockedLevel = SaveManager.LoadLevel();
-
-        // E�er bitirdi�imiz seviye, en son a��lan seviyeye e�itse, bir sonrakini a�.
-        if (currentLevel >= unlockedLevel)
-        {
-            SaveManager.SaveLevel(currentLevel + 1);
-            Debug.Log($"Yeni seviye a��ld�: {currentLevel + 1}");
-        }
-        */
-
-        // 2. Coin animasyonunu ba�lat
         int visualCoinCount = Mathf.Min(20, amount);
-
-        // E�er hi� coin g�sterilmeyecekse direkt men�ye d�n.
         if (visualCoinCount == 0)
         {
             SceneManager.LoadScene("MenuScene");
@@ -147,9 +125,15 @@ public class UIAnimationManager : MonoBehaviour
 
         for (int i = 0; i < visualCoinCount; i++)
         {
-            // ... (Mevcut coin animasyon kodunuz burada kalabilir)
-            GameObject coin = Instantiate(coinPrefab, coinSpawnOrigin.transform.parent);
+            // --- DEĞİŞİKLİK 1: Instantiate yerine havuzdan al ---
+            GameObject coin = SimpleObjectPool.Instance.GetPooledObject();
+            if (coin == null) continue; // Güvenlik kontrolü
+
+            // Coin'i doğru canvas'a taşı ve pozisyonunu ayarla
+            coin.transform.SetParent(coinSpawnOrigin.transform.parent, false);
             coin.transform.position = coinSpawnOrigin.position;
+
+            // ... (scale, offset, spreadPosition kodları aynı)
             Vector3 initialScale = Vector3.zero;
             Vector3 punchScale = Vector3.one * 1.5f;
             Vector3 finalScale = Vector3.one * 0.4f;
@@ -164,27 +148,26 @@ public class UIAnimationManager : MonoBehaviour
             seq.Join(coin.transform.DOMove(spreadPosition, coinBurstDuration).SetEase(Ease.OutQuad));
             seq.Append(coin.transform.DOMove(coinTarget.position, coinMoveTime).SetEase(Ease.InQuad));
             seq.Join(coin.transform.DOScale(finalScale, coinMoveTime));
-            seq.OnComplete(() => Destroy(coin));
+
+            // --- DEĞİŞİKLİK 2: Destroy yerine havuza geri döndür ---
+            seq.OnComplete(() =>
+            {
+                SimpleObjectPool.Instance.ReturnObjectToPool(coin);
+            });
 
             DOVirtual.DelayedCall(delay + coinBurstDuration, () => audioSource.PlayOneShot(coinCollectSound));
 
-            // 3. SADECE SON coin animasyonu bitti�inde men�ye d�n
             if (i == visualCoinCount - 1)
             {
                 seq.OnComplete(() =>
                 {
-                    Destroy(coin);
-                    // Animasyon bitti, �imdi men�ye d�nebiliriz.
+                    // Son coin de havuza geri döndü
+                    SimpleObjectPool.Instance.ReturnObjectToPool(coin);
+                    // Şimdi menüye dönebiliriz
                     SceneManager.LoadScene("MenuScene");
                 });
             }
         }
-
-        // TODO: totalCoins'i PlayerPrefs ile kaydetmelisiniz.
-        // int savedCoins = PlayerPrefs.GetInt("TotalCoins", 0);
-        // PlayerPrefs.SetInt("TotalCoins", savedCoins + amount);
-        totalCoins += amount;
-        Debug.Log("Total Coins: " + totalCoins);
     }
 
     private void ShowRewardedAd(System.Action onComplete)
