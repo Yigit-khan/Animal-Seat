@@ -1011,6 +1011,7 @@ public class GameManager : MonoBehaviour
         targetSlot.PlaceAnimal(selectedAnimal);
         selectedAnimal.transform.position = targetSlot.transform.position + new Vector3(0, seatHeightOffset, 0);
         animalQueue.Remove(selectedAnimal);
+        selectedAnimal.DisplayMyRules();
         return true;
     }
 
