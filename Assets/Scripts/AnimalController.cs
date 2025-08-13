@@ -59,6 +59,8 @@ public class AnimalController : MonoBehaviour
     /// <summary>
     /// Hayvanın oturup oturmadığını yönetir. Değeri her değiştiğinde Animator'ü otomatik olarak günceller.
     /// </summary>
+    // AnimalController.cs içinde
+
     public bool isSeated
     {
         get { return _isSeated; }
@@ -72,16 +74,24 @@ public class AnimalController : MonoBehaviour
                 animator.SetBool("isSeated", _isSeated);
             }
 
-            // --- YENİ MANTIK ---
-            // Eğer hayvan OTURUYORSA, rastgele animasyon döngüsünü BAŞLAT.
             if (_isSeated)
             {
+                // Oturuyorsa, rastgele animasyon döngüsünü BAŞLAT.
                 StartIdleAnimationRoutine();
             }
-            // Eğer hayvan artık oturmuyorsa (kalkıyorsa), rastgele animasyon döngüsünü DURDUR.
             else
             {
+                // Kalkıyorsa, rastgele animasyon döngüsünü DURDUR.
                 StopIdleAnimationRoutine();
+
+                
+                if (animator != null && animator.gameObject.activeInHierarchy)
+                {
+                   
+                    animator.Play(animator.GetCurrentAnimatorStateInfo(0).shortNameHash, 0, 0f); // Bu anlık resetler
+                    animator.Update(0f); // Değişikliğin hemen yansıması için
+
+                }
             }
         }
     }
