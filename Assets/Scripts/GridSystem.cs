@@ -108,7 +108,6 @@ public class GridSystem
         {
             if (!seatController.Value.isOccupied)
             {
-                Debug.Log(seatController.Key);
                 emptySeats.Add(seatController.Value);
             }
         }

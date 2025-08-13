@@ -7,6 +7,7 @@ using DG.Tweening;
 using JetBrains.Annotations;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem.Interactions;
+using System;
 
 #if UNITY_EDITOR
 using UnityEditor;
@@ -125,12 +126,13 @@ public class GameManager : MonoBehaviour
     // Tutorial level variables
     private bool isTutorialLevel = false;
     private bool isTutorialCompleted = false;
-    private GameObject tutorialInteractableObject;
 
     private bool isRecallModeActive = false;
     private bool isEyepatchModeActive = false;
 
     public static GameState CurrentGameState { get; private set; }
+    public static event Action OnFirstAnimalPlaced;
+    public GameObject tutorialInteractableObject;
 
     private void Awake()
     {
@@ -154,10 +156,10 @@ public class GameManager : MonoBehaviour
 
         isWinSequenceStarted = false;
         isGameOverSequenceStarted = false;
-        if (tutorialAnimScript.Instance != null)
+        if (TutorialAnimScript.Instance != null)
         {
             isTutorialLevel = true;
-            tutorialInteractableObject = tutorialAnimScript.Instance.interactableObject;
+            tutorialInteractableObject = TutorialAnimScript.Instance.interactableObject;
         }
         
 
@@ -276,7 +278,6 @@ public class GameManager : MonoBehaviour
     {
         _recallPowerUpSO = ScriptableObject.Instantiate(PowerUpController.Instance.GetReferenceByName("Recall").so);
         _eyepatchPowerUpSO = ScriptableObject.Instantiate(PowerUpController.Instance.GetReferenceByName("Eyepatch").so);
-
     }
     private void InitializeAnimalQueue()
     {
@@ -321,6 +322,27 @@ public class GameManager : MonoBehaviour
 
     private void HandlePlayerInput()
     {
+        Ray mouseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // Işının bir yere çarpıp çarpmadığını kontrol et
+        if (Physics.Raycast(mouseRay, out RaycastHit hit, 100f))
+        {
+            // EĞER ÇARPTI İSE:
+
+            // 1. Işını, vurduğu noktaya kadar KIRMIZI renkte çiz.
+            Debug.DrawRay(mouseRay.origin, mouseRay.direction * hit.distance, Color.red);
+
+            // 2. Vurulan collider'ın etrafına kırmızı bir kutu çizmek için yardımcı fonksiyonumuzu çağır.
+            DebugDrawBounds(hit.collider.bounds, Color.red);
+        }
+        else
+        {
+            // EĞER ÇARPMADI İSE:
+
+            // Işını, tam uzunlukta SARI renkte çiz.
+            Debug.DrawRay(mouseRay.origin, mouseRay.direction * 100f, Color.yellow);
+        }
+
         if (CurrentGameState != GameState.Playing)
         {
             return;
@@ -329,6 +351,36 @@ public class GameManager : MonoBehaviour
         if (Input.GetMouseButtonDown(0)) HandleMouseDown();
         if (Input.GetMouseButton(0) && selectedAnimal != null) HandleMouseDrag();
         if (Input.GetMouseButtonUp(0) && selectedAnimal != null) HandleMouseUp();
+    }
+
+    private void DebugDrawBounds(Bounds bounds, Color color)
+    {
+        // Kutunun 8 köşesini hesapla
+        Vector3 p1 = new Vector3(bounds.min.x, bounds.min.y, bounds.min.z);
+        Vector3 p2 = new Vector3(bounds.max.x, bounds.min.y, bounds.min.z);
+        Vector3 p3 = new Vector3(bounds.max.x, bounds.min.y, bounds.max.z);
+        Vector3 p4 = new Vector3(bounds.min.x, bounds.min.y, bounds.max.z);
+
+        Vector3 p5 = new Vector3(bounds.min.x, bounds.max.y, bounds.min.z);
+        Vector3 p6 = new Vector3(bounds.max.x, bounds.max.y, bounds.min.z);
+        Vector3 p7 = new Vector3(bounds.max.x, bounds.max.y, bounds.max.z);
+        Vector3 p8 = new Vector3(bounds.min.x, bounds.max.y, bounds.max.z);
+
+        // 12 kenarı çiz
+        Debug.DrawLine(p1, p2, color);
+        Debug.DrawLine(p2, p3, color);
+        Debug.DrawLine(p3, p4, color);
+        Debug.DrawLine(p4, p1, color);
+
+        Debug.DrawLine(p5, p6, color);
+        Debug.DrawLine(p6, p7, color);
+        Debug.DrawLine(p7, p8, color);
+        Debug.DrawLine(p8, p5, color);
+
+        Debug.DrawLine(p1, p5, color);
+        Debug.DrawLine(p2, p6, color);
+        Debug.DrawLine(p3, p7, color);
+        Debug.DrawLine(p4, p8, color);
     }
 
     private void HandleMouseDown()
@@ -522,11 +574,9 @@ public class GameManager : MonoBehaviour
 
     private bool IsTutorialAction(GameObject targetObject)
     {
-        if (targetObject == null) return true;
+        if (targetObject == null || tutorialInteractableObject == null ) return true;
 
         if (isTutorialCompleted) return true;
-
-        if (tutorialInteractableObject == null) return true;
 
         if (targetObject == tutorialInteractableObject)
         {
@@ -638,6 +688,8 @@ public class GameManager : MonoBehaviour
               .SetEase(Ease.OutQuad);
         }
 
+        OnFirstAnimalPlaced?.Invoke();
+
         animalQueue.Remove(animal);
         animal.gameObject.layer = animal.originalLayer;
         CheckWinCondition();
@@ -690,7 +742,6 @@ public class GameManager : MonoBehaviour
         return isValid;
     }
     */
-
     private void LoseLife()
     {
         Debug.Log("LoseLife ÇAĞRILDI. Mevcut Can: " + (currentLives - 1));
@@ -736,9 +787,9 @@ public class GameManager : MonoBehaviour
 
         CurrentGameState = GameState.Lost;
 
-        if (tutorialAnimScript.Instance != null)
+        if (TutorialAnimScript.Instance != null)
         {
-            tutorialAnimScript.Instance.ForceClose();
+            TutorialAnimScript.Instance.ForceClose();
         }
 
         string loseReasonText = isSoftLock ? "NO MOVES LEFT" : "FAILED"; // YENİ
@@ -809,9 +860,9 @@ public class GameManager : MonoBehaviour
                 {
                     Debug.LogError("InGameUIManager referansı atanmamış!");
                 }
-                if (tutorialAnimScript.Instance != null)
+                if (TutorialAnimScript.Instance != null)
                 {
-                    tutorialAnimScript.Instance.ForceClose();
+                    TutorialAnimScript.Instance.ForceClose();
                 }
             });
         }
@@ -890,7 +941,10 @@ public class GameManager : MonoBehaviour
                     controller.Initialize(SlotState.Unlocked);
                     holdingSlots.Add(controller);
                     if (holdingSlotsParent.tag == "Tutorial")
-                        controller.TutorialScaleAnim();
+                    {
+                        controller.isPulsing = true;
+                        StartPulsingObject(slotObj);
+                    }
                 }
             }
         }
@@ -1109,9 +1163,34 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        PowerUpUIReference recallRef = PowerUpController.Instance.GetReferenceByName(_recallPowerUpSO.powerupName);
+        GameObject buttonGameObject = recallRef.uiButton.gameObject;
+
+        if (_recallPowerUpSO.isPulsing)
+        {
+
+            if (recallRef != null && recallRef.uiButton != null)
+            {
+                StopPulsingObject(buttonGameObject, recallRef.so.buttonInitialScale);
+
+                _recallPowerUpSO.isPulsing = false;
+                recallRef.so.isPulsing = false;
+            }
+            else
+            {
+                Debug.LogWarning($"Could not find the UI reference for '{_recallPowerUpSO.powerupName}' to stop its pulse.");
+            }
+        }
+
+        if (isTutorialLevel && !IsTutorialAction(buttonGameObject))
+        {
+            SoundManager.Instance.PlaySFX("RecallFail");
+            return;
+        }
+
         isRecallModeActive = true;
         PowerUpController.Instance.SetPowerUpVisuals(_recallPowerUpSO, true);
-        StartShakingSeatedAnimals(AnimalController.Instances.Where(animal => animal.isSeated && animal.isRecallable));
+        StartShakingAnimals(AnimalController.Instances.Where(animal => animal.isSeated && animal.isRecallable));
         SoundManager.Instance.PlaySFX("PowerUpActivate");
         Debug.Log($"{_recallPowerUpSO.powerupName} modu aktif. Geri alınacak hayvanı seçin.");
     }
@@ -1123,7 +1202,7 @@ public class GameManager : MonoBehaviour
     {
         isRecallModeActive = false;
         PowerUpController.Instance.SetPowerUpVisuals(_recallPowerUpSO, false);
-        StopShakingSeatedAnimals();
+        StopShakingAnimals(AnimalController.Instances);
     }
 
     /// <summary>
@@ -1138,7 +1217,6 @@ public class GameManager : MonoBehaviour
                 && animal.isSeated
                 && animal.isRecallable)
             {
-
                 RecallAnimal(animal);
             }
             else
@@ -1188,11 +1266,35 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        PowerUpUIReference eyepatchRef = PowerUpController.Instance.GetReferenceByName(_eyepatchPowerUpSO.powerupName);
+        GameObject buttonGameObject = eyepatchRef.uiButton.gameObject;
+
+        if (_eyepatchPowerUpSO.isPulsing)
+        {
+
+            if (eyepatchRef != null && eyepatchRef.uiButton != null)
+            {
+                StopPulsingObject(buttonGameObject, eyepatchRef.so.buttonInitialScale);
+
+                _eyepatchPowerUpSO.isPulsing = false;
+                eyepatchRef.so.isPulsing = false;
+            }
+            else
+            {
+                Debug.LogWarning($"Could not find the UI reference for '{_eyepatchPowerUpSO.powerupName}' to stop its pulse.");
+            }
+        }
+
+        if (isTutorialLevel && !IsTutorialAction(buttonGameObject))
+        {
+            SoundManager.Instance.PlaySFX("EyepatchFail");
+            return;
+        }
 
         isEyepatchModeActive = true;
         PowerUpController.Instance.SetPowerUpVisuals(_eyepatchPowerUpSO, true);
         SoundManager.Instance.PlaySFX("PowerUpActivate");
-        StartShakingSeatedAnimals(AnimalController.Instances.Where(animal => animal.animalSO._animalName == "Aslan" && !animal.animalSO.eyepatched));
+        StartShakingAnimals(AnimalController.Instances.Where(animal => animal.animalSO._animalName == "Aslan" && !animal.animalSO.eyepatched));
         Debug.Log($"{_eyepatchPowerUpSO.powerupName} modu aktif. Geri alınacak hayvanı seçin.");
     }
 
@@ -1200,7 +1302,7 @@ public class GameManager : MonoBehaviour
     {
         isEyepatchModeActive = false;
         PowerUpController.Instance.SetPowerUpVisuals(_eyepatchPowerUpSO, false);
-        StopShakingSeatedAnimals();
+        StopShakingAnimals(AnimalController.Instances);
     }
 
     public void HandleEyepatchClick()
@@ -1246,7 +1348,7 @@ public class GameManager : MonoBehaviour
         Debug.Log($"{animal.animalSO._animalName} gozu baglandi!");
 
     }
-    private void StartShakingSeatedAnimals(IEnumerable<AnimalController> animals)
+    private void StartShakingAnimals(IEnumerable<AnimalController> animals)
     {
         foreach (var animal in animals)
         {
@@ -1266,50 +1368,44 @@ public class GameManager : MonoBehaviour
     // <summary>
     // Hayvanlardaki tüm titreme animasyonlarını durdurur.
     // </summary>
-    private void StopShakingSeatedAnimals()
+    private void StopShakingAnimals(IEnumerable<AnimalController> animals)
     {
         DOTween.Kill("shake");
 
-        foreach (var animal in AnimalController.Instances)
+        foreach (var animal in animals)
         {
-            if (animal.isSeated)
-            {
-                animal.transform.DORotate(Vector3.zero, 0.1f);
-            }
+           animal.transform.DORotate(Vector3.zero, 0.1f);
         }
     }
 
-    private void StartPulsingSeatedAnimals(IEnumerable<AnimalController> animals)
+    public void StartPulsingObject(GameObject obj)
     {
         float pulseScale = 1.15f;
         float pulseDuration = 0.5f;
+        
+        var t = obj.transform;
+        t.DOKill();
 
-        foreach (var animal in animals)
-        {
-            var t = animal.transform;
-            t.DOKill();
+        Vector3 originalScale = t.localScale;
 
-            Vector3 originalScale = t.localScale;
-
-            t.DOScale(originalScale * pulseScale, pulseDuration)
-             .SetEase(Ease.InOutSine)
-             .SetLoops(-1, LoopType.Yoyo)
-             .SetId("pulse");
-        }
+        t.DOScale(originalScale * pulseScale, pulseDuration)
+            .SetEase(Ease.InOutSine)
+            .SetLoops(-1, LoopType.Yoyo)
+            .SetId("pulse");
     }
 
-    private void StopPulsingSeatedAnimals()
+    public void StopPulsingObject(GameObject obj, Vector3 originalScale)
     {
-        DOTween.Kill("pulse");
-
-        foreach (var animal in AnimalController.Instances)
+        if (obj == null)
         {
-            if (animal.isSeated)
-            {
-                animal.transform.DOKill();
-                animal.transform.localScale = Vector3.one;
-            }
+            Debug.LogWarning("StopPulsingObject was called with a null object. Can't stop pulsing.");
+            return; // Exit the method immediately
         }
+
+        DOTween.Kill("pulse");
+        
+        obj.transform.DOKill();
+        obj.transform.localScale = originalScale;
     }
 
     #endregion

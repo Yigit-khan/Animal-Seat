@@ -43,11 +43,11 @@ public class PowerUpController : MonoBehaviour
             {
                 entry.uiButton = btnGO.GetComponent<Button>();
                 if (entry.uiButton == null)
-                    Debug.LogError($"GameObject '{entry.uiButtonObjectName}' üzerinde Button component'i yok!");
+                    Debug.LogWarning($"GameObject '{entry.uiButtonObjectName}' üzerinde Button component'i yok!");
             }
             else
             {
-                Debug.LogError($"Button GameObject '{entry.uiButtonObjectName}' bulunamadı!");
+                Debug.LogWarning($"Button GameObject '{entry.uiButtonObjectName}' bulunamadı!");
             }
 
             // Text ataması
@@ -56,11 +56,11 @@ public class PowerUpController : MonoBehaviour
             {
                 entry.uiText = txtGO.GetComponent<TextMeshProUGUI>();
                 if (entry.uiText == null)
-                    Debug.LogError($"GameObject '{entry.uiTextObjectName}' üzerinde TextMeshProUGUI component'i yok!");
+                    Debug.LogWarning($"GameObject '{entry.uiTextObjectName}' üzerinde TextMeshProUGUI component'i yok!");
             }
             else
             {
-                Debug.LogError($"Text GameObject '{entry.uiTextObjectName}' bulunamadı!");
+                Debug.LogWarning($"Text GameObject '{entry.uiTextObjectName}' bulunamadı!");
             }
         }
 
@@ -79,14 +79,48 @@ public class PowerUpController : MonoBehaviour
             if (entry.uiButton == null || entry.so == null)
                 continue;
 
+            Debug.Log("EKLENIYOR: " + entry.so.name);
             // 1) Başlangıç ölçeğini SO içine kaydet
-            entry.so.recallButtonInitialScale = entry.uiButton.transform.localScale;
+            entry.so.buttonInitialScale = entry.uiButton.transform.localScale;
 
             // 2) Butona tıklama event’i ekle
             entry.uiButton.onClick.AddListener(() => OnPowerUpClick(entry));
 
             // 3) UI’ı başlangıç değeriyle güncelle
             entry.uiText.text = entry.so.RemainingUse.ToString();
+
+            if (entry.uiButton.gameObject.tag == "Tutorial")
+            {
+                GameManager.Instance.StartPulsingObject(entry.uiButton.gameObject);
+                entry.so.isPulsing = true;
+
+                if (entry.so.powerupName == "Recall")
+                {
+                    entry.uiButton.gameObject.SetActive(false);
+                }
+            }
+        }
+    }
+
+    private void OnEnable()
+    {
+        GameManager.OnFirstAnimalPlaced += ShowRecallButton;
+    }
+
+    private void ShowRecallButton()
+    {
+        PowerUpUIReference recallRef = GetReferenceByName("Recall");
+
+        Debug.Log(
+            $"recallRef != null: {(recallRef != null)}, " +
+            $"recallRef.so.isPulsing: {recallRef.so.isPulsing}"
+        );
+
+        if (recallRef != null && recallRef.so.isPulsing)
+        {
+            recallRef.uiButton.gameObject.SetActive(true);
+            GameManager.Instance.tutorialInteractableObject = recallRef.uiButton.gameObject;
+            Debug.Log("OnFirstAnimalPlaced anonsu alındı! Recall butonu şimdi görünür.");
         }
     }
 
@@ -124,7 +158,7 @@ public class PowerUpController : MonoBehaviour
         entry.uiButton.transform.DOKill();
 
         // Hedef ölçeği hesapla
-        Vector3 initialScale = so.recallButtonInitialScale;
+        Vector3 initialScale = so.buttonInitialScale;
         Vector3 targetScale = isActive
             ? initialScale * so.buttonScaleAmount
             : initialScale;
@@ -153,4 +187,18 @@ public class PowerUpController : MonoBehaviour
         powerup.RemainingUse--;
         reference.uiText.text = powerup.RemainingUse.ToString();
     }
+
+    public PowerUpUIReference GetPowerUpUIReferenceBySO(PowerupSO powerupSO)
+    {
+        // Metoda geçersiz bir referans verilip verilmediğini kontrol et
+        if (powerupSO == null)
+        {
+            return null;
+        }
+
+        // List.Find metodu ile, listedeki her bir 'e' elemanının 'so' alanının,
+        // metoda verilen 'powerupSO' ile aynı olup olmadığını kontrol et.
+        return powerUps.Find(e => e.so == powerupSO);
+    }
+
 }

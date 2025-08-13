@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using DG.Tweening;
 using TMPro;
+using UnityEngine.Rendering;
 
 // Durumları yönetmek için enum
 public enum TutorialState
@@ -12,9 +13,9 @@ public enum TutorialState
     Closing // Yeni durum: Zorla kapatılıyor
 }
 
-public class tutorialAnimScript : MonoBehaviour
+public class TutorialAnimScript : MonoBehaviour
 {
-    public static tutorialAnimScript Instance { get; private set; }
+    public static TutorialAnimScript Instance { get; private set; }
 
     [Header("Panel Animasyonu")]
     public float slideDuration = 0.5f;
@@ -30,12 +31,32 @@ public class tutorialAnimScript : MonoBehaviour
     [Header("Interactable object")]
     public GameObject interactableObject;
 
+    public bool recallTutorial = false;
+
+    [Space]
+    [Header("Highlight Animation Settings")]
+    [Tooltip("Hightlight sırasında slot'un ölçeğinin çarpanını belirler (1 = orijinal boyut).")]
+    [SerializeField] private float highlightScale = 1.2f;
+    [Tooltip("Vurgu animasyonunun toplam süresi (saniye).")]
+    [SerializeField] private float highlightDuration = 0.5f;
+    [Tooltip("Animasyonun kaç titreşimle (vibrato) oynayacağını ayarlar.")]
+    [SerializeField] private int highlightVibrato = 10;
+    [Tooltip("Punch animasyonunun esneklik parametresi (0–1 arası).")]
+    [SerializeField] private float highlightElasticity = 1f;
 
     // --- Özel Değişkenler ---
     private TutorialState currentState;
     private Vector2 initialPosition;
     private Tween textAnimationTween;
     private string fullText;
+
+    // Animasyon degisgenleri
+    [SerializeField] private float singlePulseDuration = 0.5f;
+    [SerializeField] private Ease pulseEase = Ease.InOutSine;
+    [HideInInspector] public bool isAnimating = false;
+    private Vector3 _initialScale;
+    private Tween _pulseTween;
+
 
     void Awake()
     {
@@ -64,6 +85,13 @@ public class tutorialAnimScript : MonoBehaviour
 
         initialPosition = rectTransform.anchoredPosition;
         rectTransform.anchoredPosition = initialPosition - new Vector2(0, slideOffsetY);
+
+        if (handImage == null || tutorialText == null)
+        {
+            Debug.LogWarning("Tutorial animasyonda null GameObject var, animasyon yapilmayacak");
+            currentState = TutorialState.Closing;
+            return;
+        }
 
         Image handImg = handImage?.GetComponent<Image>();
         if (handImg != null)
@@ -115,7 +143,6 @@ public class tutorialAnimScript : MonoBehaviour
 
     public void OnPanelClicked()
     {
-        Debug.Log("panel tiklandi!");
         switch (currentState)
         {
             case TutorialState.WritingText:
@@ -186,7 +213,6 @@ public class tutorialAnimScript : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
     void OnDestroy()
     {
         // Statik referansı temizle ki sahnede hayalet bir referans kalmasın.

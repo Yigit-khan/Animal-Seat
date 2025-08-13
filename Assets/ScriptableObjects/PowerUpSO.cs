@@ -40,7 +40,9 @@ public class PowerupSO : ScriptableObject
     public float buttonScaleAmount = 1.2f;
     [Tooltip("Buton animasyon süresi (saniye).")]
     public float buttonAnimationDuration = 0.3f;
-    [HideInInspector] public Vector3 recallButtonInitialScale;
+
+    [HideInInspector] public Vector3 buttonInitialScale;
+    [HideInInspector] public bool isPulsing;
 
     #endregion
 
