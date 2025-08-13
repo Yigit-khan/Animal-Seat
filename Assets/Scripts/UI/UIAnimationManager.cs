@@ -14,6 +14,11 @@ public class UIAnimationManager : MonoBehaviour
     [SerializeField] private TMP_Text coinText;
     [SerializeField] private int coinRewardAmount = 100;
 
+    [Header("Coin Animation Settings")]
+    [SerializeField] private float coinMoveTime = 0.5f;       // Faster move to target (was 1.0)
+    [SerializeField] private float coinBurstDuration = 0.2f;  // Faster spawn/spread burst (was 0.3)
+    [SerializeField] private float coinDelayStep = 0.03f;     // Tighter stagger between coins (was 0.05)
+
     [Header("Win UI Buttons")]
     [SerializeField] private Button buttonContinue;
     [SerializeField] private Button button2xContinue;
@@ -24,8 +29,8 @@ public class UIAnimationManager : MonoBehaviour
     [SerializeField] private Button buttonExit;
 
     [Header("UI Text References")]
-    [Tooltip("Kaybetme ekranýnda gösterilecek ana baþlýk (FAILED / NO MOVES LEFT)")]
-    [SerializeField] private TMP_Text loseTitleText; // YENÝ
+    [Tooltip("Kaybetme ekranï¿½nda gï¿½sterilecek ana baï¿½lï¿½k (FAILED / NO MOVES LEFT)")]
+    [SerializeField] private TMP_Text loseTitleText; // YENï¿½
 
     private CoinManager _coinManager;
 
@@ -41,7 +46,7 @@ public class UIAnimationManager : MonoBehaviour
         buttonContinue.onClick.AddListener(() => OnContinueClicked(false));
         button2xContinue.onClick.AddListener(() => OnContinueClicked(true));
 
-        // Butonlara týklandýðýnda hangi fonksiyonlarýn çalýþacaðýný ata.
+        // Butonlara tï¿½klandï¿½ï¿½ï¿½nda hangi fonksiyonlarï¿½n ï¿½alï¿½ï¿½acaï¿½ï¿½nï¿½ ata.
         if (buttonRetry != null)
             buttonRetry.onClick.AddListener(OnRetryButtonPressed);
 
@@ -51,22 +56,22 @@ public class UIAnimationManager : MonoBehaviour
 
     private void OnRetryButtonPressed()
     {
-        // Tekrar týklamayý önlemek için butonlarý devre dýþý býrak.
+        // Tekrar tï¿½klamayï¿½ ï¿½nlemek iï¿½in butonlarï¿½ devre dï¿½ï¿½ï¿½ bï¿½rak.
         buttonContinue.interactable = false;
         buttonExit.interactable = false;
 
-        // Önce reklam göster, reklam bittiðinde ödülü ver.
+        // ï¿½nce reklam gï¿½ster, reklam bittiï¿½inde ï¿½dï¿½lï¿½ ver.
         ShowRewardedAd(() =>
         {
-            // --- ÖDÜL KISMI ---
-            // 1. GameManager'ý bul ve 1 can eklemesini söyle.
+            // --- ï¿½Dï¿½L KISMI ---
+            // 1. GameManager'ï¿½ bul ve 1 can eklemesini sï¿½yle.
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.ResumeGame();
                 GameManager.Instance.AddOneLife();
             }
 
-            // 2. Oyunu normale döndür ve level'ý yeniden baþlat.
+            // 2. Oyunu normale dï¿½ndï¿½r ve level'ï¿½ yeniden baï¿½lat.
             Time.timeScale = 1f;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         });
@@ -81,7 +86,7 @@ public class UIAnimationManager : MonoBehaviour
     }
     public void GoToMenu()
     {
-        // Oyunu normale döndür ve menüye git.
+        // Oyunu normale dï¿½ndï¿½r ve menï¿½ye git.
         Time.timeScale = 1f;
         SceneManager.LoadScene("MenuScene");
     }
@@ -95,47 +100,45 @@ public class UIAnimationManager : MonoBehaviour
         {
             ShowRewardedAd(() =>
             {
-                // Oyuncu reklamý izledi, þimdi ekstra ödülü ver.
-                // Zaten 100 coin'i kazanmýþtý, þimdi bir 100 daha ekliyoruz.
+                // Oyuncu reklamï¿½ izledi, ï¿½imdi ekstra ï¿½dï¿½lï¿½ ver.
+                // Zaten 100 coin'i kazanmï¿½ï¿½tï¿½, ï¿½imdi bir 100 daha ekliyoruz.
                 _coinManager.AddCoins(coinRewardAmount);
-                // Animasyonu 200 coin için göster.
+                // Animasyonu 200 coin iï¿½in gï¿½ster.
                 CollectCoinsAndProceed(coinRewardAmount * 2);
             });
         }
         else
         {
-            // Normal devam etme. Sadece animasyonu 100 coin için göster.
+            // Normal devam etme. Sadece animasyonu 100 coin iï¿½in gï¿½ster.
             CollectCoinsAndProceed(coinRewardAmount);
         }
     }
 
     private void CollectCoinsAndProceed(int amount)
     {
-        /* gamemanagera taþýndý
+        /* gamemanagera taï¿½ï¿½ndï¿½
         _coinManager.AddCoins(amount);
         Debug.Log("Current coins: " + _coinManager.CurrentCoins);
         */
 
 
-        /* Burasý gamemanager içerisinde taþýnacak
-        // 1. Yeni seviye kilidini açma mantýðýný BURAYA TAÞIYIN
+        /* Burasï¿½ gamemanager iï¿½erisinde taï¿½ï¿½nacak
+        // 1. Yeni seviye kilidini aï¿½ma mantï¿½ï¿½ï¿½nï¿½ BURAYA TAï¿½IYIN
         int currentLevel = SaveManager.LoadCurrentLevel();
         int unlockedLevel = SaveManager.LoadLevel();
 
-        // Eðer bitirdiðimiz seviye, en son açýlan seviyeye eþitse, bir sonrakini aç.
+        // Eï¿½er bitirdiï¿½imiz seviye, en son aï¿½ï¿½lan seviyeye eï¿½itse, bir sonrakini aï¿½.
         if (currentLevel >= unlockedLevel)
         {
             SaveManager.SaveLevel(currentLevel + 1);
-            Debug.Log($"Yeni seviye açýldý: {currentLevel + 1}");
+            Debug.Log($"Yeni seviye aï¿½ï¿½ldï¿½: {currentLevel + 1}");
         }
         */
 
-        // 2. Coin animasyonunu baþlat
+        // 2. Coin animasyonunu baï¿½lat
         int visualCoinCount = Mathf.Min(20, amount);
-        float moveTime = 1f;
-        float delayStep = 0.05f;
 
-        // Eðer hiç coin gösterilmeyecekse direkt menüye dön.
+        // Eï¿½er hiï¿½ coin gï¿½sterilmeyecekse direkt menï¿½ye dï¿½n.
         if (visualCoinCount == 0)
         {
             SceneManager.LoadScene("MenuScene");
@@ -153,25 +156,25 @@ public class UIAnimationManager : MonoBehaviour
             Vector2 randomOffset = Random.insideUnitCircle.normalized * 60f;
             Vector3 spreadPosition = coinSpawnOrigin.position + new Vector3(randomOffset.x, randomOffset.y + 50f, 0);
             coin.transform.localScale = initialScale;
-            float delay = i * delayStep;
+            float delay = i * coinDelayStep;
 
             Sequence seq = DOTween.Sequence();
             seq.AppendInterval(delay);
-            seq.Append(coin.transform.DOScale(punchScale, 0.3f).SetEase(Ease.OutBack));
-            seq.Join(coin.transform.DOMove(spreadPosition, 0.3f).SetEase(Ease.OutQuad));
-            seq.Append(coin.transform.DOMove(coinTarget.position, moveTime).SetEase(Ease.InQuad));
-            seq.Join(coin.transform.DOScale(finalScale, moveTime));
+            seq.Append(coin.transform.DOScale(punchScale, coinBurstDuration).SetEase(Ease.OutBack));
+            seq.Join(coin.transform.DOMove(spreadPosition, coinBurstDuration).SetEase(Ease.OutQuad));
+            seq.Append(coin.transform.DOMove(coinTarget.position, coinMoveTime).SetEase(Ease.InQuad));
+            seq.Join(coin.transform.DOScale(finalScale, coinMoveTime));
             seq.OnComplete(() => Destroy(coin));
 
-            DOVirtual.DelayedCall(delay + 0.3f, () => audioSource.PlayOneShot(coinCollectSound));
+            DOVirtual.DelayedCall(delay + coinBurstDuration, () => audioSource.PlayOneShot(coinCollectSound));
 
-            // 3. SADECE SON coin animasyonu bittiðinde menüye dön
+            // 3. SADECE SON coin animasyonu bittiï¿½inde menï¿½ye dï¿½n
             if (i == visualCoinCount - 1)
             {
                 seq.OnComplete(() =>
                 {
                     Destroy(coin);
-                    // Animasyon bitti, þimdi menüye dönebiliriz.
+                    // Animasyon bitti, ï¿½imdi menï¿½ye dï¿½nebiliriz.
                     SceneManager.LoadScene("MenuScene");
                 });
             }
@@ -186,7 +189,7 @@ public class UIAnimationManager : MonoBehaviour
 
     private void ShowRewardedAd(System.Action onComplete)
     {
-        Debug.Log("Reklam gösteriliyor...");
+        Debug.Log("Reklam gï¿½steriliyor...");
         if (GameManager.Instance != null)
             GameManager.Instance.PauseGame();
         StartCoroutine(SimulateAd(onComplete));

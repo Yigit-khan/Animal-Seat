@@ -15869,6 +15869,9 @@ MonoBehaviour:
   coinTarget: {fileID: 8886615237886518244}
   coinText: {fileID: 8936438902776930202}
   coinRewardAmount: 100
+  coinMoveTime: 0.5
+  coinBurstDuration: 0.2
+  coinDelayStep: 0.04
   buttonContinue: {fileID: 8615107548702627855}
   button2xContinue: {fileID: 5787035550524094339}
   buttonRetry: {fileID: 8285064320267487320}
@@ -26235,6 +26238,9 @@ MonoBehaviour:
   coinTarget: {fileID: 0}
   coinText: {fileID: 8936438902776930202}
   coinRewardAmount: 100
+  coinMoveTime: 0.5
+  coinBurstDuration: 0.2
+  coinDelayStep: 0.03
   buttonContinue: {fileID: 8615107548702627855}
   button2xContinue: {fileID: 5787035550524094339}
   buttonRetry: {fileID: 8285064320267487320}
