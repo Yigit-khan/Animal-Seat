@@ -70,9 +70,9 @@ public class LevelSelectController : MonoBehaviour
             // UI güncelle
             UpdateLevelDisplay();
             UpdateHexNumbers();
+            Debug.Log("Yeni level acildi: " + unlockedLevel);
         }
 
-        Debug.Log("Yeni level açýldý: " + unlockedLevel);
     }
 
     public void SelectPreviousLevel()
@@ -82,7 +82,11 @@ public class LevelSelectController : MonoBehaviour
         // Eðer þu anki seviye 1'den büyükse, bir önceki seviyeye geçebiliriz.
         if (currentLevelIndex > 1)
         {
-            currentLevelIndex--;
+            unlockedLevel--;
+            SaveManager.SaveLevel(unlockedLevel);
+
+            currentLevelIndex = unlockedLevel;
+
             UpdateLevelDisplay();
             UpdateHexNumbers();
             Debug.Log("Önceki seviye seçildi: " + currentLevelIndex);
