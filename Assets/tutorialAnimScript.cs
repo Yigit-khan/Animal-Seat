@@ -146,7 +146,7 @@ public class TutorialAnimScript : MonoBehaviour
         switch (currentState)
         {
             case TutorialState.WritingText:
-                if (textAnimationTween != null) 
+                if (textAnimationTween != null)
                     textAnimationTween.Complete();
                 Invoke("ClosePanel", 1f);
                 break;
@@ -162,7 +162,7 @@ public class TutorialAnimScript : MonoBehaviour
         // Eğer zaten kapanıyorsa tekrar çağırma.
         if (currentState == TutorialState.AnimatingIn || currentState == TutorialState.Closing) return;
 
-      SoundManager.Instance.PlaySFX("UiCloseSound"); 
+        SoundManager.Instance.PlaySFX("UiCloseSound");
         currentState = TutorialState.Closing;
 
         KillAllTweens();
