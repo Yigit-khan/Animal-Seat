@@ -1665,6 +1665,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 744750946127697797, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
   m_PrefabInstance: {fileID: 879444493}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &879444495 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2930943737620493815, guid: 62d7af43047b1ad4b809a9053def1b72, type: 3}
+  m_PrefabInstance: {fileID: 879444493}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &905885714
 GameObject:
   m_ObjectHideFlags: 0
@@ -2738,6 +2743,10 @@ PrefabInstance:
       propertyPath: slideOffsetY
       value: -2000
       objectReference: {fileID: 0}
+    - target: {fileID: 7770636038689697055, guid: 32957a561aaf0f94fbf56173f7fa401e, type: 3}
+      propertyPath: interactableObject
+      value: 
+      objectReference: {fileID: 879444495}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

@@ -28,11 +28,13 @@ public class SeatController : MonoBehaviour
     public Vector2Int GridPosition;
 
     [Tooltip("Koltuk şu anda dolu mu?")]
-    public bool isOccupied { get; 
+    public bool isOccupied
+    {
+        get;
         private set;
-    
-    } 
-        
+
+    }
+
         = false;
 
     [Tooltip("Eğer koltuk doluysa, hangi hayvan tarafından işgal edildiği.")]
@@ -78,7 +80,7 @@ public class SeatController : MonoBehaviour
             meshRenderer.material = originalMaterial;
         }
     }
-    
+
     /// <summary>
     /// Bu koltuğun grid pozisyonunu ayarlar. Genellikle GridSystem tarafından çağrılır.
     /// </summary>
@@ -99,22 +101,26 @@ public class SeatController : MonoBehaviour
         }
 
         var tailRenderers = animal.GetComponentsInChildren<SkinnedMeshRenderer>().Where(renderer => renderer.name == "tail");
-        foreach(var tailRenderer in tailRenderers)
+        foreach (var tailRenderer in tailRenderers)
         {
             tailRenderer.enabled = false;
         }
 
         isOccupied = true;
         occupiedBy = animal;
+        var boxCollider = GetComponent<BoxCollider>();
+        if (boxCollider != null)
+            boxCollider.enabled = false;
+
         if (animal != null && animal.animalSO != null)
         {
             animal.animalSO.gridOriginPos = this.GridPosition;
         }
-     
-        if (occupiedBy.TryGetComponent<CapsuleCollider>(out var capsule))
+
+        if (animal != null && animal.TryGetComponent<CapsuleCollider>(out var capsule))
             capsule.enabled = false;
 
-        if (occupiedBy.TryGetComponent<SphereCollider>(out var sphere))
+        if (animal != null && animal.TryGetComponent<SphereCollider>(out var sphere))
             sphere.enabled = true;
     }
 
@@ -123,19 +129,39 @@ public class SeatController : MonoBehaviour
     /// </summary>
     public void Vacate()
     {
-        var tailRenderers = occupiedBy.GetComponentsInChildren<SkinnedMeshRenderer>().Where(renderer => renderer.name == "tail");
+        // Eğer dolu değilse veya referans yoksa, sadece koltuk collider'ını açıp çık
+        if (!isOccupied || occupiedBy == null)
+        {
+            var seatCol0 = GetComponent<BoxCollider>();
+            if (seatCol0 != null)
+                seatCol0.enabled = true;
+            isOccupied = false;
+            occupiedBy = null;
+            return;
+        }
+
+        var animal = occupiedBy;
+
+        var tailRenderers = animal.GetComponentsInChildren<SkinnedMeshRenderer>().Where(renderer => renderer.name == "tail");
         foreach (var tailRenderer in tailRenderers)
         {
             tailRenderer.enabled = true;
         }
 
+        // Koltuk collider'ını tekrar aç
+        var seatCol = GetComponent<BoxCollider>();
+        if (seatCol != null)
+            seatCol.enabled = true;
+
+        // Hayvanın colliderlarını eski haline getir: Capsule açık, Sphere kapalı
+        if (animal.TryGetComponent<CapsuleCollider>(out var cap))
+            cap.enabled = true;
+
+        if (animal.TryGetComponent<SphereCollider>(out var sph))
+            sph.enabled = false;
+
         isOccupied = false;
         occupiedBy = null;
-        if (occupiedBy.TryGetComponent<CapsuleCollider>(out var capsule))
-            capsule.enabled = true;
-
-        if (occupiedBy.TryGetComponent<SphereCollider>(out var sphere))
-            sphere.enabled = false;
     }
 
 
@@ -150,7 +176,7 @@ public class SeatController : MonoBehaviour
         // Sadece bir prefab atanmışsa devam et.
         if (startingAnimalPrefab == null)
             return;
-            
+
         // Sahne kamerasından çok uzaktaysak, performans ve okunabilirlik için çizim yapma.
         if (SceneView.currentDrawingSceneView != null)
         {
@@ -158,11 +184,11 @@ public class SeatController : MonoBehaviour
             if (distanceToCamera > gizmoMaxDrawDistance)
                 return;
         }
-            
+
         // Atanan prefab'dan hayvanın ismini bul.
         AnimalController controller = startingAnimalPrefab.GetComponent<AnimalController>();
-        string animalName = (controller != null && controller.animalSO != null) 
-                            ? controller.animalSO._animalName 
+        string animalName = (controller != null && controller.animalSO != null)
+                            ? controller.animalSO._animalName
                             : startingAnimalPrefab.name;
 
         // Metnin stilini ayarla (renk, boyut, kalınlık vb.).
@@ -176,5 +202,5 @@ public class SeatController : MonoBehaviour
         Vector3 textPosition = transform.position + Vector3.up * 0.8f;
         Handles.Label(textPosition, animalName, style);
     }
-    #endif
+#endif
 }
