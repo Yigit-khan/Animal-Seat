@@ -33,16 +33,12 @@ public class TutorialAnimScript : MonoBehaviour
 
     public bool recallTutorial = false;
 
+    public bool activateOnStart = true;
+
     [Space]
     [Header("Highlight Animation Settings")]
     [Tooltip("Hightlight sırasında slot'un ölçeğinin çarpanını belirler (1 = orijinal boyut).")]
     [SerializeField] private float highlightScale = 1.2f;
-    [Tooltip("Vurgu animasyonunun toplam süresi (saniye).")]
-    [SerializeField] private float highlightDuration = 0.5f;
-    [Tooltip("Animasyonun kaç titreşimle (vibrato) oynayacağını ayarlar.")]
-    [SerializeField] private int highlightVibrato = 10;
-    [Tooltip("Punch animasyonunun esneklik parametresi (0–1 arası).")]
-    [SerializeField] private float highlightElasticity = 1f;
 
     // --- Özel Değişkenler ---
     private TutorialState currentState;
@@ -54,21 +50,16 @@ public class TutorialAnimScript : MonoBehaviour
     [SerializeField] private float singlePulseDuration = 0.5f;
     [SerializeField] private Ease pulseEase = Ease.InOutSine;
     [HideInInspector] public bool isAnimating = false;
-    private Vector3 _initialScale;
-    private Tween _pulseTween;
-
 
     void Awake()
     {
 
         if (Instance != null && Instance != this)
         {
-            Destroy(this.gameObject);
+            Destroy(gameObject);
+            return;
         }
-        if (Instance != this)
-        {
-            Instance = this;
-        }
+        Instance = this;
 
         currentState = TutorialState.AnimatingIn;
         if (tutorialText != null)
@@ -86,12 +77,24 @@ public class TutorialAnimScript : MonoBehaviour
         initialPosition = rectTransform.anchoredPosition;
         rectTransform.anchoredPosition = initialPosition - new Vector2(0, slideOffsetY);
 
+        if (activateOnStart)
+        {
+            AnimatePanel();
+        }
+    }
+
+    public void AnimatePanel()
+    {
+        RectTransform rectTransform = GetComponent<RectTransform>();
+
         if (handImage == null || tutorialText == null)
         {
             Debug.LogWarning("Tutorial animasyonda null GameObject var, animasyon yapilmayacak");
             currentState = TutorialState.Closing;
             return;
         }
+
+        currentState = TutorialState.AnimatingIn;
 
         Image handImg = handImage?.GetComponent<Image>();
         if (handImg != null)

@@ -121,6 +121,15 @@ public class PowerUpController : MonoBehaviour
             recallRef.uiButton.gameObject.SetActive(true);
             GameManager.Instance.tutorialInteractableObject = recallRef.uiButton.gameObject;
             Debug.Log("OnFirstAnimalPlaced anonsu alındı! Recall butonu şimdi görünür.");
+
+            if (TutorialAnimScript.Instance != null)
+            {
+                TutorialAnimScript.Instance.AnimatePanel();
+            }
+            else
+            {
+                Debug.LogWarning("TutorialAnimScript null oldugu icin getirilemedi.");
+            }
         }
     }
 

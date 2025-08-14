@@ -694,54 +694,6 @@ public class GameManager : MonoBehaviour
         animal.gameObject.layer = animal.originalLayer;
         CheckWinCondition();
     }
-
-    /*
-    private bool IsPlacementValid(SeatController targetSeat)
-    {
-        if (selectedAnimal == null)
-        {
-            Debug.LogError("IsPlacementValid çağrıldı ancak selectedAnimal null!");
-            return false;
-        }
-
-        // 1) CurrentLevelAnimals içindeki prefab'lar değil,
-        //    runtime'daki AnimalController'lar üzerinden veri toplayın.
-        //    Aksi taktirde prefab.GetComponent<AnimalController>() null döner.
-
-
-        // 2) Önce koltuğu alıp null kontrolü yapın!
-        Vector2Int checkPos = targetSeat.GridPosition;
-        SeatController adjacentSeat = gridSystem.GetSeatAt(checkPos);
-        if (adjacentSeat == null)
-        {
-            Debug.LogWarning($"Soldaki komşu koltuk bulunamadı: [{checkPos.x},{checkPos.y}]");
-            return false;
-        }
-
-        // 3) Burada SeatController.GridPosition’ı doğrudan değiştirmek yerine
-        //    yeni bir Vector2Int ile gridOriginPos’u hesaplayın:
-        Vector2Int newOrigin = new Vector2Int(
-            adjacentSeat.GridPosition.x,
-            adjacentSeat.GridPosition.y
-        );
-
-        // 4) animalSO’nun null olmadığından emin olun
-        var animalController = selectedAnimal;
-        if (animalController.animalSO == null)
-        {
-            Debug.LogError($"{animalController.name} üzerinde AnimalSO yok!");
-            return false;
-        }
-
-        animalController.animalSO.gridOriginPos = newOrigin;
-        //Debug.Log($"{animalController.animalSO._animalName} yeni gridOriginPos: {newOrigin}");
-
-        // 5) Interaction testi için doğru listeyi kullanın
-        bool isValid = _animalManager.IsAllInteractionsValid(animalSOs);
-        //Debug.Log("isValid: " + isValid);
-        return isValid;
-    }
-    */
     private void LoseLife()
     {
         Debug.Log("LoseLife ÇAĞRILDI. Mevcut Can: " + (currentLives - 1));
