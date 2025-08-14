@@ -106,12 +106,16 @@ public class SeatController : MonoBehaviour
 
         isOccupied = true;
         occupiedBy = animal;
-        var boxCollider = GetComponent<BoxCollider>().enabled = false;
-        
         if (animal != null && animal.animalSO != null)
         {
             animal.animalSO.gridOriginPos = this.GridPosition;
         }
+     
+        if (occupiedBy.TryGetComponent<CapsuleCollider>(out var capsule))
+            capsule.enabled = false;
+
+        if (occupiedBy.TryGetComponent<SphereCollider>(out var sphere))
+            sphere.enabled = true;
     }
 
     /// <summary>
@@ -127,7 +131,11 @@ public class SeatController : MonoBehaviour
 
         isOccupied = false;
         occupiedBy = null;
-        var boxCollider = GetComponent<BoxCollider>().enabled = true;
+        if (occupiedBy.TryGetComponent<CapsuleCollider>(out var capsule))
+            capsule.enabled = true;
+
+        if (occupiedBy.TryGetComponent<SphereCollider>(out var sphere))
+            sphere.enabled = false;
     }
 
 
