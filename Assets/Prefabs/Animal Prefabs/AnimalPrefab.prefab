@@ -98,11 +98,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animalSO: {fileID: 0}
-  isRecallable: 1
   eyepatchRenderer: {fileID: 0}
+  isRecallable: 1
   occupiedSeats: []
-  animator: {fileID: 0}
-  animalRenderers: []
+  idleAnimationTriggerName: IdleAction
+  minIdleInterval: 3
+  maxIdleInterval: 15
 --- !u!1001 &2826211198595794961
 PrefabInstance:
   m_ObjectHideFlags: 0

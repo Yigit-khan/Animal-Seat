@@ -1600,7 +1600,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_TargetDisplay: 0
 --- !u!224 &932846137
 RectTransform:
@@ -1827,6 +1827,7 @@ MonoBehaviour:
   whiteEffectAreaMaterial: {fileID: 2100000, guid: e9e17af4333fb3f4d9c2728817ab2c7d, type: 2}
   winUI: {fileID: 1486792980}
   inGameUIManager: {fileID: 33174658}
+  tutorialInteractableObject: {fileID: 0}
 --- !u!4 &1142940857
 Transform:
   m_ObjectHideFlags: 0
@@ -2779,6 +2780,14 @@ MonoBehaviour:
   tutorialText: {fileID: 2101388372}
   textAnimationDuration: 1
   interactableObject: {fileID: 0}
+  recallTutorial: 0
+  highlightScale: 1.2
+  highlightDuration: 0.5
+  highlightVibrato: 10
+  highlightElasticity: 1
+  singlePulseDuration: 0.5
+  pulseEase: 4
+  isAnimating: 0
 --- !u!114 &1755251035
 MonoBehaviour:
   m_ObjectHideFlags: 0

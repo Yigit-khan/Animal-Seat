@@ -72,11 +72,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 619077069591548399, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: m_Height
-      value: 1
+      value: 0.9411154
+      objectReference: {fileID: 0}
+    - target: {fileID: 619077069591548399, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: m_Radius
+      value: 0.35923156
       objectReference: {fileID: 0}
     - target: {fileID: 619077069591548399, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: m_Center.y
-      value: 0.5
+      value: 0.4705577
+      objectReference: {fileID: 0}
+    - target: {fileID: 619077069591548399, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: m_Center.z
+      value: -0.0057667196
       objectReference: {fileID: 0}
     - target: {fileID: 3259450285671157730, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: animalSO
@@ -84,7 +92,7 @@ PrefabInstance:
       objectReference: {fileID: 11400000, guid: 5c7282068e4bc0a48ada8779f9b5d369, type: 2}
     - target: {fileID: 3259450285671157730, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: minIdleInterval
-      value: 10
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 5793116159061711575, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: m_LocalScale.x

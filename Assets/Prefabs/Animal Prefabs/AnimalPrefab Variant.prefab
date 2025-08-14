@@ -12,6 +12,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: tail
       objectReference: {fileID: 0}
+    - target: {fileID: 3259450285671157730, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: minIdleInterval
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 3834263793691551477, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: m_Enabled
       value: 1
