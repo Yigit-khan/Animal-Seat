@@ -195,6 +195,10 @@ PrefabInstance:
       propertyPath: isSeated
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3259450285671157730, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
+      propertyPath: minIdleInterval
+      value: 10
+      objectReference: {fileID: 0}
     - target: {fileID: 5793116159061711575, guid: fdc7112dcc071d441a8832f3b6c6082f, type: 3}
       propertyPath: m_LocalScale.x
       value: 2

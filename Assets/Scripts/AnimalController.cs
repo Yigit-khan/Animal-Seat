@@ -36,7 +36,7 @@ public class AnimalController : MonoBehaviour
     [Tooltip("Otururken oynatılacak rastgele animasyonun Animator'deki trigger adı.")]
     [SerializeField] private string idleAnimationTriggerName = "IdleAction";
     [Tooltip("Rastgele animasyonlar arasındaki minimum bekleme süresi (saniye).")]
-    [SerializeField] private float minIdleInterval = 5.0f;
+    [SerializeField] private float minIdleInterval = 10.0f;
     [Tooltip("Rastgele animasyonlar arasındaki maksimum bekleme süresi (saniye).")]
     [SerializeField] private float maxIdleInterval = 15.0f;
     private Coroutine idleAnimationCoroutine; // Rastgele animasyon döngüsünü tutmak için Coroutine referansı.
